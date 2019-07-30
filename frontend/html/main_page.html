@@ -1,0 +1,222 @@
+<html>
+
+<head>
+    <title>Модуль "Дебиторская задолженность"</title>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link href="/css/style_main_page.css" rel="stylesheet" type="text/css">
+    <link type="text/css" rel="stylesheet" href="/css/jquery.dropdown.css" />
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.dropdown.js"></script>
+    <script src="/js/main_page.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="/js/datepicker-ru.js"></script>
+</head>
+
+<body>
+    <div id="page_body">
+        <div id="main_menu_content">
+            <div id="main_menu">
+                <nav class="main-menu" style="width: 69px;">
+                    <ul>
+                        <li class="has-subnav" title="Список компаний" data-jq-dropdown="#jq-dropdown-company-list">
+                            <a href="#">
+                                <i class="left-menu-icon material-icons">account_balance</i>
+                                <span class="nav-text">
+                                    Список компаний
+                                </span>
+                            </a>
+                        </li>
+                        <li class="has-subnav" title="Поиск" onclick="openPopupWindow('popup_search')">
+                            <a href="#">
+                                <i class="left-menu-icon material-icons">search</i>
+                                <span class="nav-text">
+                                    Поиск
+                                </span>
+                            </a>
+                        </li>
+                        <li class="has-subnav" title="Список объектов" onclick="openCloseObjectList()">
+                            <a href="#">
+                                <i class="left-menu-icon material-icons">home</i>
+                                <span class="nav-text">
+                                    Список объектов
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                    <ul class="logout">
+                        <li id="account_settings" title="Профиль" onclick="openPopupWindow('popup_profile')">
+                            <a href="# ">
+                                <i class="left-menu-icon material-icons ">account_circle</i>
+                                <span class="nav-text ">
+                                    Профиль
+                                </span>
+                            </a>
+                        </li>
+                        <li id="app_exit" title="Выйти" onclick="logout()">
+                            <a href="# ">
+                                <i class="left-menu-icon material-icons ">exit_to_app</i>
+                                <span class="nav-text ">
+                                    Выйти
+                                </span>
+                            </a>
+                        </li>
+                        <li id="menu_change_state" title="Раскрыть меню" onclick="openCloseMainMenu()">
+                            <a href="# ">
+                                <i class="left-menu-icon material-icons ">arrow_forward</i>
+                                <span class="nav-text ">
+                                    Свернуть
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <div id="body_content">
+            <div id="update_info_content">
+                <div id="update_info_top_content">
+                    <div id="redmine_content">
+                        <div class="info-content-header">Redmine</div>
+                        <div class="info-block-content"></div>
+                    </div>
+                    <div id="news_content">
+                        <div class="info-content-header"><i class="material-icons">subject</i>Новости</div>
+                        <div class="info-block-content"></div>
+                    </div>
+                    <div id="updates_content">
+                        <div class="info-content-header"><i class="material-icons">sync</i>Обновления</div>
+                        <div class="info-block-content"></div>
+                    </div>
+                </div>
+                <div id="update_info_bottom_content">
+                    <div id="our_contacts_content">
+                            <div class="info-content-header"><i class="material-icons">contact_support</i>Контакты</div>
+                    </div>
+                </div>
+            </div>
+        
+            <div id="popup_object_list" state="close">
+                <div id="popup_object_content">
+                    <div id="object_list_header">
+                        <div class="div-header">
+                            <input id="object_list_search_input" type="text" placeholder="Поиск объекта" oninput="objectListSearch()">
+                        </div>
+                    </div>
+                    <div id="object_list_tree">
+                        <ul class="object-list-tree"></ul>
+                    </div>
+                </div>
+            </div>
+        
+            <div id="main_content">
+                <div id="top_content">
+                    <div id="top_info">
+                        <div id="current_adress">Текущий адрес</div>
+                        <div id="current_company">Текущая компания</div>
+                    </div>
+                    <div id="top_left_content">
+                        <div class="main-table-header">
+                            <div class="header">Договора</div>
+                            <div class="header-icons"><i class="material-icons" title="Добавить договор" onclick="alert('Недостаточно прав')">add</i></div>
+                        </div>
+                        <div class="main-table-content">
+                            <table id="agreement_list_table"></table>
+                        </div>
+                    </div>
+                    <div id="top_right_content">
+                            <div class="main-table-header">
+                                <div class="header">Прописанные</div>
+                                <div class="header-icons"><i class="material-icons" title="Добавить прописанного" onclick="alert('Недостаточно прав')">add</i></div>
+                            </div>
+                        <div class="main-table-content">
+                            <table id="owners_table"></table>
+                        </div>
+                    </div>
+                </div>
+                <div id="middle_content">
+                    <div class="main-table-header">
+                        <div class="header">Дополнительная информация</div>
+                        <div class="header-icons">
+                            <i class="material-icons" title="Добавить примечание к адресу" onclick="alert('Недостаточно прав')">comment</i>
+                            <i class="material-icons" title="Настройки панели дополнительной информации" onclick="alert('Недостаточно прав')">settings</i>
+                        </div>
+                    </div>
+                </div>
+                <div id="bottom_content"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="info_content_btn" class="circle-button" title="Информация" onclick="openCloseInfo()"><i class="material-icons">help</i></div>
+
+    <div id="popup_background">
+        <div id="popup_search" class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name">Поиск абонента</div>
+                <div class="popup-close" onclick="closePopupWindow()"><i class="material-icons">close</i></div>
+            </div>
+            <div class="popup-content">
+                <form id="sub_search_form">
+                    <input id="sub_search_input" class="input-main" type="text" placeholder="Введите данные для поиска">
+                    <div class="content-center">
+                        <button id="sub_search_btn" class="button-main"><i class="material-icons">search</i>Найти</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="popup_report" class="popup-fullscreen">
+            <div class="popup-header-fullscreen">
+                <div class="popup-report-name">Справка</div>
+                <div class="popup-report-print"><button class="popup-fullscreen-print-btn" onclick="printReport()">Печать</button></div>
+                <div class="popup-report-close" onclick="closePopupWindow()"><i class="material-icons" title="Закрыть">close</i></div>
+            </div>
+            <div class="popup-content">
+            </div>
+        </div>
+
+        <div id="popup_profile" class="popup-fullscreen">
+            <div class="popup-header-fullscreen">
+                <div class="popup-fullscreen-name">Профиль</div>
+                <div class="popup-close-fullscreen" onclick="closePopupWindow()"><i class="material-icons" title="Закрыть">close</i></div>
+            </div>
+            <div class="popup-content">
+                <div id="profile_left_content">
+                    <div class="tabs" id="profile_tabs">
+                        <button class="tab-button active" onclick="openProfileTab(this,'profile_settings')">Настройки</button>
+                        <button class="tab-button" onclick="openProfileTab(this,'profile_data_loading')">Загрузка данных</button>
+                    </div>
+                    <div id="profile_tab_content">
+                        <div id="profile_settings" class="profile-tab-content active">Настройки</div>
+                        <div id="profile_data_loading" class="profile-tab-content">Загрузка данных</div>
+                    </div>
+                </div>
+                <div id="profile_right_content">
+                    <div id="profile_chat">
+                        <div id="chat_header"><i class="material-icons">chat</i>Чат</div>
+                        <div id="chat_content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="popup_not_fullscreen" class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name"></div>
+                <div class="popup-close" onclick="closePopupWindow()"><i class="material-icons" title="Закрыть">close</i></div>
+            </div>
+            <div class="popup-content"></div>
+        </div>
+    </div>
+
+    <div id="jq-dropdown-company-list" class="jq-dropdown jq-dropdown-tip">
+        <ul class="jq-dropdown-menu">
+        </ul>
+    </div>
+</body>
+
+</html>

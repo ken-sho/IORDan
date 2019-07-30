@@ -1,0 +1,61 @@
+body {
+    width: 100%;
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    box-sizing: border-box;
+    background: url(images/main_page_background.jpg);
+    background-position: top center;
+}
+
+#body_content {
+    width: 40%;
+    margin: auto;
+}
+
+#company_name, #project_list_header {
+    color: #134769;
+    font-size: 3vh;
+    text-align: center;
+}
+
+#company, #projects {
+    width: 100%;
+    margin-top: 25px;
+    background-color: white;
+    border: 1px solid #134769;
+    border-radius: 7px;
+    box-sizing: border-box;
+    box-shadow: 0 5px 10px 0 rgba(0, 0, 0, .1);
+    -moz-box-shadow: 0 5px 10px 0 rgba(0, 0, 0, .1);
+    -webkit-box-shadow: 0 5px 10px 0 rgba(0, 0, 0, .1);
+    -o-box-shadow: 0 5px 10px 0 rgba(0, 0, 0, .1);
+    -ms-box-shadow: 0 5px 10px 0 rgba(0, 0, 0, .1);
+}
+
+#footer {
+    width: 40%;
+    margin: auto;
+    text-align: center;
+    padding: 10px;
+    color: white;
+}
+
+#about_company {
+    padding: 5px;
+}
+
+.project-name {
+    padding: 5px;
+    background-color: #87B3D0;
+    font-size: 2vh;
+    border-top: 1px solid #134769;
+    border-bottom: 1px solid #134769;
+}
+
+.project-description {
+    padding: 5px;
+}
+
+a:visited {
+    color: rgb(0, 0, 238);
+}

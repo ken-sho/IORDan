@@ -1,0 +1,33 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link href="/css/style_login_page.css" rel="stylesheet" type="text/css">
+    <script src="/js/login_page.js"></script>
+    <script src="/js/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+    <div id="page_body">
+        <div id="page_content">
+            <div id="login_form_div">
+                <p id="login_form_title">ИОРДан<br><span class="secondary-title">"Интерфейс обработки распределенных данных"<br>Веб-модуль "Дебиторская задолженность"</span></p>
+                <hr>
+                <form id="login_form">
+                    <p class="login-form-input-name">Email</p>
+                    <p><input id="login_email" type="text" name="email"></p>
+                    <p class="login-form-input-name">Пароль</p>
+                    <p><input id="login_password" type="password" name="password"></p>
+                    <div id="remember_me"><input type="checkbox">Запомнить меня</div>
+                    <p><button id="login_form_btn" onclick="loginSubmit()">ВОЙТИ</button></p>
+                    <div id="login_alert"></div>
+                    <div id="certified_operator_notification">Обработка персональных данных осуществляется <a href="https://rkn.gov.ru/personal-data/register/?id=24-15-002862" target="_blank">сертифицированным оператором</a></div>
+                </form>
+            </div>
+        </div>
+        <div id="footer">© ООО "Интел-Град Плюс"</div>
+    </div>
+</body>
+
+</html>
