@@ -4,7 +4,7 @@
     <title>Модуль "Дебиторская задолженность"</title>
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp" rel="stylesheet">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link href="/css/style_main_page.css" rel="stylesheet" type="text/css">
     <link type="text/css" rel="stylesheet" href="/css/jquery.dropdown.css" />
@@ -13,13 +13,16 @@
     <script src="/js/main_page.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="/js/datepicker-ru.js"></script>
+    <script src="/js/xlsx.core.min.js"></script>
+    <script src="/js/FileSaver.js"></script>
+    <script src="/js/tableexport.js"></script>
 </head>
 
 <body>
     <div id="page_body">
         <div id="main_menu_content">
             <div id="main_menu">
-                <nav class="main-menu" style="width: 69px;">
+                <nav class="main-menu">
                     <ul>
                         <li class="has-subnav" title="Список компаний" data-jq-dropdown="#jq-dropdown-company-list">
                             <a href="#">
@@ -39,17 +42,25 @@
                         </li>
                         <li class="has-subnav" title="Список объектов" onclick="openCloseObjectList()">
                             <a href="#">
-                                <i class="left-menu-icon material-icons">home</i>
+                                <i class="left-menu-icon material-icons-round">home</i>
                                 <span class="nav-text">
                                     Список объектов
                                 </span>
                             </a>
                         </li>
+                        <li class="has-subnav" title="Управление" onclick="openPopupWithMenu('popup_control')">
+                            <a href="#">
+                                <i class="left-menu-icon material-icons-outlined">assessment</i>
+                                <span class="nav-text">
+                                    Управление
+                                </span>
+                            </a>
+                        </li>
                     </ul>
                     <ul class="logout">
-                        <li id="account_settings" title="Профиль" onclick="openPopupWindow('popup_profile')">
+                        <li id="account_settings" title="Профиль" onclick="openPopupWithMenu('popup_profile')">
                             <a href="# ">
-                                <i class="left-menu-icon material-icons ">account_circle</i>
+                                <i class="left-menu-icon material-icons">account_circle</i>
                                 <span class="nav-text ">
                                     Профиль
                                 </span>
@@ -57,7 +68,7 @@
                         </li>
                         <li id="app_exit" title="Выйти" onclick="logout()">
                             <a href="# ">
-                                <i class="left-menu-icon material-icons ">exit_to_app</i>
+                                <i class="left-menu-icon material-icons">exit_to_app</i>
                                 <span class="nav-text ">
                                     Выйти
                                 </span>
@@ -65,7 +76,7 @@
                         </li>
                         <li id="menu_change_state" title="Раскрыть меню" onclick="openCloseMainMenu()">
                             <a href="# ">
-                                <i class="left-menu-icon material-icons ">arrow_forward</i>
+                                <i class="left-menu-icon material-icons">arrow_forward</i>
                                 <span class="nav-text ">
                                     Свернуть
                                 </span>
@@ -80,12 +91,18 @@
             <div id="update_info_content">
                 <div id="update_info_top_content">
                     <div id="redmine_content">
-                        <div class="info-content-header">Redmine</div>
-                        <div class="info-block-content"></div>
+                        <div class="main-table-header">
+                            <div class="header">Список задач</div>
+                            <div class="header-icons"><i class="material-icons" title="Добавить задачу" onclick="openPopupWindow('popup_add_task')">add</i></div>
+                        </div>
+                        <div class="info-block-content">
+                            <div id="tasks_list"></div>
+                        </div>
                     </div>
                     <div id="news_content">
                         <div class="info-content-header"><i class="material-icons">subject</i>Новости</div>
-                        <div class="info-block-content"></div>
+                        <div class="info-block-content">
+                        </div>
                     </div>
                     <div id="updates_content">
                         <div class="info-content-header"><i class="material-icons">sync</i>Обновления</div>
@@ -101,9 +118,22 @@
         
             <div id="popup_object_list" state="close">
                 <div id="popup_object_content">
+                        <div id="object_list_settings">
+                            <div id="object_list_settings_left">
+                                <button class="object-tree-btn" onclick="switchToggle('object_list_toggle')">Режим печати<i id="object_list_toggle" class="material-icons object-search-icon" state="off">toggle_off</i></button>
+                            </div>
+                            <div id="object_list_settings_right">
+                                <button class="object-tree-btn"><i class="material-icons object-search-icon" title="Настройки дерева объектов">
+                                        settings
+                                    </i></button>
+                            </div>
+                        </div>
                     <div id="object_list_header">
-                        <div class="div-header">
+                        <div id="search_input">
                             <input id="object_list_search_input" type="text" placeholder="Поиск объекта" oninput="objectListSearch()">
+                        </div>
+                        <div id="clear_search_input">
+                            <button id="clear_object_btn" class="primary-btn" onclick="clearObjectSearchInput()">Очистить</button>
                         </div>
                     </div>
                     <div id="object_list_tree">
@@ -130,7 +160,7 @@
                     <div id="top_right_content">
                             <div class="main-table-header">
                                 <div class="header">Прописанные</div>
-                                <div class="header-icons"><i class="material-icons" title="Добавить прописанного" onclick="alert('Недостаточно прав')">add</i></div>
+                                <div class="header-icons"><i class="material-icons" title="Добавить прописанного" onclick="">add</i></div>
                             </div>
                         <div class="main-table-content">
                             <table id="owners_table"></table>
@@ -145,8 +175,11 @@
                             <i class="material-icons" title="Настройки панели дополнительной информации" onclick="alert('Недостаточно прав')">settings</i>
                         </div>
                     </div>
+                    <div id="obj_info_content"></div>
+                    <div id="obj_info_notation"></div>
                 </div>
-                <div id="bottom_content"></div>
+                <div id="bottom_content">
+                </div>
             </div>
         </div>
     </div>
@@ -161,7 +194,7 @@
             </div>
             <div class="popup-content">
                 <form id="sub_search_form">
-                    <input id="sub_search_input" class="input-main" type="text" placeholder="Введите данные для поиска">
+                    <input id="sub_search_input" class="input-search" type="text" placeholder="Введите данные для поиска">
                     <div class="content-center">
                         <button id="sub_search_btn" class="button-main"><i class="material-icons">search</i>Найти</button>
                     </div>
@@ -169,38 +202,95 @@
             </div>
         </div>
 
-        <div id="popup_report" class="popup-fullscreen">
-            <div class="popup-header-fullscreen">
-                <div class="popup-report-name">Справка</div>
-                <div class="popup-report-print"><button class="popup-fullscreen-print-btn" onclick="printReport()">Печать</button></div>
-                <div class="popup-report-close" onclick="closePopupWindow()"><i class="material-icons" title="Закрыть">close</i></div>
+        <div id="popup_add_task" class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name">Добавить задачу</div>
+                <div class="popup-close" onclick="closePopupWindow()"><i class="material-icons">close</i></div>
             </div>
             <div class="popup-content">
+                <form name="add_task">
+                    <p><span class="form-input-name">Название</span><input type="text" class="input-main"></p>
+                    <p><span class="form-input-name">Тип</span><select>
+                        <option selected>Ошибка</option>
+                        <option>Улучшение</option>
+                        <option>Поддержка</option>
+                    </select></p>
+                    <p><span class="form-input-name">Приоритет</span><select>
+                        <option>Низкий</option>
+                        <option selected>Нормальный</option>
+                        <option>Высокий</option>
+                        <option>Срочный</option>
+                        <option>Немедленный</option>
+                    </select></p>
+                    <p>Описание</p>
+                    <textarea></textarea>
+                    <p><span class="form-input-name">Файлы</span><input type="file"></p>
+                </form>
             </div>
         </div>
 
-        <div id="popup_profile" class="popup-fullscreen">
-            <div class="popup-header-fullscreen">
-                <div class="popup-fullscreen-name">Профиль</div>
-                <div class="popup-close-fullscreen" onclick="closePopupWindow()"><i class="material-icons" title="Закрыть">close</i></div>
+
+        <div id="popup_add_owner" class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name">Добавить прописанного</div>
+                <div class="popup-close" onclick="closePopupWindow()"><i class="material-icons">close</i></div>
             </div>
             <div class="popup-content">
-                <div id="profile_left_content">
-                    <div class="tabs" id="profile_tabs">
-                        <button class="tab-button active" onclick="openProfileTab(this,'profile_settings')">Настройки</button>
-                        <button class="tab-button" onclick="openProfileTab(this,'profile_data_loading')">Загрузка данных</button>
-                    </div>
-                    <div id="profile_tab_content">
-                        <div id="profile_settings" class="profile-tab-content active">Настройки</div>
-                        <div id="profile_data_loading" class="profile-tab-content">Загрузка данных</div>
-                    </div>
+                <form name="add_owner">
+                    <table class="table-form">
+                        <tbody>
+                            <tr>
+                                <td>ФИО</td>
+                                <td><input id="add_owner_name" type="text" class="input-main"></td>
+                            </tr>
+                            <tr>
+                                <td>Дата рождения</td>
+                                <td><input id="add_owner_birth_date" type="date" class="input-main birth-date"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button id="add_owner_btn" class="button-main"><i class="material-icons">
+                            add
+                        </i>Добавить</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="popup_edit_owner" class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name">Редактировать прописанного</div>
+                <div class="popup-close" onclick="closePopupWindow()"><i class="material-icons">close</i></div>
+            </div>
+            <div class="popup-content">
+                <form name="edit_owner">
+                    <table class="table-form">
+                        <tbody>
+                            <tr>
+                                <td>ФИО</td>
+                                <td><input id="edit_owner_name" type="text" class="input-main"></td>
+                            </tr>
+                            <tr>
+                                <td>Дата рождения</td>
+                                <td><input id="edit_owner_birth_date" type="date" class="input-main birth-date"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button class="button-main"><i class="material-icons-outlined">
+                            save
+                        </i>Сохранить</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="popup_report" class="popup-fullscreen">
+            <div class="popup-header-fullscreen">
+                <div class="popup-report-name">Справка</div>
+                <div class="popup-report-operation">
+                    <button class="popup-fullscreen-print-btn" onclick="printReport()">Печать</button>
+                    <div class="popup-report-close" onclick="closePopupWindow()"><i class="material-icons" title="Закрыть">close</i></div>
                 </div>
-                <div id="profile_right_content">
-                    <div id="profile_chat">
-                        <div id="chat_header"><i class="material-icons">chat</i>Чат</div>
-                        <div id="chat_content"></div>
-                    </div>
-                </div>
+            </div>
+            <div class="popup-content">
             </div>
         </div>
 
@@ -210,6 +300,51 @@
                 <div class="popup-close" onclick="closePopupWindow()"><i class="material-icons" title="Закрыть">close</i></div>
             </div>
             <div class="popup-content"></div>
+        </div>
+    </div>
+
+    <div id="popup_profile" class="popup-with-menu">
+        <div class="popup-header-fullscreen">
+            <div class="popup-fullscreen-name">Профиль</div>
+            <div class="popup-close-fullscreen" onclick="closePopupWindow()"><i class="material-icons"
+                    title="Закрыть">close</i></div>
+        </div>
+        <div class="popup-content">
+            <div id="profile_left_content">
+                <div class="tabs" id="profile_tabs">
+                    <button class="tab-button active"
+                        onclick="openTabs('profile_tabs', this,'profile_settings')">Настройки</button>
+                </div>
+                <div id="profile_tabs_content">
+                    <div id="profile_settings" class="profile-tab-content active">Настройки</div>
+                </div>
+            </div>
+            <div id="profile_right_content">
+                <div id="profile_chat">
+                    <div id="chat_header"><i class="material-icons">chat</i>Чат</div>
+                    <div id="chat_content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="popup_control" class="popup-with-menu">
+        <div class="popup-header-fullscreen">
+            <div class="popup-fullscreen-name">Управление Текущая компания</div>
+            <div class="popup-close-fullscreen" onclick="closePopupWindow()"><i class="material-icons"
+                    title="Закрыть">close</i></div>
+        </div>
+        <div class="popup-content">
+            <div class="tabs" id="control_tabs">
+                <button class="tab-button active"
+                    onclick="openTabs('control_tabs', this,'control_reports')">Справки</button>
+                <button class="tab-button" onclick="openTabs('control_tabs', this,'profile_data_loading')">Загрузка
+                        данных</button>
+            </div>
+            <div id="control_tabs_content">
+                <div id="control_reports" class="profile-tab-content active">Справки</div>
+                <div id="profile_data_loading" class="profile-tab-content">Загрузка данных</div>
+            </div>
         </div>
     </div>
 
