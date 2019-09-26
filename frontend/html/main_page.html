@@ -1,6 +1,7 @@
 <html>
 
 <head>
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
     <title>Модуль "Дебиторская задолженность"</title>
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link href="/css/style_main_page.css" rel="stylesheet" type="text/css">
     <link type="text/css" rel="stylesheet" href="/css/jquery.dropdown.css" />
+    <link type="text/css" rel="stylesheet" href="/css/gifplayer.css" />
     <script src="/js/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="/js/jquery.dropdown.js"></script>
     <script src="/js/main_page.js"></script>
@@ -16,6 +18,8 @@
     <script src="/js/xlsx.core.min.js"></script>
     <script src="/js/FileSaver.js"></script>
     <script src="/js/tableexport.js"></script>
+    <script src="/js/jquery.inputmask.js"></script>
+    <script src="/js/gifplayer.js"></script>
 </head>
 
 <body>
@@ -25,31 +29,31 @@
                 <nav class="main-menu">
                     <ul>
                         <li class="has-subnav" title="Список компаний" data-jq-dropdown="#jq-dropdown-company-list">
-                            <a href="#">
+                            <a>
                                 <i class="left-menu-icon material-icons">account_balance</i>
                                 <span class="nav-text">
                                     Список компаний
                                 </span>
                             </a>
                         </li>
-                        <li class="has-subnav" title="Поиск" onclick="openPopupWindow('popup_search')">
-                            <a href="#">
+                        <li class="has-subnav li-change-events" title="Быстрый поиск" onclick="openPopupWindow('popup_search')">
+                            <a>
                                 <i class="left-menu-icon material-icons">search</i>
                                 <span class="nav-text">
-                                    Поиск
+                                    Быстрый поиск
                                 </span>
                             </a>
                         </li>
-                        <li class="has-subnav" title="Список объектов" onclick="openCloseObjectList()">
-                            <a href="#">
+                        <li class="has-subnav li-change-events" title="Список объектов" onclick="openCloseObjectList()">
+                            <a>
                                 <i class="left-menu-icon material-icons-round">home</i>
                                 <span class="nav-text">
                                     Список объектов
                                 </span>
                             </a>
                         </li>
-                        <li class="has-subnav" title="Управление" onclick="openPopupWithMenu('popup_control')">
-                            <a href="#">
+                        <li class="has-subnav li-change-events" title="Управление" onclick="openPopupWithMenu('popup_control')">
+                            <a>
                                 <i class="left-menu-icon material-icons-outlined">assessment</i>
                                 <span class="nav-text">
                                     Управление
@@ -59,7 +63,7 @@
                     </ul>
                     <ul class="logout">
                         <li id="account_settings" title="Профиль" onclick="openPopupWithMenu('popup_profile')">
-                            <a href="# ">
+                            <a>
                                 <i class="left-menu-icon material-icons">account_circle</i>
                                 <span class="nav-text ">
                                     Профиль
@@ -67,7 +71,7 @@
                             </a>
                         </li>
                         <li id="app_exit" title="Выйти" onclick="logout()">
-                            <a href="# ">
+                            <a>
                                 <i class="left-menu-icon material-icons">exit_to_app</i>
                                 <span class="nav-text ">
                                     Выйти
@@ -75,7 +79,7 @@
                             </a>
                         </li>
                         <li id="menu_change_state" title="Раскрыть меню" onclick="openCloseMainMenu()">
-                            <a href="# ">
+                            <a>
                                 <i class="left-menu-icon material-icons">arrow_forward</i>
                                 <span class="nav-text ">
                                     Свернуть
@@ -93,25 +97,28 @@
                     <div id="redmine_content">
                         <div class="main-table-header">
                             <div class="header">Список задач</div>
-                            <div class="header-icons"><i class="material-icons" title="Добавить задачу" onclick="openPopupWindow('popup_add_task')">add</i></div>
+                            <!-- <div class="header-icons"><i class="material-icons" title="Добавить задачу" onclick="openPopupWindow('popup_add_task')">add</i></div> -->
+                            <div class="header-icons"><i class="material-icons" title="Добавить задачу" onclick="alert('Недостаточно прав')">add</i></div>
                         </div>
                         <div class="info-block-content">
                             <div id="tasks_list"></div>
                         </div>
                     </div>
-                    <div id="news_content">
-                        <div class="info-content-header"><i class="material-icons">subject</i>Новости</div>
+                    <div id="updates_content">
+                        <div class="block-header"><i class="material-icons">sync</i>Обновления системы</div>
                         <div class="info-block-content">
                         </div>
                     </div>
-                    <div id="updates_content">
-                        <div class="info-content-header"><i class="material-icons">sync</i>Обновления</div>
-                        <div class="info-block-content"></div>
+                    <div id="news_content">
+                        <div class="block-header"><i class="material-icons">subject</i>Новости</div>
+                        <div class="info-block-content">
+                            <div id="news_list"></div>
+                        </div>
                     </div>
                 </div>
                 <div id="update_info_bottom_content">
                     <div id="our_contacts_content">
-                            <div class="info-content-header"><i class="material-icons">contact_support</i>Контакты</div>
+                            <div class="block-header"><i class="material-icons">contact_support</i>Контакты</div>
                     </div>
                 </div>
             </div>
@@ -133,7 +140,7 @@
                             <input id="object_list_search_input" type="text" placeholder="Поиск объекта" oninput="objectListSearch()">
                         </div>
                         <div id="clear_search_input">
-                            <button id="clear_object_btn" class="primary-btn" onclick="clearObjectSearchInput()">Очистить</button>
+                            <button id="clear_object_btn" class="primary-btn-text" onclick="clearObjectSearchInput()">Очистить</button>
                         </div>
                     </div>
                     <div id="object_list_tree">
@@ -151,7 +158,7 @@
                     <div id="top_left_content">
                         <div class="main-table-header">
                             <div class="header">Договора</div>
-                            <div class="header-icons"><i class="material-icons" title="Добавить договор" onclick="alert('Недостаточно прав')">add</i></div>
+                            <div class="header-icons"><i class="material-icons" title="Добавить договор" onclick="openPopupWindow('popup_add_agreement')">add</i></div>
                         </div>
                         <div class="main-table-content">
                             <table id="agreement_list_table"></table>
@@ -160,7 +167,10 @@
                     <div id="top_right_content">
                             <div class="main-table-header">
                                 <div class="header">Прописанные</div>
-                                <div class="header-icons"><i class="material-icons" title="Добавить прописанного" onclick="">add</i></div>
+                                <div class="header-icons">
+                                    <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-owners" title="Справка" onclick="">help_outline</i>
+                                    <i class="material-icons" title="Добавить прописанного" onclick="openPopupWindow('popup_add_owner')">add</i>
+                                </div>
                             </div>
                         <div class="main-table-content">
                             <table id="owners_table"></table>
@@ -171,15 +181,21 @@
                     <div class="main-table-header">
                         <div class="header">Дополнительная информация</div>
                         <div class="header-icons">
-                            <i class="material-icons" title="Добавить примечание к адресу" onclick="alert('Недостаточно прав')">comment</i>
+                            <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-info" title="Справка" onclick="">help_outline</i>
                             <i class="material-icons" title="Настройки панели дополнительной информации" onclick="alert('Недостаточно прав')">settings</i>
+                            <i class="material-icons" title="Добавить примечание к адресу" onclick="alert('Недостаточно прав')">comment</i>
+                            <i class="material-icons" title="Редактировать дополнительную информацию" onclick="openPopupWindow('popup_edit_object_info')">edit</i>
+                            <i class="material-icons" title="Контакты" onclick="openPopupWindow('popup_object_contacts')">call</i>
+                            <i class="material-icons" title="Создать уведомление" onclick="alert('Недостаточно прав')">add_alert</i>
                         </div>
                     </div>
-                    <div id="obj_info_content"></div>
+                    <div id="object_info">
+                        <div id="obj_info_content"></div>
+                        <div id="main_calendar"></div>
+                    </div>
                     <div id="obj_info_notation"></div>
                 </div>
-                <div id="bottom_content">
-                </div>
+                <div id="bottom_content"></div>
             </div>
         </div>
     </div>
@@ -189,14 +205,17 @@
     <div id="popup_background">
         <div id="popup_search" class="popup-window">
             <div class="popup-header">
-                <div class="popup-name">Поиск абонента</div>
-                <div class="popup-close" onclick="closePopupWindow()"><i class="material-icons">close</i></div>
+                <div class="popup-name">Быстрый поиск</div>
+                <div class="popup-close" onclick="closePopupWindow('popup_search')"><i class="material-icons">close</i></div>
             </div>
             <div class="popup-content">
                 <form id="sub_search_form">
-                    <input id="sub_search_input" class="input-search" type="text" placeholder="Введите данные для поиска">
+                    <input id="sub_search_input" class="input-search" type="text" placeholder="Введите данные для поиска (ФИО, ЛС)" onkeyup="keyupSearch()">
+                    <div id="fast_search_menu">
+                        <ul></ul>
+                    </div>
                     <div class="content-center">
-                        <button id="sub_search_btn" class="button-main"><i class="material-icons">search</i>Найти</button>
+                        <button id="sub_search_btn" class="button-main" onclick="clickFastSearch()"><i class="material-icons">search</i>Найти</button>
                     </div>
                 </form>
             </div>
@@ -205,7 +224,7 @@
         <div id="popup_add_task" class="popup-window">
             <div class="popup-header">
                 <div class="popup-name">Добавить задачу</div>
-                <div class="popup-close" onclick="closePopupWindow()"><i class="material-icons">close</i></div>
+                <div class="popup-close" onclick="closePopupWindow('popup_add_task')"><i class="material-icons">close</i></div>
             </div>
             <div class="popup-content">
                 <form name="add_task">
@@ -229,27 +248,83 @@
             </div>
         </div>
 
+        <div id="popup_add_agreement" class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name">Добавить договор</div>
+                <div class="popup-close" onclick="closePopupWindow('popup_add_agreement')"><i class="material-icons">close</i></div>
+            </div>
+            <div class="popup-content">
+                <form name="add_agreement">
+                    <table class="table-form">
+                        <tbody>
+                            <tr>
+                                <td class="table-input-name">Собственник прописан?</td>
+                                <td colspan="3"><input id="owner_yes" type="radio" name="owner" value="yes" checked><label for="owner_yes">Да</label><input id="owner_no" type="radio" name="owner" value="no"><label for="owner_no">Нет</label></td>
+                            </tr>
+                            <tr class="add-agreement-owner">
+                                <td class="table-input-name">Собственник</td>
+                                <td colspan="3"><select id="add_agreement_owner_select" class="input-main"></select></td>
+                            </tr>
+                            <tr class="add-agreement-no-owner">
+                                <td class="table-input-name">ФИО *</td>
+                                <td colspan="3"><input id="add_agreement_fio" type="text" class="input-main"></td>
+                            </tr>
+                            <tr class="add-agreement-no-owner">
+                                <td class="table-input-name">Дата рождения</td>
+                                <td colspan="3"><input id="add_agreement_birth_date" type="date" class="input-main"></td>
+                            </tr>
+                            <tr>
+                                <td class="table-input-name">Наименование договора *</td>
+                                <td colspan="3"><input id="add_agreement_name" type="text" class="input-main"></td>
+                            </tr>
+                            <tr>
+                                <td class="table-input-name">Дата договора *</td>
+                                <td><input id="add_agreement_date" type="date" class="input-main"></td>
+                                <td class="table-input-name">Доля</td>
+                                <td><input id="add_agreement_part" type="text" class="input-main"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
+                    <button id="add_agreement_btn" class="button-main" onclick="addNewAgreement()"><i class="material-icons">
+                            add
+                        </i>Добавить</button>
+                </form>
+            </div>
+        </div>
+
 
         <div id="popup_add_owner" class="popup-window">
             <div class="popup-header">
                 <div class="popup-name">Добавить прописанного</div>
-                <div class="popup-close" onclick="closePopupWindow()"><i class="material-icons">close</i></div>
+                <div class="popup-close" onclick="closePopupWindow('popup_add_owner')"><i class="material-icons">close</i></div>
             </div>
             <div class="popup-content">
                 <form name="add_owner">
                     <table class="table-form">
                         <tbody>
                             <tr>
-                                <td>ФИО</td>
-                                <td><input id="add_owner_name" type="text" class="input-main"></td>
+                                <td class="table-input-name">ФИО *</td>
+                                <td colspan="3"><input id="add_owner_name" type="text" class="input-main"></td>
                             </tr>
                             <tr>
-                                <td>Дата рождения</td>
-                                <td><input id="add_owner_birth_date" type="date" class="input-main birth-date"></td>
+                                <td class="table-input-name">Дата рождения</td>
+                                <td colspan="3"><input id="add_owner_birth_date" type="date" class="input-main"></td>
+                            </tr>
+                            <tr>
+                                <td class="table-input-name">Дата прописки</td>
+                                <td><input id="add_owner_subscribe_date" type="date" class="input-main"></td>
+                                <td class="table-input-name">Дата выписки</td>
+                                <td><input id="add_owner_unsubscribe_date" type="date" class="input-main"></td>
+                            </tr>
+                            <tr>
+                                <td class="table-input-name">Место рождения</td>
+                                <td colspan="3"><textarea id="add_owner_birth_place" class="form-textarea" rows="3"></textarea></td>
                             </tr>
                         </tbody>
                     </table>
-                    <button id="add_owner_btn" class="button-main"><i class="material-icons">
+                    <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
+                    <button id="add_owner_btn" class="button-main" onclick="addNewOwner()"><i class="material-icons">
                             add
                         </i>Добавить</button>
                 </form>
@@ -259,35 +334,144 @@
         <div id="popup_edit_owner" class="popup-window">
             <div class="popup-header">
                 <div class="popup-name">Редактировать прописанного</div>
-                <div class="popup-close" onclick="closePopupWindow()"><i class="material-icons">close</i></div>
+                <div class="popup-close" onclick="closePopupWindow('popup_edit_owner')"><i class="material-icons">close</i></div>
             </div>
             <div class="popup-content">
                 <form name="edit_owner">
                     <table class="table-form">
                         <tbody>
                             <tr>
-                                <td>ФИО</td>
-                                <td><input id="edit_owner_name" type="text" class="input-main"></td>
+                                <td class="table-input-name">ФИО *</td>
+                                <td colspan="3"><input id="edit_owner_name" type="text" class="input-main"></td>
                             </tr>
                             <tr>
-                                <td>Дата рождения</td>
-                                <td><input id="edit_owner_birth_date" type="date" class="input-main birth-date"></td>
+                                <td class="table-input-name">Дата рождения</td>
+                                <td colspan="3"><input id="edit_owner_birth_date" type="date" class="input-main birth-date"></td>
+                            </tr>
+                            <tr>
+                                <td class="table-input-name">Дата прописки</td>
+                                <td><input id="edit_owner_subscribe_date" type="date" class="input-main"></td>
+                                <td class="table-input-name">Дата выписки</td>
+                                <td><input id="edit_owner_unsubscribe_date" type="date" class="input-main"></td>
+                            </tr>
+                            <tr>
+                                <td class="table-input-name">Место рождения</td>
+                                <td colspan="3"><textarea id="edit_owner_birth_place" class="form-textarea" rows="3"></textarea></td>
                             </tr>
                         </tbody>
                     </table>
-                    <button class="button-main"><i class="material-icons-outlined">
+                    <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
+                    <button id="edit_owner_btn" class="button-main" onclick="editOwnerRequest()"><i class="material-icons-outlined">
                             save
                         </i>Сохранить</button>
                 </form>
             </div>
         </div>
 
+        <div id="popup_edit_object_info" class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name">Редактировать дополнительную информацию</div>
+                <div class="popup-close" onclick="closePopupWindow('popup_edit_object_info')"><i class="material-icons">close</i></div>
+            </div>
+            <div class="popup-content">
+                <form name="edit_object_info">
+                    <table id="edit_object_info_table" class="table-form"></table>
+                    <button id="edit_object_info" class="button-main" onclick="editObjectInfo()"><i class="material-icons-outlined">
+                            save
+                        </i>Сохранить</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="popup_object_contacts" class="popup-window">
+                <div class="popup-header">
+                    <div class="popup-name">Контакты</div>
+                    <div class="popup-close" onclick="closePopupWindow('popup_object_contacts')"><i class="material-icons">close</i></div>
+                </div>
+                <div class="popup-content">
+                    <div class="popup-tabs" id="contacts_tabs">
+                        <button class="tab-button active" onclick="openTabs('contacts_tabs', this,'contacts_list')">Список контактов</button>
+                        <button class="tab-button" onclick="openTabs('contacts_tabs', this,'contacts_add')">Добавить</button>
+                        <button class="tab-button" onclick="openTabs('contacts_tabs', this,'contacts_edit')">Редактировать</button>
+                    </div>
+                    <div id="contacts_tabs_content" class="tabs-content">
+                        <div id="contacts_list" class="tab-content active"></div>
+                        <div id="contacts_add" class="tab-content">
+                            <form name="add_contact">
+                                <table class="table-form">
+                                    <tbody>
+                                        <tr>
+                                            <td class="table-input-name">Новый контакт?</td>
+                                            <td><input id="new_contact_yes" type="radio" name="contact" value="yes"><label for="new_contact_yes">Да</label><input id="new_contact_no" type="radio" name="contact" value="no" checked><label for="new_contact_no">Нет</label></td>
+                                        </tr>
+                                        <tr class="add-new-contact">
+                                            <td class="table-input-name">Данные контакта</td>
+                                            <td><select id="add_contact_select" class="input-main"></select></td>
+                                        </tr>
+                                        <tr class="add-contact">
+                                            <td class="table-input-name">Данные контакта *</td>
+                                            <td><input id="add_contact_name" type="text" class="input-main"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="table-input-name">Тип контакта</td>
+                                            <td><select id="add_contact_phone_type" class="input-main" onchange="changeContactType('add_contact_phone_type','add_contact_phone_number')">
+                                                    <option value="cellphone">Мобильный</option>
+                                                    <option value="phone">Стационарный</option>
+                                                    <option value="email">Email</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="table-input-name">Контакт *</td>
+                                            <td><input id="add_contact_phone_number" type="text" class="input-main"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
+                                <button id="add_contact_btn" class="button-main" onclick="addNewContact()"><i class="material-icons">
+                                        add
+                                    </i>Добавить</button>
+                            </form>
+                        </div>
+                        <div id="contacts_edit" class="tab-content">
+                            <form name="edit_contact">
+                                <table class="table-form">
+                                    <tbody>
+                                        <tr>
+                                            <td class="table-input-name">Данные контакта</td>
+                                            <td><select id="edit_contact_select" class="input-main" onchange="changeEditContact()"></select></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="table-input-name">Тип контакта</td>
+                                            <td><select id="edit_contact_phone_type" class="input-main" onchange="changeContactType('edit_contact_phone_type','edit_contact_phone_number')">
+                                                    <option value="cellphone">Мобильный</option>
+                                                    <option value="phone">Стационарный</option>
+                                                    <option value="email">Email</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="table-input-name">Контакт *</td>
+                                            <td><input id="edit_contact_phone_number" type="text" class="input-main"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
+                                <button id="edit_contact_btn" class="button-main" onclick="editContact()"><i class="material-icons-outlined">
+                                        save
+                                    </i>Сохранить</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         <div id="popup_report" class="popup-fullscreen">
             <div class="popup-header-fullscreen">
                 <div class="popup-report-name">Справка</div>
                 <div class="popup-report-operation">
                     <button class="popup-fullscreen-print-btn" onclick="printReport()">Печать</button>
-                    <div class="popup-report-close" onclick="closePopupWindow()"><i class="material-icons" title="Закрыть">close</i></div>
+                    <div class="popup-report-close" onclick="closePopupWindow('popup_report')"><i class="material-icons" title="Закрыть">close</i></div>
                 </div>
             </div>
             <div class="popup-content">
@@ -297,16 +481,36 @@
         <div id="popup_not_fullscreen" class="popup-window">
             <div class="popup-header">
                 <div class="popup-name"></div>
-                <div class="popup-close" onclick="closePopupWindow()"><i class="material-icons" title="Закрыть">close</i></div>
+                <div class="popup-close" onclick="closePopupWindow('popup_not_fullscreen')"><i class="material-icons" title="Закрыть">close</i></div>
             </div>
             <div class="popup-content"></div>
+        </div>
+
+        <div id="popup_process_control_file" class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name"></div>
+                <div class="popup-close" onclick="closePopupWindow('popup_process_control_file')"><i class="material-icons" title="Закрыть">close</i></div>
+            </div>
+            <div class="popup-content">
+                <form name="proccess_control_file">
+                    <table class="table-form">
+                        <tbody>
+                            <tr>
+                                <td class="table-input-name">Управляющая компания</td>
+                                <td><select id="proccess_file_company_select" class="input-main"></select></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button id="process_file_btn" class="button-main" onclick="processFile()">Обработать</button>
+                </form>
+            </div>
         </div>
     </div>
 
     <div id="popup_profile" class="popup-with-menu">
         <div class="popup-header-fullscreen">
             <div class="popup-fullscreen-name">Профиль</div>
-            <div class="popup-close-fullscreen" onclick="closePopupWindow()"><i class="material-icons"
+            <div class="popup-close-fullscreen" onclick="closePopupWindow('popup_profile')"><i class="material-icons"
                     title="Закрыть">close</i></div>
         </div>
         <div class="popup-content">
@@ -315,8 +519,8 @@
                     <button class="tab-button active"
                         onclick="openTabs('profile_tabs', this,'profile_settings')">Настройки</button>
                 </div>
-                <div id="profile_tabs_content">
-                    <div id="profile_settings" class="profile-tab-content active">Настройки</div>
+                <div id="profile_tabs_content" class="tabs-content">
+                    <div id="profile_settings" class="tab-content active">Настройки</div>
                 </div>
             </div>
             <div id="profile_right_content">
@@ -331,19 +535,123 @@
     <div id="popup_control" class="popup-with-menu">
         <div class="popup-header-fullscreen">
             <div class="popup-fullscreen-name">Управление Текущая компания</div>
-            <div class="popup-close-fullscreen" onclick="closePopupWindow()"><i class="material-icons"
+            <div class="popup-close-fullscreen" onclick="closePopupWindow('popup_control')"><i class="material-icons"
                     title="Закрыть">close</i></div>
         </div>
         <div class="popup-content">
             <div class="tabs" id="control_tabs">
-                <button class="tab-button active"
-                    onclick="openTabs('control_tabs', this,'control_reports')">Справки</button>
-                <button class="tab-button" onclick="openTabs('control_tabs', this,'profile_data_loading')">Загрузка
-                        данных</button>
+                <button class="tab-button active" onclick="openTabs('control_tabs', this,'control_reports')">Справки</button>
+                <button class="tab-button" onclick="openTabs('control_tabs', this,'control_files')">Работа с файлами</button>
+                <button class="tab-button" onclick="openTabs('control_tabs', this,'control_report_settings')">Настройка справок</button>
             </div>
-            <div id="control_tabs_content">
-                <div id="control_reports" class="profile-tab-content active">Справки</div>
-                <div id="profile_data_loading" class="profile-tab-content">Загрузка данных</div>
+            <div id="control_tabs_content" class="tabs-content">
+                <div id="control_reports" class="tab-content active">
+                    <div id="reports_list">
+                        <div class="block">
+                            <div class="block-header"><i class="material-icons">history</i><span>История запросов</span></div>
+                            <div class="block-content"></div>
+                        </div>
+                    </div>
+                    <div id="report_fast_access">
+                        <div class="block">
+                            <div class="block-header-without-icon"><span>Быстрый доступ</span></div>
+                            <div class="block-content">
+                                <form name="report_fast_access">
+                                    <table class="table-form">
+                                        <tbody>
+                                            <tr>
+                                                <td class="table-input-name">Справки</td>
+                                                <td><table id="report_fast_access_reports_list"></table></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="table-input-name">ЛС *</td>
+                                                <td><input id="report_fast_access_ls" type="text" class="input-main"></td>
+                                            </tr>
+                                            <tr class="report-fast-access-one-owner">
+                                                <td class="table-input-name">ФИО *</td>
+                                                <td><input id="report_fast_access_fio" type="text" class="input-main"></td>
+                                            </tr>
+                                            <tr class="report-fast-access-part-owners">
+                                                <td class="table-input-name">ФИО *</td>
+                                                <td>
+                                                    <table id="report_fast_access_owners_list">
+                                                        <tr id="report_fast_access_owner_1">
+                                                            <td><input name="fio" type="text" class="input-main"></td>
+                                                            <td class="add-report-part"><input name="part" type="text" class="input-main add-report-part-input" placeholder="Доля"></td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="table-input-name">Тип собственности</td>
+                                                <td>
+                                                    <select id="report_fast_access_own_select" class="table-form-select">
+                                                        <option value="one">Один собственник</option>
+                                                        <option value="together">Совместная собственность</option>
+                                                        <option value="part">Долевая собственность</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="table-input-name">Дата начала</td>
+                                                <td><input id="report_fast_access_start_date" type="text" class="input-main" onclick="DatepickerSetCurrentDate('report_fast_access_start_date')"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="table-input-name">Дата конца</td>
+                                                <td><input id="report_fast_access_end_date" type="text" class="input-main" onclick="DatepickerSetCurrentDate('report_fast_access_end_date')"></td>
+                                            </tr>
+                                                <td></td>
+                                                <td class="form-btn-td">
+                                                    <button id="fast_access_add_owner_btn" class="primary-btn-text form-btn report-fast-access-part-owners" onclick="addOwnerReportFastAccess()">Добавить собственника</button>
+                                                    <button class="primary-btn-text form-btn" onclick="clearForm('report_fast_access')">Очистить форму</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
+                                    <button id="report_fast_access_btn" class="button-main" onclick="addReport()">Выполнить</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="control_files" class="tab-content">
+                    <div id="files_left_column">
+                        <div id="control_files_upload" class="block">
+                            <div class="block-header"><i class="material-icons">file_upload</i><span>Загрузка файлов</span></div>
+                            <div class="block-content">
+                                <button id="select_files" class="primary-btn-text"><label for="files_upload_input">Выбрать файлы</label></button>
+                                <span id="number_of_uploaded_files">Выбрано файлов: 0</span>
+                                <button id="files_upload_btn" class="primary-btn-text" onclick="uploadFiles()">Загрузить</button>
+                                <form name="files_upload">
+                                        <input id="files_upload_input" type="file" name="files" multiple>
+                                </form>
+                            </div>
+                        </div>
+                        <div id="control_files_list" class="block">
+                            <div class="block-header"><i class="material-icons">list</i><span>Список файлов</span></div>
+                            <div class="block-content"></div>
+                        </div>
+                    </div>
+                    <div id="files_center_column">
+                    </div>
+                </div>
+                <div id="control_report_settings" class="tab-content">
+                    <div id="report_settings_select_menu">
+                        <ul>
+                            <!-- <li class="active"><a><span>Примечание для печати</span></a></li> -->
+                        </ul>
+                    </div>
+                    <div id="form_settings_content">
+                        <!-- <div id="form_settings_tab1">
+                            <textarea id="print_notation_textarea" rows="3" disabled></textarea>
+                            <p>
+                                <button id="change_print_notation" class="primary-btn-text" onclick="changePrintNotation()">Изменить</button>
+                                <button id="save_print_notation" class="primary-btn-text" onclick="savePrintNotation()">Сохранить</button>
+                            </p>
+                        </div> -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -352,6 +660,94 @@
         <ul class="jq-dropdown-menu">
         </ul>
     </div>
+
+    <div id="jq-dropdown-help-owners" class="jq-dropdown jq-dropdown-tip jq-dropdown-anchor-right">
+        <div class="jq-dropdown-panel">
+            <div class="dropdown-help">
+                <div class="dropdown-help-menu">
+                    <div class="dropdown-help-menu-tab" onclick="changeTabHelpMenu('owners_tab1')">Добавить прописанного</div>
+                    <div id="dropdown_help_menu_owners_tab1" class="dropdown-help-menu-tab-content">
+                        <div class="help-gif">
+                            <img class="gifplayer" src="/images/help_gif/help_add_owner.png" width="100%">
+                        </div>
+                        <div class="help-text">
+                            <ol>
+                                <li>Нажмите на иконку "<i class="material-icons help-menu-icon">add</i>" в панели "Прописанные";</li>
+                                <li>Заполните все необходимые поля в форме;</li>
+                                <li>Нажмите на кнопку "Добавить".</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="dropdown-help-menu-tab" onclick="changeTabHelpMenu('owners_tab2')">Редактировать прописанного</div>
+                    <div id="dropdown_help_menu_owners_tab2" class="dropdown-help-menu-tab-content">
+                        <div class="help-gif">
+                            <img class="gifplayer" src="/images/help_gif/help_edit_owner.png" width="100%">
+                        </div>
+                        <div class="help-text">
+                            <ol>
+                                <li>Нажмите на иконку "<i class="material-icons help-menu-icon">edit</i>" в таблице "Прописанные";</li>
+                                <li>Отредактируйте все необходимые поля в форме;</li>
+                                <li>Нажмите на кнопку "Сохранить".</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="dropdown-help-menu-tab" onclick="changeTabHelpMenu('owners_tab3')">Выполнить справку</div>
+                    <div id="dropdown_help_menu_owners_tab3" class="dropdown-help-menu-tab-content">
+                        <div class="help-gif">
+                            <img class="gifplayer" src="/images/help_gif/help_execute_report.png" width="100%">
+                        </div>
+                        <div class="help-text">
+                            <ol>
+                                <li>Нажмите на кнопку "<i class="material-icons help-menu-icon">event_note</i>" в таблице "Прописанные";</li>
+                                <li>Выберите из списка нужную справку;</li>
+                                <li>Укажите период для выполнения справки (если требуется);</li>
+                                <li>Нажмите на кнопку "Выполнить".</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="jq-dropdown-help-info" class="jq-dropdown jq-dropdown-tip jq-dropdown-anchor-right">
+        <div class="jq-dropdown-panel">
+            <div class="dropdown-help">
+                <div class="dropdown-help-menu">
+                    <div class="dropdown-help-menu-tab" onclick="changeTabHelpMenu('info_tab1')">Добавить контакт</div>
+                    <div id="dropdown_help_menu_info_tab1" class="dropdown-help-menu-tab-content">
+                        <div class="help-gif">
+                            <img class="gifplayer" src="/images/help_gif/help_add_contact.png" width="100%">
+                        </div>
+                        <div class="help-text">
+                            <ol>
+                                <li>Нажмите на иконку "<i class="material-icons help-menu-icon">call</i>" в панели "Дополнительная информация";</li>
+                                <li>Нажмите на вкладку "Добавить";</li>
+                                <li>Заполните все необходимые поля в форме;</li>
+                                <li>Нажмите на кнопку "Добавить".</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="dropdown-help-menu-tab" onclick="changeTabHelpMenu('info_tab2')">Редактировать контакт</div>
+                    <div id="dropdown_help_menu_info_tab2" class="dropdown-help-menu-tab-content">
+                        <div class="help-gif">
+                            <img class="gifplayer" src="/images/help_gif/help_edit_contact.png" width="100%">
+                        </div>
+                        <div class="help-text">
+                            <ol>
+                                <li>Нажмите на иконку "<i class="material-icons help-menu-icon">call</i>" в панели "Дополнительная информация";</li>
+                                <li>Нажмите на вкладку "Редактировать";</li>
+                                <li>Выберите контакт из списка контактов;</li>
+                                <li>Заполните все необходимые поля в форме;</li>
+                                <li>Нажмите на кнопку "Сохранить".</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>
