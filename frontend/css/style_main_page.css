@@ -323,7 +323,7 @@ button {
 }
 
 form {
-    margin: 0;
+    margin-bottom: 5px;
 }
 
 .button-main {
@@ -680,15 +680,35 @@ div {
     text-align: center;
 }
 
-.main-table-header, .block-header, #chat_header {
+.block-header, .block-header-icons {
     height: 30px;
     box-sizing: border-box;
     background: linear-gradient(lightblue 0%, #6393c1d6 100%);
     font-size: 21px;
 }
 
-.block-header span, .block-header-without-icon span {
-    vertical-align: middle;
+.block-header .header {
+    width: 100%;
+    padding-left: 3px;
+    padding-top: 1px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.block-header-popup-window {
+    height: 25px;
+    box-sizing: border-box;
+    background: linear-gradient(lightblue 0%, #6393c1d6 100%);
+    font-size: 18px;
+}
+
+.block-header-popup-window .header {
+    width: 100%;
+    padding-left: 3px;
+    padding-top: 1px;
+    height: 100%;
+    box-sizing: border-box;
+    text-align: left;
 }
 
 .block-header-without-icon {
@@ -701,18 +721,24 @@ div {
 
 .block-content {
     padding: 5px;
+    height: calc(100% - 30px);
 }
 
-.header {
+.block-content-no-padding {
+    padding: 0;
+    height: calc(100% - 30px);
+}
+
+.block-header-icons .header {
     width: calc(100% - 250px);
-    padding-left: 5px;
+    padding-left: 3px;
     padding-top: 1px;
     height: 100%;
     box-sizing: border-box;
     float: left;
 }
 
-.header-icons {
+.block-header-icons .header-icons {
     width: 250px;
     float: left;
     height: 100%;
@@ -859,7 +885,7 @@ div {
     height: calc(100% - 30px);
 }
 
-#chat_header i, .block-header i {
+.header i {
     vertical-align: middle;
     color: steelblue;
     font-size: 28px;
@@ -890,7 +916,8 @@ div {
 }
 
 .task-name {
-    background-color: lightblue
+    background-color: lightblue;
+    padding: 5px;
 }
 
 .task-description {
@@ -1024,7 +1051,7 @@ p {
     display: none;
 }
 
-.input-main {
+.input-main, .select-main {
     font-size: 16px;
     padding-left: 2px;
     width: 100%;
@@ -1115,8 +1142,13 @@ form[name="proccess_control_file"] td:first-child{
 
 form[name="add_contact"] td:first-child,
 form[name="edit_contact"] td:first-child,
-form[name="report_fast_access"] td:first-child {
+form[name="report_fast_access"] td:first-child,
+form[name="add_issue"] td:first-child {
     width: 150px;
+}
+
+form[name="add_object_notation"] td:first-child {
+    width: 553px;
 }
 
 .add-agreement-no-owner, .add-contact {
@@ -1144,10 +1176,6 @@ form[name="report_fast_access"] td:first-child {
 
 #files_center_column {
     padding-right: 5px;
-}
-
-#files_left_column .block:not(:first-child) {
-    margin-top: 5px;
 }
 
 #reports_list {
@@ -1178,11 +1206,12 @@ form[name="report_fast_access"] td:first-child {
 
 .block {
     border: 1px solid gray;
+    margin-top: 5px;
 }
 
-/* .form-btn {
-    padding: 5px;
-} */
+.block:first-child {
+    margin-top: 0;
+}
 
 .form-btn-td {
     text-align: right;
@@ -1308,7 +1337,7 @@ form[name="report_fast_access"] td:first-child {
     border-right: 0;
 }
 
-#form_settings_content {
+#report_settings_content {
     width: calc(100% - 250px);
     height: 100%;
     float: left;
@@ -1429,9 +1458,13 @@ textarea {
     cursor: default;
 }
 
-.news-block {
+.news-block, .notation-block {
     width: 100%;
     border-bottom: 1px solid gray;
+}
+
+.notation-block:last-child {
+    border-bottom: 0;
 }
 
 .news-header {
@@ -1440,16 +1473,18 @@ textarea {
     background-color: lightblue;
 }
 
-.news-content {
+.news-content, .notation-content {
     padding: 5px;
     max-height: 200;
     overflow-y: auto;
+    text-align: left;
 }
 
-.news-creation-date {
+.news-creation-date, .notation-creation-time {
     padding: 5px;
     padding-top: 0;
     text-align: right;
+    color: gray;
 }
 
 .notification-loading {
@@ -1468,4 +1503,16 @@ textarea {
 .notification-loading-text {
     float: left;
     padding: 3px;
+}
+
+#report_settings_preview {
+    height: 80%;
+}
+
+#report_settings_print_notation {
+    height: calc(20% - 5px);
+}
+
+#report_settings_preview .block-content {
+    overflow: auto;
 }

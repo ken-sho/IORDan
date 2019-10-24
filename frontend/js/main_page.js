@@ -5,7 +5,6 @@ var CURRENT_OBJECT_DATA = {};
 
 $(document).ready(function() {
     sessionStorage.setItem('printMode', 'off');
-    getUserData();
     getProjectTaskList("web_deb");
     getNewsList();
     showCurrentCompany();
@@ -21,9 +20,13 @@ $(document).ready(function() {
         }
     });
     if (!sessionStorage.firstVisit) {
+        getUserData([createCompanyDropdownMenu, getUpdateList]);
         $('#update_info_content').show();
         $('#main_content').hide();
         sessionStorage.setItem('firstVisit', 'true');
+    }
+    else {
+        getUserData([createCompanyDropdownMenu, initializationPopupControl, getUpdateList]);
     }
 
     $('#add_contact_phone_number').inputmask("(999)999-99-99");
@@ -49,11 +52,15 @@ $(document).ready(function() {
 });
 
 // получение данных о пользователе
-function getUserData() {
+function getUserData(callback) {
     $.get( "/web_request?query=", function( data ) {
         USER_DATA = JSON.parse(data);
-        createCompanyDropdownMenu();
-        initializationPopupControl();
+
+        if (!isEmpty(callback)) {
+            for (func of callback) {
+                func();
+            }
+        }
     });
 }
 
@@ -85,7 +92,6 @@ function chooseCompany(companyName, companyId) {
     $('#current_company').text(companyName);
     $('#popup_control .popup-fullscreen-name').text('Управление ' + companyName);
     setCookie('companyId', companyId);
-    setPrintNotation(companyId);
     initializationPopupControl();
     sessionStorage.setItem('currentCompanyId', companyId);
     sessionStorage.setItem('currentCompany', companyName);
@@ -98,12 +104,6 @@ function chooseCompany(companyName, companyId) {
         });
     }
 
-}
-
-function setPrintNotation(companyId) {
-    let objectKey = `id${companyId}`;
-    let notation = USER_DATA.printNotationList[objectKey];
-    sessionStorage.setItem('printNotation', notation);
 }
 
 function openCloseMainMenu () {
@@ -141,7 +141,7 @@ function closePopupWindow(popupId) {
 
 function openPopupWithMenu(popupId) {
     $('.popup-with-menu').hide();
-    $(`#${popupId}`).show();
+    $(`#${popupId}`).fadeIn(200);
     let popup = $('#popup_object_list');
     if (popup.attr('state') == 'open') {
         $('#popup_object_content').hide();
@@ -275,6 +275,7 @@ function createObjectsTree() {
         }
     });
 }
+
 function getObjectData() {
     $.ajax({
         type: "POST",
@@ -283,7 +284,6 @@ function getObjectData() {
         success: function (data) {
                         
             OBJECT_DATA = JSON.parse(data);
-            console.log(OBJECT_DATA);
 
             getObjectAgreementsData();
 
@@ -292,6 +292,8 @@ function getObjectData() {
             getObjectInfoData();
 
             getObjectContactsData();
+
+            getObjectNotationsData();
 
             createMainCalendar();
 
@@ -319,11 +321,16 @@ function refreshObjectData(callback) {
 function clickDropdownMenu() {
     $('.dropdown-report .dropdown-menu-item').each(function () {
         $(this).click(function () {
-            let repNum = $(this).attr('rep_num');
-            let repName = $(this).attr('rep_name');
-            let repType = $(this).attr('rep_type');
-            let accid = $(this).parent().parent().attr('accid');
-            let humanId = $(this).parent().parent().attr('humanid');
+            const repNum = $(this).attr('rep_num');
+            const repName = $(this).attr('rep_name');
+            const repType = $(this).attr('rep_type');
+            const accid = $(this).parent().parent().attr('accid');
+            const humanId = $(this).parent().parent().attr('humanid');
+
+            const reportId = `${repType}_${repNum}`;
+            setPrintNotation(reportId);
+
+
 
             if (repType == 'report') {
                 let content = '<table id="rep_range_table"><tr><td>Дата начала</td><td><input type="text" id="start_date"></td></tr>' +
@@ -363,6 +370,12 @@ function clickDropdownMenu() {
             }
         });
     });
+}
+
+function setPrintNotation(reportId) {
+    let reportsList = getCurrentCompanyReportsArray();
+    const printNotation = reportsList[reportId].print_notation;
+    sessionStorage.setItem('printNotation', printNotation);
 }
 
 function getObjectAgreementsData() {
@@ -583,6 +596,52 @@ function  getObjectPeopleArr() {
     return peopleArr;
 }
 
+function getObjectNotationsData() {
+
+    $('#notations_list').empty();
+
+    let notationsData = OBJECT_DATA[4];
+
+    if (!isEmpty(notationsData)) {
+        for (elem in notationsData) {
+            const notation = notationsData[elem];
+            const id = elem;
+            const value = notation.value;
+            const author = notation.author;
+            const creationTime = notation.creation_time;
+
+            $('<div>', {id: id, class: 'notation-block'}).append(
+                $('<div>', {class: 'notation-content', text: value}),
+                $('<div>', {class: 'notation-creation-time', text: `Добавил: ${author} ${creationTime}`})
+            ).appendTo('#notations_list');
+        }
+    }
+    else {
+        $('<div>', {class: 'notification', text: 'Примечания отсутствуют'}).appendTo('#notations_list');
+    }
+}
+
+function addObjectNotation() {
+    event.preventDefault();
+
+    let value = $('#add_object_notation_input').val();
+    let accid = CURRENT_OBJECT_DATA.accid;
+
+    if (value !== '') {
+        encodeURIstring = encodeURI(`/base_func?val_param=addchg_accnote&val_param1=${accid}&val_param2=add&val_param3=${value}`);
+        $.post(encodeURIstring, function (data) {
+            console.log(data);
+            refreshObjectData([getObjectNotationsData]);
+            // closePopupWindow();
+            // refreshObjectData([getObjectOwnersData, clickDropdownMenu]);
+            // $('#add_owner_name, #add_owner_birth_date').val('');
+        });
+    }
+    else {
+        $('#add_object_notation_input').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+    }
+}
+
 function createSelectWithPeople(selectId) {
     $('#add_contact_select').empty();
 
@@ -616,9 +675,10 @@ function createDropdownMenu(index, accid, humanid, reportsArr) {
     $('<div>', {id: `jq-dropdown-${index}`, class: 'jq-dropdown dropdown-report jq-dropdown-tip', accid: accid, humanid: humanid}).append(
         $('<ul>', {class: 'jq-dropdown-menu'})
     ).appendTo($('body'));
-    for (report in reportsArr) {
-        $('<li>', {class: 'dropdown-menu-item', rep_name:  reportsArr[report].repName, rep_num: reportsArr[report].repNum, rep_type: reportsArr[report].repType}).append(
-            $('<a>', {text: reportsArr[report].repName})
+    for (elem in reportsArr) {
+        const report = reportsArr[elem];
+        $('<li>', {class: 'dropdown-menu-item', rep_name:  report.rep_name, rep_num: report.rep_num, rep_type: report.rep_type}).append(
+            $('<a>', {text: report.rep_name})
         ).appendTo($(`#jq-dropdown-${index} ul`));
     }
 }
@@ -627,9 +687,10 @@ function createDropdownMenuReportTree(index, reportsArr) {
     $('<div>', {id: `jq-dropdown-${index}`, class: 'jq-dropdown dropdown-report jq-dropdown-tip'}).append(
         $('<ul>', {class: 'jq-dropdown-menu'})
     ).appendTo($('body'));
-    for (report in reportsArr) {
-        $('<li>', {class: 'dropdown-menu-item', rep_name:  reportsArr[report].repName, rep_num: reportsArr[report].repNum, rep_type: reportsArr[report].repType}).append(
-            $('<a>', {text: reportsArr[report].repName})
+    for (elem in reportsArr) {
+        const report = reportsArr[elem];
+        $('<li>', {class: 'dropdown-menu-item', rep_name:  report.rep_name, rep_num: report.rep_num, rep_type: report.rep_type}).append(
+            $('<a>', {text: report.rep_name})
         ).appendTo($(`#jq-dropdown-${index} ul`));
     }
 }
@@ -732,6 +793,7 @@ function deleteCookie(name) {
   }
 
 function getProjectTaskList(projectId) {
+    $('#tasks_list').empty();
     createContentLoader('#redmine_content .info-block-content');
     $.get(`/redmine?request=/issues.json?project_id=${projectId}`, function (data) {
         let taskList = JSON.parse(data);
@@ -1162,6 +1224,8 @@ function editContact() {
 function addReport() {
     event.preventDefault();
     let reportArray = [];
+    const validateinputsArray = [];
+
     $('#report_fast_access_reports_list input[type="checkbox"]').each(function() {
         if ($(this).prop('checked') == true) {
             let repNum = $(this).attr('rep_num');
@@ -1171,17 +1235,20 @@ function addReport() {
     });
 
     let ownType = $('#report_fast_access_own_select').val();
-    let fio;
+    let fioValue;
 
     if (ownType == 'one') {
-        fio = $('#report_fast_access_fio').val();
+        fioInput = $('#report_fast_access_fio');
+        validateinputsArray.push(fioInput);
+        fioValue = fioInput.val();
     }
     else if (ownType == 'together') {
         let fioArray = [];
         $('#report_fast_access_owners_list tr input[name="fio"]').each(function() {
             fioArray.push($(this).val());
+            validateinputsArray.push($(this));
         });
-        fio = fioArray;
+        fioValue = fioArray;
     }
     else if (ownType == 'part') {
         let fioPartArray = [];
@@ -1190,22 +1257,67 @@ function addReport() {
             let part = $(this).find('input[name="part"]').val();
             let elemArray = `${fio} доля ${part}`;
             fioPartArray.push(elemArray);
+            validateinputsArray.push($(this).find('input[name="fio"]'));
+            validateinputsArray.push($(this).find('input[name="part"]'));
         });
-        fio = fioPartArray;
+        fioValue = fioPartArray;
     }
 
-    let ls = $('#report_fast_access_ls').val();
+    let lsInput = $('#report_fast_access_ls');
+    validateinputsArray.push(lsInput);
+    const lsValue = lsInput.val();
     let repName = $('#report_fast_access_select option:selected').attr('rep_name');
     let repType = reportArray;
     let startDate = $('#report_fast_access_start_date').val();
     let endDate = $('#report_fast_access_end_date').val();
+
+    if (validateFormInputs([validateinputsArray])) {
+        let encodeURIstring = encodeURI(`/report?multi=${fioValue}&rtype=${repType}&rnum=0&accid=${lsValue}&humanid=&dateb=${startDate}&datee=${endDate}`);
+        $.get(encodeURIstring, function (data) {
+            $('#popup_report .popup-name-fullscreen').text(repName);
+            $('#popup_report .popup-content').html(data);
+            openPopupWindow('popup_report');
+        });
+    }
+}
+
+function addIssue() {
+    event.preventDefault();
+
+    const subjectInput = $('#add_issue_subject');
+    const descriptionTextarea = $('#add_issue_description');
+
+    const validateArray = [subjectInput, descriptionTextarea];
+
+    const subject = subjectInput.val();
+    const trackerId = $('#add_issue_tracker').val();
+    const priorityId = $('#add_issue_priority').val();
+    const description = descriptionTextarea.val();
+
+    if (validateFormInputs([validateArray])) {
+        const issue = {
+            "issue": {
+                "project_id": "web_deb",
+                "subject": subject,
+                "priority_id": priorityId,
+                "tracker_id": trackerId,
+                "description": description
+            }
+        };
+
+        $.ajax({
+            url: '/redmine?request=/issues.json?key=2f61a40033781606b1508aa4dc66568a50bdf7f0',
+            type: 'POST',
+            data: JSON.stringify(issue),
+            contentType: 'application/json',
+            success: function(data) {
+                showSuccessMessage('Задача успешно добавлена!', 'add_task_btn');
+                clearFormInputs([validateArray]);
+                getProjectTaskList("web_deb");
+            }
+        });
+    }
     
-    let encodeURIstring = encodeURI(`/report?multi=${fio}&rtype=${repType}&rnum=0&accid=${ls}&humanid=&dateb=${startDate}&datee=${endDate}`);
-    $.get(encodeURIstring, function (data) {
-        $('#popup_report .popup-name-fullscreen').text(repName);
-        $('#popup_report .popup-content').html(data);
-        openPopupWindow('popup_report');
-    });
 }
 
 function addOwnerReportFastAccess() {
@@ -1402,7 +1514,7 @@ function getCurrentCompanyReportsArray() {
 
 function fillSelectFromReportsArray(selectId, array) {
     for (report of array) {
-        $('<option>', {text: report.repName, rep_name: report.repName, rep_num: report.repNum, rep_type: report.repType}).appendTo($(`#${selectId}`));
+        $('<option>', {text: report.rep_name, rep_name: report.rep_name, rep_num: report.rep_num, rep_type: report.rep_type}).appendTo($(`#${selectId}`));
     }
 }
 
@@ -1419,25 +1531,30 @@ function initializationPopupControl() {
     $('#report_fast_access_reports_list, #control_files_list .block-content, #report_settings_select_menu ul, #proccess_file_company_select').empty();
     let reportsArr = getCurrentCompanyReportsArray();
     
-    for (report of reportsArr) {
+    for (elem in reportsArr) {
+        const report = reportsArr[elem];
         $('<tr>').append(
             $('<td>').append(
-                $('<input>', {type: 'checkbox', id: `report_fast_access_${report.repNum}_${report.repType}`, rep_name: report.repName, rep_num: report.repNum, rep_type: report.repType}),
-                $('<label>', {for: `report_fast_access_${report.repNum}_${report.repType}`, text: report.repName})
-
+                $('<input>', {type: 'checkbox', id: `report_fast_access_${report.rep_num}_${report.rep_type}`, rep_name: report.rep_name, rep_num: report.rep_num, rep_type: report.rep_type}),
+                $('<label>', {for: `report_fast_access_${report.rep_num}_${report.rep_type}`, text: report.rep_name})
             )
         ).appendTo($('#report_fast_access_reports_list'));
 
-        // <li class="active"><a><span>Примечание для печати</span></a></li>
-
-        $('<li>').append(
+        $('<li>', {rep_name: report.rep_name, rep_num: report.rep_num, rep_type: report.rep_type, print_notation: report.print_notation}).append(
             $('<a>').append(
-                $('<span>', {text: report.repName, rep_name: report.repName, rep_num: report.repNum, rep_type: report.repType})
+                $('<span>', {text: report.rep_name})
             )
         ).appendTo('#report_settings_select_menu ul');
     }
 
-    $('#report_settings_select_menu ul li:first-child').addClass('active');
+    const reportsSettingsFirstreportLi = $('#report_settings_select_menu ul li:first-child');
+    reportsSettingsFirstreportLi.addClass('active');
+    const firstReportRepNum = reportsSettingsFirstreportLi.attr('rep_num');
+    const firstReportRepType = reportsSettingsFirstreportLi.attr('rep_type');
+    const firstReportNotation = reportsSettingsFirstreportLi.attr('print_notation');
+    getReportPreview(firstReportRepNum, firstReportRepType);
+    $('#print_notation_textarea').val(firstReportNotation.replace(/<br ?\/?>/g, '\n'));
+
 
     let companyArr = USER_DATA.orgList;
     fillSelectFromCompanyArray('proccess_file_company_select', companyArr);
@@ -1460,11 +1577,6 @@ function initializationPopupControl() {
         }
     });
 
-    let currentCompanyId = getCookie('companyId');
-    companyKey = 'id' + currentCompanyId;
-    let currentCompanyPrintNotation = USER_DATA.printNotationList[companyKey].replace(/<br ?\/?>/g, '\n');
-    $('#print_notation_textarea').val(currentCompanyPrintNotation);
-
     getControlFilesList();
     changeTabControlReportSettings();
 }
@@ -1476,18 +1588,19 @@ function changePrintNotation() {
 }
 
 function savePrintNotation() {
+    const currentReportLi = $('#report_settings_select_menu ul li.active');
     $('#print_notation_textarea').attr('disabled', true);
     $('#save_print_notation').hide();
     $('#change_print_notation').show();
 
     let currentCompanyId = getCookie('companyId');
     let notationValue = $('#print_notation_textarea').val().replace(/\n/g, "<br>");
-    encodeURIstring = encodeURI(`/base_func?val_param=sprav_note_chg&val_param1=${currentCompanyId}&val_param2=${notationValue}`);
+    let repNum = currentReportLi.attr('rep_num');
+    let repType = currentReportLi.attr('rep_type');
+    encodeURIstring = encodeURI(`/base_func?val_param=sprav_note_chg&val_param1=${currentCompanyId}&val_param2=${repType}&val_param3=${repNum}&val_param4=${notationValue}`);
     $.post(encodeURIstring, function (data) {
         if (data == 'success') {
-            $.get( "/web_request?query=", function( data ) {
-                setPrintNotation(currentCompanyId);
-            });
+            getUserData();
             showSuccessMessage('Примечание для печати успешно сохранено!', 'save_print_notation');
         }
     });
@@ -1693,7 +1806,6 @@ function keyupSearch() {
         encodeURIstring = encodeURI(`/base_func?val_param=fast_find&val_param1=${searchValue}&val_param2=${currentCompanyId}`);
         $.post(encodeURIstring, function (data) {
             if (data !== '') {
-                console.log(data);
                 let searchListArray = JSON.parse(data);
                 for (elem of searchListArray) {
                     let dataArray = elem.split('&');
@@ -1770,7 +1882,8 @@ function changeTabHelpMenu(tabId) {
 
 function getNewsList() {
     createContentLoader('#news_content .info-block-content');
-    $.post('/base_func?val_param=news_portal', function (data) {
+
+    $.post('/base_func?val_param=news_portal&val_param1=1', function (data) {
         let newsList = JSON.parse(data).news;
         for (elem in newsList) {
             let news = newsList[elem];
@@ -1779,7 +1892,7 @@ function getNewsList() {
             let creationDate = news.created;
             $('<div>', {class: 'news-block'}).append(
                 $('<div>', {class: 'news-header', text: name}),
-                $('<div>', {class: 'news-content', text: content}),
+                $('<div>', {class: 'news-content'}).append(content),
                 $('<div>', {class: 'news-creation-date', text: `Добавлено: ${creationDate}`})
 
             ).appendTo('#news_list');
@@ -1789,10 +1902,66 @@ function getNewsList() {
     removeContentLoader('#news_content .info-block-content', '#news_list');
 }
 
+function getUpdateList() {
+    createContentLoader('#updates_content .info-block-content');
+    const headCompanyId = USER_DATA.head_company;
+
+    $.post(`/base_func?val_param=news_portal&val_param1=${headCompanyId}`, function (data) {
+        let updatesList = JSON.parse(data).news;
+        for (elem in updatesList) {
+            let update = updatesList[elem];
+            let name = update.name;
+            let content = update.content;
+            let creationDate = update.created;
+            $('<div>', {class: 'news-block'}).append(
+                $('<div>', {class: 'news-header', text: name}),
+                $('<div>', {class: 'news-content'}).append(content),
+                $('<div>', {class: 'news-creation-date', text: `Добавлено: ${creationDate}`})
+            ).appendTo('#updates_list');
+        }
+    });
+    removeContentLoader('#updates_content .info-block-content', '#updates_list');
+}
+
 function changeTabControlReportSettings() {
     let tabsCollection = $('#report_settings_select_menu ul li');
     tabsCollection.on('click', function() {
         tabsCollection.removeClass('active');
         $(this).addClass('active');
+
+        const repNum = $(this).attr('rep_num');
+        const repType = $(this).attr('rep_type');
+        const printNotation = $(this).attr('print_notation');
+
+        getReportPreview(repNum, repType);
+        $('#print_notation_textarea').val(printNotation.replace(/<br ?\/?>/g, '\n'));
+
     });
+}
+
+function getReportPreview(repNum, repType) {
+    const divForContent = $('#report_settings_preview .block-content');
+    $.get(`/report?rnum=${repNum}&rtype=${repType}&accid=201287&humanid=401245&dateb=&datee=`, function (data) {
+        divForContent.html(data);
+    });
+}
+
+function validateFormInputs([inputsArray]) {
+
+    let valid = true;
+
+    for (input of inputsArray) {
+        if (!input.val()) {
+            input.fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+            valid = false;
+        }
+    }
+
+    return valid;
+}
+
+function clearFormInputs([inputsArray]) {
+    for (input of inputsArray) {
+        input.val('');
+    }
 }
