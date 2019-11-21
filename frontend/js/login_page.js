@@ -22,3 +22,18 @@ function loginSubmit() {
         }
     });
 }
+
+$(document).ready(function() {
+    $('#remember_me_checkbox').on('click', function() {
+        const label = $('#remember_me .checkbox-container');
+        const checkbox = $('#remember_me .checkbox-container .checkmark');
+        if ($(this).prop('checked')) {
+            label.addClass('active');
+            checkbox.addClass('active');
+        }
+        else {
+            label.removeClass('active');
+            checkbox.removeClass('active');
+        }
+    });
+})

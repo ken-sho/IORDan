@@ -28,6 +28,14 @@
             <div id="main_menu">
                 <nav class="main-menu">
                     <ul>
+                        <li id="home_page" class="has-subnav" title="Главная" onclick="openHomePage()">
+                            <a>
+                                <i class="left-menu-icon material-icons-round">home</i>
+                                <span class="nav-text">
+                                    Главная
+                                </span>
+                            </a>
+                        </li>
                         <li class="has-subnav" title="Список компаний" data-jq-dropdown="#jq-dropdown-company-list">
                             <a>
                                 <i class="left-menu-icon material-icons">account_balance</i>
@@ -36,17 +44,17 @@
                                 </span>
                             </a>
                         </li>
-                        <li class="has-subnav li-change-events" title="Быстрый поиск" onclick="openPopupWindow('popup_search')">
+                        <!-- <li class="has-subnav li-change-events" title="Быстрый поиск" onclick="openPopupWindow('popup_search')">
                             <a>
                                 <i class="left-menu-icon material-icons">search</i>
                                 <span class="nav-text">
                                     Быстрый поиск
                                 </span>
                             </a>
-                        </li>
+                        </li> -->
                         <li class="has-subnav li-change-events" title="Список объектов" onclick="openCloseObjectList()">
                             <a>
-                                <i class="left-menu-icon material-icons-round">home</i>
+                                <i class="left-menu-icon material-icons">list</i>
                                 <span class="nav-text">
                                     Список объектов
                                 </span>
@@ -60,21 +68,11 @@
                                 </span>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="logout">
-                        <li id="account_settings" title="Профиль" onclick="openPopupWithMenu('popup_profile')">
+                        <li id="info_page" class="has-subnav" title="Информация" onclick="openInfoPage()">
                             <a>
-                                <i class="left-menu-icon material-icons">account_circle</i>
-                                <span class="nav-text ">
-                                    Профиль
-                                </span>
-                            </a>
-                        </li>
-                        <li id="app_exit" title="Выйти" onclick="logout()">
-                            <a>
-                                <i class="left-menu-icon material-icons">exit_to_app</i>
-                                <span class="nav-text ">
-                                    Выйти
+                                <i class="left-menu-icon material-icons">help_outline</i>
+                                <span class="nav-text">
+                                    Информация
                                 </span>
                             </a>
                         </li>
@@ -92,58 +90,19 @@
         </div>
 
         <div id="body_content">
-            <div id="update_info_content">
-                <div id="update_info_top_content">
-                    <div id="redmine_content">
-                        <div class="block-header-icons">
-                            <div class="header">Список задач</div>
-                            <div class="header-icons"><i class="material-icons" title="Добавить задачу" onclick="openPopupWindow('popup_add_task')">add</i></div>
-                            <!-- <div class="header-icons"><i class="material-icons" title="Добавить задачу" onclick="alert('Недостаточно прав')">add</i></div> -->
-                        </div>
-                        <div class="info-block-content">
-                            <div id="tasks_list"></div>
-                        </div>
-                    </div>
-                    <div id="updates_content">
-                        <div class="block-header">
-                            <div class="header">
-                                <i class="material-icons">sync</i>Обновления системы</div>
-                            </div>
-                        <div class="info-block-content">
-                            <div id="updates_list"></div>
-                        </div>
-                    </div>
-                    <div id="news_content">
-                        <div class="block-header">
-                            <div class="header">
-                                <i class="material-icons">subject</i>Новости</div>
-                            </div>
-                        <div class="info-block-content">
-                            <div id="news_list"></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="update_info_bottom_content">
-                    <div id="our_contacts_content">
-                            <div class="block-header">
-                                <div class="header">
-                                    <i class="material-icons">contact_support</i>Контакты
-                                </div>
-                            </div>
-                    </div>
-                </div>
-            </div>
-        
             <div id="popup_object_list" state="close">
                 <div id="popup_object_content">
                         <div id="object_list_settings">
                             <div id="object_list_settings_left">
-                                <button class="object-tree-btn" onclick="switchToggle('object_list_toggle')">Режим печати<i id="object_list_toggle" class="material-icons object-search-icon" state="off">toggle_off</i></button>
+                                <span class="object-tree-btn" onclick="switchToggle('object_list_toggle')"><i id="object_list_toggle" class="material-icons-outlined object-search-icon" state="off">toggle_off</i>Режим печати</span>
                             </div>
                             <div id="object_list_settings_right">
-                                <button class="object-tree-btn"><i class="material-icons object-search-icon" title="Настройки дерева объектов">
+                                <!-- <button class="object-tree-btn" onclick="openPopupWindow('popup_object_list_settings')"><i class="material-icons object-search-icon" title="Настройки списка объектов">
                                         settings
-                                    </i></button>
+                                    </i></button> -->
+                                <i class="material-icons-outlined object-search-icon" title="Настройки списка объектов" onclick="openPopupWindow('popup_object_list_settings')">
+                                    settings_applications
+                                </i>
                             </div>
                         </div>
                     <div id="object_list_header">
@@ -151,7 +110,7 @@
                             <input id="object_list_search_input" type="text" placeholder="Поиск объекта" oninput="objectListSearch()">
                         </div>
                         <div id="clear_search_input">
-                            <button id="clear_object_btn" class="primary-btn-text" onclick="clearObjectSearchInput()">Очистить</button>
+                            <button id="clear_object_btn" class="button-primary" onclick="clearObjectSearchInput()">ОЧИСТИТЬ</button>
                         </div>
                     </div>
                     <div id="object_list_tree">
@@ -161,57 +120,119 @@
             </div>
         
             <div id="main_content">
-                <div id="top_content">
-                    <div id="top_info">
-                        <div id="current_adress">Текущий адрес</div>
-                        <div id="current_company">Текущая компания</div>
-                    </div>
-                    <div id="top_left_content">
-                        <div class="block-header-icons">
-                            <div class="header">Договора</div>
-                            <div class="header-icons"><i class="material-icons" title="Добавить договор" onclick="openPopupWindow('popup_add_agreement')">add</i></div>
+                <div id="head_bar">
+                    <div id="main_search_content">
+                        <div id="main_search_icon">
+                            <i class="main-search-icon material-icons">search</i>
                         </div>
-                        <div class="main-table-content">
-                            <table id="agreement_list_table"></table>
+                        <div id="main_search_input_content">
+                            <input id="main_search_input" type="text" onkeyup="mainSearchKeyup('main_search_input', 'main_search_menu')">
+                        </div>
+                        <div id="main_search_menu">
+                            <ul class="obj-search-ul"></ul>
                         </div>
                     </div>
-                    <div id="top_right_content">
-                            <div class="block-header-icons">
-                                <div class="header">Прописанные</div>
-                                <div class="header-icons">
-                                    <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-owners" title="Справка" onclick="">help_outline</i>
-                                    <i class="material-icons" title="Добавить прописанного" onclick="openPopupWindow('popup_add_owner')">add</i>
+                    <div id="head_bar_navigation">
+                        <div id="logout_button">
+                            <a onclick="logout()">
+                                <i class="material-icons">exit_to_app</i>
+                                <span class="nav-text ">
+                                    ВЫХОД
+                                </span>
+                            </a>
+                        </div>
+                        <div id="profile_button">
+                            <i class="material-icons-outlined" onclick="openPopupWithMenu('popup_profile')">account_circle</i>
+                        </div>
+                    </div>
+                </div>
+                <div id="obj_content">
+                    <div id="obj_content_background">
+                        <div id="obj_adress"></div>
+                        <div id="obj_info">
+                            <div id="obj_agreements_info">
+                                <div class="block-header-icons">
+                                    <div class="header">Договора</div>
+                                    <div class="header-icons"><i class="material-icons" title="Добавить договор"
+                                            onclick="openPopupWindow('popup_add_agreement')">add</i></div>
+                                </div>
+                                <div class="main-table-content">
+                                    <table id="agreement_list_table"></table>
                                 </div>
                             </div>
-                        <div class="main-table-content">
-                            <table id="owners_table"></table>
+                            <div id="obj_owners_info">
+                                <div class="block-header-icons">
+                                    <div class="header">Прописанные</div>
+                                    <div class="header-icons">
+                                        <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-owners" title="Справка"
+                                            onclick="">help_outline</i>
+                                        <i class="material-icons" title="Добавить прописанного" onclick="openPopupWindow('popup_add_owner')">add</i>
+                                    </div>
+                                </div>
+                                <div class="main-table-content">
+                                    <table id="owners_table"></table>
+                                </div>
+                            </div>
+                            <div id="obj_ls_info">
+                                <div class="block-header-icons">
+                                    <div class="header">Дополнительная информация</div>
+                                    <div class="header-icons">
+                                        <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-info" title="Справка"
+                                            onclick="">help_outline</i>
+                                        <i class="material-icons" title="Настройки панели дополнительной информации"
+                                            onclick="alert('Недостаточно прав')">settings</i>
+                                        <i class="material-icons" title="Примечания к адресу"
+                                            onclick="openPopupWindow('popup_object_notations')">comment</i>
+                                        <i class="material-icons" title="Редактировать дополнительную информацию"
+                                            onclick="openPopupWindow('popup_edit_object_info')">edit</i>
+                                        <i class="material-icons" title="Контакты" onclick="openPopupWindow('popup_object_contacts')">call</i>
+                                        <i class="material-icons" title="Создать уведомление" onclick="alert('Недостаточно прав')">add_alert</i>
+                                    </div>
+                                </div>
+                                <div id="obj_additional_info">
+                                    <div id="obj_info_content"></div>
+                                    <div id="main_calendar"></div>
+                                    <div id="obj_info_notation"></div>
+                                </div>
+                                <div id="obj_main_table"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div id="middle_content">
-                    <div class="block-header-icons">
-                        <div class="header">Дополнительная информация</div>
-                        <div class="header-icons">
-                            <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-info" title="Справка" onclick="">help_outline</i>
-                            <i class="material-icons" title="Настройки панели дополнительной информации" onclick="alert('Недостаточно прав')">settings</i>
-                            <i class="material-icons" title="Примечания к адресу" onclick="openPopupWindow('popup_object_notations')">comment</i>
-                            <i class="material-icons" title="Редактировать дополнительную информацию" onclick="openPopupWindow('popup_edit_object_info')">edit</i>
-                            <i class="material-icons" title="Контакты" onclick="openPopupWindow('popup_object_contacts')">call</i>
-                            <i class="material-icons" title="Создать уведомление" onclick="alert('Недостаточно прав')">add_alert</i>
+                <div id="update_info_content">
+                    <div id="redmine_content">
+                        <div class="block-main-header-with-icon">
+                            <div class="header"><i class="material-icons">list</i>Список задач</div>
+                            <div class="header-icon"><i class="material-icons" title="Добавить задачу" onclick="openPopupWindow('popup_add_task')">add</i></div>
+                        </div>
+                        <div class="info-block-content">
+                            <div id="tasks_list"></div>
                         </div>
                     </div>
-                    <div id="object_info">
-                        <div id="obj_info_content"></div>
-                        <div id="main_calendar"></div>
+                    <div id="updates_content">
+                        <div class="block-main-header">
+                            <div class="header">
+                                <i class="material-icons">sync</i>Обновления системы</div>
+                            </div>
+                        <div class="info-block-content">
+                            <div id="updates_list"></div>
+                        </div>
                     </div>
-                    <div id="obj_info_notation"></div>
+                    <div id="news_content">
+                        <div class="block-main-header">
+                            <div class="header">
+                                <i class="material-icons">subject</i>Новости</div>
+                            </div>
+                        <div class="info-block-content">
+                            <div id="news_list"></div>
+                        </div>
+                    </div>
                 </div>
-                <div id="bottom_content"></div>
             </div>
         </div>
     </div>
 
-    <div id="info_content_btn" class="circle-button" title="Информация" onclick="openCloseInfo()"><i class="material-icons">help</i></div>
+    <!-- <div id="info_content_btn" class="circle-button" title="Информация" onclick="openCloseInfo()"><i class="material-icons">help</i></div> -->
 
     <div id="popup_background">
         <div id="popup_search" class="popup-window">
@@ -221,14 +242,58 @@
             </div>
             <div class="popup-content">
                 <form id="sub_search_form">
-                    <input id="sub_search_input" class="input-search" type="text" placeholder="Введите данные для поиска (ФИО, ЛС)" onkeyup="keyupSearch()">
+                    <input id="sub_search_input" class="input-search" type="text" placeholder="Введите данные для поиска (ФИО, ЛС)" onkeyup="keyupSearch('sub_search_input', 'fast_search_menu', 'sub_search_btn')">
                     <div id="fast_search_menu">
-                        <ul></ul>
+                        <ul class="obj-search-ul"></ul>
                     </div>
                     <div class="content-center">
-                        <button id="sub_search_btn" class="button-main" onclick="clickFastSearch()"><i class="material-icons">search</i>Найти</button>
+                        <button id="sub_search_btn" class="button-primary" onclick="clickFastSearch()">Найти</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <div id="popup_object_list_settings" class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name">Список объектов</div>
+                <div class="popup-close" onclick="closePopupWindow('popup_object_list_settings')"><i class="material-icons">close</i></div>
+            </div>
+            <div class="popup-content">
+                <div class="popup-tabs" id="object_list_settings_tabs">
+                    <button class="tab-button active" onclick="openTabs('object_list_settings_tabs', this,'object_list_settings')">Настройки</button>
+                    <button class="tab-button" onclick="openTabs('object_list_settings_tabs', this,'object_list_template')">Шаблоны</button>
+                </div>
+                <div id="object_list_settings_tabs_content" class="popup-tabs-content">
+                    <div id="object_list_settings" class="tab-content active"></div>
+                    <div id="object_list_template" class="tab-content">
+                        <form name="choose_template_form">
+                            <table class="table-form">
+                                <tbody>
+                                    <tr>
+                                        <td class="table-input-name">Текущий:</td>
+                                        <td id="current_template_name">Отсутствует</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="table-input-name">Шаблон</td>
+                                        <td>
+                                            <select id="choose_template_select" class="input-main" onchange="changeTemplateSelect()"></select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="table-input-name">Описание</td>
+                                        <td>
+                                            <textarea id="choose_template_description" class="fixed-textarea" rows="3" disabled></textarea>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="content-center">
+                                <button id="change_template_btn" class="button-primary" style="margin-top: 10px" onclick="applyTemplateObjectList()">Применить</button>
+                                <button id="clear_template_btn" class="button-primary" style="margin-top: 10px" onclick="clearTemplateObjectList()" disabled>Сбросить</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -276,9 +341,9 @@
                         </tbody>
                     </table>
                     <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
-                    <button id="add_task_btn" class="button-main" onclick="addIssue()"><i class="material-icons">
-                            add
-                        </i>Добавить</button>
+                    <div class="form-submit-btn">
+                        <button id="add_task_btn" class="button-primary" onclick="addIssue()">Добавить</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -321,9 +386,9 @@
                         </tbody>
                     </table>
                     <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
-                    <button id="add_agreement_btn" class="button-main" onclick="addNewAgreement()"><i class="material-icons">
-                            add
-                        </i>Добавить</button>
+                    <div class="form-submit-btn">
+                        <button id="add_agreement_btn" class="button-primary" onclick="addNewAgreement()">Добавить</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -359,9 +424,9 @@
                         </tbody>
                     </table>
                     <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
-                    <button id="add_owner_btn" class="button-main" onclick="addNewOwner()"><i class="material-icons">
-                            add
-                        </i>Добавить</button>
+                    <div class="form-submit-btn">
+                        <button id="add_owner_btn" class="button-primary" onclick="addNewOwner()">Добавить</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -396,9 +461,9 @@
                         </tbody>
                     </table>
                     <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
-                    <button id="edit_owner_btn" class="button-main" onclick="editOwnerRequest()"><i class="material-icons-outlined">
-                            save
-                        </i>Сохранить</button>
+                    <div class="form-submit-btn">
+                            <button id="edit_owner_btn" class="button-primary" onclick="editOwnerRequest()">Сохранить</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -411,9 +476,9 @@
             <div class="popup-content">
                 <form name="edit_object_info">
                     <table id="edit_object_info_table" class="table-form"></table>
-                    <button id="edit_object_info" class="button-main" onclick="editObjectInfo()"><i class="material-icons-outlined">
-                            save
-                        </i>Сохранить</button>
+                    <div class="form-submit-btn">
+                        <button id="edit_object_info" class="button-primary" onclick="editObjectInfo()">Сохранить</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -429,7 +494,7 @@
                     <button class="tab-button" onclick="openTabs('contacts_tabs', this,'contacts_add')">Добавить</button>
                     <button class="tab-button" onclick="openTabs('contacts_tabs', this,'contacts_edit')">Редактировать</button>
                 </div>
-                <div id="contacts_tabs_content" class="tabs-content">
+                <div id="contacts_tabs_content" class="popup-tabs-content">
                     <div id="contacts_list" class="tab-content active"></div>
                     <div id="contacts_add" class="tab-content">
                         <form name="add_contact">
@@ -463,9 +528,9 @@
                                 </tbody>
                             </table>
                             <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
-                            <button id="add_contact_btn" class="button-main" onclick="addNewContact()"><i class="material-icons">
-                                    add
-                                </i>Добавить</button>
+                            <div class="form-submit-btn">
+                                <button id="add_contact_btn" class="button-primary" onclick="addNewContact()">Добавить</button>
+                            </div>
                         </form>
                     </div>
                     <div id="contacts_edit" class="tab-content">
@@ -492,9 +557,9 @@
                                 </tbody>
                             </table>
                             <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
-                            <button id="edit_contact_btn" class="button-main" onclick="editContact()"><i class="material-icons-outlined">
-                                    save
-                                </i>Сохранить</button>
+                            <div class="form-submit-btn">
+                                <button id="edit_contact_btn" class="button-primary" onclick="editContact()">Сохранить</button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -508,43 +573,69 @@
             </div>
             <div class="popup-content">
                 <form name="add_object_notation">
-                    <div class="block">
-                        <div class="block-header-popup-window">
-                            <div class="header">Добавить примечание</div>
-                        </div>
-                        <div class="block-content">
-                            <table class="table-form">
-                                <tbody>
-                                    <tr>
-                                        <td><input id="add_object_notation_input" type="text" class="input-main"></td>
-                                        <td><button id="add_object_notation_btn" class="primary-btn-text" onclick="addObjectNotation()">Добавить</button></td>
-                                    </tr>
-                                </tbody>
-                            </table>                            
-                        </div>
+                    <h3>Добавить примечание</h3>
+                    <div>
+                        <table class="table-form">
+                            <tbody>
+                                <tr>
+                                    <td><input id="add_object_notation_input" type="text" class="input-main"></td>
+                                    <td><button id="add_object_notation_btn" class="button-primary"onclick="addObjectNotation()">Добавить</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-
-                    <div class="block">
-                            <div class="block-header-popup-window">
-                                <div class="header">Список примечаний</div>
-                            </div>
-                            <div class="block-content-no-padding">
-                                <div id="notations_list"></div>                
-                            </div>
-                        </div>
+                    <h3>Список примечаний</h3>
+                    <div class="block-primary">
+                        <div id="notations_list"></div>  
+                    </div>
                 </form>
             </div>
         </div>
 
         <div id="popup_report" class="popup-fullscreen">
-            <div class="popup-header-fullscreen">
-                <div class="popup-report-name">Справка</div>
-                <div class="popup-report-operation">
-                    <button class="popup-fullscreen-print-btn" onclick="printReport()">Печать</button>
-                    <div class="popup-report-close" onclick="closePopupWindow('popup_report')"><i class="material-icons" title="Закрыть">close</i></div>
+            <div class="popup-background">
+                <div class="popup-header-fullscreen">
+                    <div class="popup-name">Справка</div>
+                    <div class="popup-report-operation">
+                        <button class="button-primary" onclick="printReport()">Печать</button>
+                        <i class="material-icons" title="Закрыть" onclick="closePopupWindow('popup_report')">close</i>
+                    </div>
+                </div>
+                <div class="popup-content">
                 </div>
             </div>
-            <div class="popup-content">
+        </div>
+
+        <div id="popup_processed_file_template" class="popup-fullscreen">
+            <div class="popup-background">
+                <div class="popup-header-fullscreen">
+                    <div class="popup-name"></div>
+                    <div class="popup-report-operation">
+                        <i class="material-icons" title="Закрыть" onclick="closePopupWindowWithConfirm('popup_processed_file_template')">close</i>
+                    </div>
+                </div>
+                <div class="popup-content-no-overflow">
+                    <div id="template_table"></div>
+                    <div id="template_total">
+                        <table id="template_total_table">
+                            <tr>
+                                <td id="template_total_td"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="popup_performed_file_template" class="popup-fullscreen">
+            <div class="popup-background">
+                <div class="popup-header-fullscreen">
+                    <div class="popup-name"></div>
+                    <div class="popup-report-operation">
+                        <i class="material-icons" title="Закрыть" onclick="closePopupWindow('popup_performed_file_template')">close</i>
+                    </div>
+                </div>
+                <div class="popup-content"></div>
             </div>
         </div>
 
@@ -571,179 +662,246 @@
                             </tr>
                         </tbody>
                     </table>
-                    <button id="process_file_btn" class="button-main" onclick="processFile()">Обработать</button>
+                    <div class="content-center">
+                        <button id="process_file_btn" class="button-primary" onclick="processFile()">Обработать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="popup_background_layer2">
+        <div id="popup_add_ardess_template" class="popup-window-layer2">
+            <div class="popup-header">
+                <div class="popup-name">Добавить адрес</div>
+                <div class="popup-close" onclick="closePopupWindowLayer2('popup_add_ardess_template')"><i class="material-icons">close</i></div>
+            </div>
+            <div class="popup-content">
+                <form id="sub_search_form">
+                    <input id="ardess_template_search_input" class="input-search" type="text" placeholder="Введите данные для поиска (ФИО, ЛС)" onkeyup="keyupSearch('ardess_template_search_input', 'ardess_template_search_menu', 'ardess_template_search_btn')">
+                    <div id="ardess_template_search_menu">
+                        <ul class="obj-search-ul"></ul>
+                    </div>
+                    <div class="content-center">
+                        <button id="ardess_template_search_btn" class="button-primary" onclick="">Добавить</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 
     <div id="popup_profile" class="popup-with-menu">
-        <div class="popup-header-fullscreen">
+        <div class="popup-header">
             <div class="popup-fullscreen-name">Профиль</div>
-            <div class="popup-close-fullscreen" onclick="closePopupWindow('popup_profile')"><i class="material-icons"
+            <div class="popup-close" onclick="closePopupWindow('popup_profile')"><i class="material-icons"
                     title="Закрыть">close</i></div>
         </div>
         <div class="popup-content">
-            <div id="profile_left_content">
-                <div class="tabs" id="profile_tabs">
-                    <button class="tab-button active"
-                        onclick="openTabs('profile_tabs', this,'profile_settings')">Настройки</button>
-                </div>
-                <div id="profile_tabs_content" class="tabs-content">
-                    <div id="profile_settings" class="tab-content active">Настройки</div>
-                </div>
+            <div class="tabs" id="profile_tabs">
+                <button class="tab-button active"
+                    onclick="openTabs('profile_tabs', this,'profile_settings')">Настройки</button>
             </div>
-            <div id="profile_right_content">
-                <div id="profile_chat">
-                    <div class="block-header">
-                        <div class="header"><i class="material-icons">chat</i>Чат</div>
+            <div class="popup-background-with-tabs">
+                <div id="profile_left_content">
+                    <div id="profile_tabs_content" class="tabs-content">
+                        <div id="profile_settings" class="tab-content active">Настройки</div>
                     </div>
-                    <div id="chat_content"></div>
+                </div>
+                <div id="profile_right_content">
+                    <div id="profile_chat">
+                        <div class="block-header">
+                            <div class="header">Чат</div>
+                        </div>
+                        <div id="chat_content"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
     <div id="popup_control" class="popup-with-menu">
-        <div class="popup-header-fullscreen">
-            <div class="popup-fullscreen-name">Управление Текущая компания</div>
-            <div class="popup-close-fullscreen" onclick="closePopupWindow('popup_control')"><i class="material-icons"
-                    title="Закрыть">close</i></div>
-        </div>
-        <div class="popup-content">
-            <div class="tabs" id="control_tabs">
-                <button class="tab-button active" onclick="openTabs('control_tabs', this,'control_reports')">Справки</button>
-                <button class="tab-button" onclick="openTabs('control_tabs', this,'control_files')">Работа с файлами</button>
-                <button class="tab-button" onclick="openTabs('control_tabs', this,'control_report_settings')">Настройка справок</button>
+        <div class="popup-header">
+                <div class="popup-fullscreen-name">Управление Текущая компания</div>
+                <div class="popup-close" onclick="closePopupWindow('popup_control')"><i class="material-icons"
+                        title="Закрыть">close</i></div>
             </div>
-            <div id="control_tabs_content" class="tabs-content">
-                <div id="control_reports" class="tab-content active">
-                    <div id="reports_list">
-                        <div class="block">
-                            <div class="block-header">
-                                <div class="header">
-                                    <i class="material-icons">history</i><span>История запросов</span>
-                                </div>
-                            </div>
-                            <div class="block-content"></div>
-                        </div>
-                    </div>
-                    <div id="report_fast_access">
-                        <div class="block">
-                            <div class="block-header-without-icon"><span>Быстрый доступ</span></div>
-                            <div class="block-content">
-                                <form name="report_fast_access">
-                                    <table class="table-form">
-                                        <tbody>
-                                            <tr>
-                                                <td class="table-input-name">Справки</td>
-                                                <td><table id="report_fast_access_reports_list"></table></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="table-input-name">ЛС *</td>
-                                                <td><input id="report_fast_access_ls" type="text" class="input-main"></td>
-                                            </tr>
-                                            <tr class="report-fast-access-one-owner">
-                                                <td class="table-input-name">ФИО *</td>
-                                                <td><input id="report_fast_access_fio" type="text" class="input-main"></td>
-                                            </tr>
-                                            <tr class="report-fast-access-part-owners">
-                                                <td class="table-input-name">ФИО *</td>
-                                                <td>
-                                                    <table id="report_fast_access_owners_list">
-                                                        <tr id="report_fast_access_owner_1">
-                                                            <td><input name="fio" type="text" class="input-main"></td>
-                                                            <td class="add-report-part"><input name="part" type="text" class="input-main add-report-part-input" placeholder="Доля"></td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="table-input-name">Тип собственности</td>
-                                                <td>
-                                                    <select id="report_fast_access_own_select" class="table-form-select">
-                                                        <option value="one">Один собственник</option>
-                                                        <option value="together">Совместная собственность</option>
-                                                        <option value="part">Долевая собственность</option>
-                                                    </select>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="table-input-name">Дата начала</td>
-                                                <td><input id="report_fast_access_start_date" type="text" class="input-main" onclick="DatepickerSetCurrentDate('report_fast_access_start_date')"></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="table-input-name">Дата конца</td>
-                                                <td><input id="report_fast_access_end_date" type="text" class="input-main" onclick="DatepickerSetCurrentDate('report_fast_access_end_date')"></td>
-                                            </tr>
-                                                <td></td>
-                                                <td class="form-btn-td">
-                                                    <button id="fast_access_add_owner_btn" class="primary-btn-text form-btn report-fast-access-part-owners" onclick="addOwnerReportFastAccess()">Добавить собственника</button>
-                                                    <button class="primary-btn-text form-btn" onclick="clearForm('report_fast_access')">Очистить форму</button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
-                                    <button id="report_fast_access_btn" class="button-main" onclick="addReport()">Выполнить</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+            <div class="popup-content">
+                <div class="tabs" id="control_tabs">
+                    <button class="tab-button active"
+                        onclick="openTabs('control_tabs', this,'control_reports')">Справки</button>
+                    <button class="tab-button" onclick="openTabs('control_tabs', this,'control_files')">Работа с
+                        файлами</button>
+                    <button class="tab-button" onclick="openTabs('control_tabs', this,'control_report_settings')">Настройка
+                        справок</button>
                 </div>
-                <div id="control_files" class="tab-content">
-                    <div id="files_left_column">
-                        <div id="control_files_upload" class="block">
-                            <div class="block-header">
-                                <div class="header">
-                                    <i class="material-icons">file_upload</i><span>Загрузка файлов</span>
+                <div class="popup-background-with-tabs">
+                    <div id="control_tabs_content" class="tabs-content">
+                        <div id="control_reports" class="tab-content active">
+                            <div id="reports_list">
+                                <div class="block">
+                                    <div class="block-header">
+                                        <div class="header">История запросов</div>
+                                    </div>
+                                    <div class="block-content"></div>
                                 </div>
                             </div>
-                            <div class="block-content">
-                                <button id="select_files" class="primary-btn-text"><label for="files_upload_input">Выбрать файлы</label></button>
-                                <span id="number_of_uploaded_files">Выбрано файлов: 0</span>
-                                <button id="files_upload_btn" class="primary-btn-text" onclick="uploadFiles()">Загрузить</button>
-                                <form name="files_upload">
-                                        <input id="files_upload_input" type="file" name="files" multiple>
-                                </form>
-                            </div>
-                        </div>
-                        <div id="control_files_list" class="block">
-                            <div class="block-header">
-                                <div class="header">
-                                    <i class="material-icons">list</i><span>Список файлов</span></div>
+                            <div id="report_fast_access">
+                                <div class="block">
+                                    <div class="block-header">
+                                        <div class="header">Быстрый доступ</div>
+                                    </div>
+                                    <div class="block-content">
+                                        <form name="report_fast_access">
+                                            <table class="table-form">
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="table-input-name">Справки</td>
+                                                        <td>
+                                                            <table id="report_fast_access_reports_list"></table>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="table-input-name">ЛС *</td>
+                                                        <td><input id="report_fast_access_ls" type="text" class="input-main"></td>
+                                                    </tr>
+                                                    <tr class="report-fast-access-one-owner">
+                                                        <td class="table-input-name">ФИО *</td>
+                                                        <td><input id="report_fast_access_fio" type="text" class="input-main"></td>
+                                                    </tr>
+                                                    <tr class="report-fast-access-part-owners">
+                                                        <td class="table-input-name">ФИО *</td>
+                                                        <td>
+                                                            <table id="report_fast_access_owners_list">
+                                                                <tr id="report_fast_access_owner_1">
+                                                                    <td><input name="fio" type="text" class="input-main"></td>
+                                                                    <td class="add-report-part"><input name="part" type="text"
+                                                                            class="input-main add-report-part-input"
+                                                                            placeholder="Доля"></td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="table-input-name">Тип собственности</td>
+                                                        <td>
+                                                            <select id="report_fast_access_own_select" class="table-form-select">
+                                                                <option value="one">Один собственник</option>
+                                                                <option value="together">Совместная собственность</option>
+                                                                <option value="part">Долевая собственность</option>
+                                                            </select>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="table-input-name">Дата начала</td>
+                                                        <td><input id="report_fast_access_start_date" type="text" class="input-main"
+                                                                onclick="DatepickerSetCurrentDate('report_fast_access_start_date')">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="table-input-name">Дата конца</td>
+                                                        <td><input id="report_fast_access_end_date" type="text" class="input-main"
+                                                                onclick="DatepickerSetCurrentDate('report_fast_access_end_date')">
+                                                        </td>
+                                                    </tr>
+                                                    <td></td>
+                                                    <td class="form-btn-td">
+                                                        <button id="fast_access_add_owner_btn"
+                                                            class="button-secondary report-fast-access-part-owners"
+                                                            onclick="addOwnerReportFastAccess()">Добавить собственника</button>
+                                                        <button class="button-secondary"
+                                                            onclick="clearForm('report_fast_access')">Очистить форму</button>
+                                                    </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения
+                                            </div>
+                                            <div class="form-submit-btn">
+                                                <button id="report_fast_access_btn" class="button-primary"
+                                                    onclick="addReport()">Выполнить</button>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
-                            <div class="block-content"></div>
-                        </div>
-                    </div>
-                    <div id="files_center_column">
-                    </div>
-                </div>
-                <div id="control_report_settings" class="tab-content">
-                    <div id="report_settings_select_menu">
-                        <ul></ul>
-                    </div>
-                    <div id="report_settings_content">
-                        <div id="report_settings_preview" class="block">
-                            <div class="block-header">
-                                <div class="header">Превью справки</div>
                             </div>
-                            <div class="block-content"></div>
                         </div>
-                        <div id="report_settings_print_notation" class="block">
-                            <div class="block-header-icons">
-                                <div class="header">Примечание для печати</div>
-                                <div class="header-icons" style="display: block;">
-                                    <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-print-notation" title="Справка" onclick="">help_outline</i>
+                        <div id="control_files" class="tab-content">
+                            <div id="control_files_top">
+                                <div id="control_files_top_left">
+                                    <div id="control_files_upload" class="block">
+                                        <div class="block-header">
+                                            <div class="header">Загрузка файлов</div>
+                                        </div>
+                                        <div class="block-content">
+                                            <div id="files_upload_number">
+                                                <span id="number_of_uploaded_files">Выбрано файлов: 0</span>
+                                            </div>
+                                            <div id="files_upload_buttons">
+                                                <button id="select_files" class="button-primary"><label for="files_upload_input">Выбрать
+                                                        файлы</label></button>
+                                                <button id="files_upload_btn" class="button-secondary" onclick="uploadFiles()">Загрузить</button>
+                                                <form name="files_upload">
+                                                    <input id="files_upload_input" type="file" name="files" multiple>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="control_files_list" class="block">
+                                        <div class="block-header">
+                                            <div class="header">Загруженные файлы</div>
+                                        </div>
+                                        <div class="block-content full-area"></div>
+                                    </div>
+                                </div>
+                                <div id="control_files_top_right">
+                                    <div id="control_processed_files_list" class="block">
+                                        <div class="block-header">
+                                            <div class="header">Обработанные файлы</div>
+                                        </div>
+                                        <div class="block-content full-area"></div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="block-content">
-                                <div id="form_settings_tab1">
-                                    <textarea id="print_notation_textarea" rows="2" disabled></textarea>
-                                    <p>
-                                        <button id="change_print_notation" class="primary-btn-text" onclick="changePrintNotation()">Изменить</button>
-                                        <button id="save_print_notation" class="primary-btn-text" onclick="savePrintNotation()">Сохранить</button>
-                                    </p>
+                            <div id="control_files_bottom">
+                                <div id="control_performed_files_list" class="block">
+                                    <div class="block-header">
+                                        <div class="header">Проведенные документы</div>
+                                    </div>
+                                    <div class="block-content full-area"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="control_report_settings" class="tab-content">
+                            <div id="report_settings_select_menu">
+                                <ul></ul>
+                            </div>
+                            <div id="report_settings_content">
+                                <div id="report_settings_preview" class="block">
+                                    <div class="block-header">
+                                        <div class="header">Превью справки</div>
+                                    </div>
+                                    <div class="block-content"></div>
+                                </div>
+                                <div id="report_settings_print_notation" class="block">
+                                    <div class="block-header-icons">
+                                        <div class="header">Примечание для печати</div>
+                                        <div class="header-icons" style="display: block;">
+                                            <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-print-notation"
+                                                title="Справка" onclick="">help_outline</i>
+                                        </div>
+                                    </div>
+                                    <div class="block-content">
+                                        <div id="form_settings_tab1">
+                                            <textarea id="print_notation_textarea" class="fixed-textarea" rows="2"
+                                                disabled></textarea>
+                                            <p>
+                                                <button id="change_print_notation" class="button-primary"
+                                                    onclick="changePrintNotation()">Изменить</button>
+                                                <button id="save_print_notation" class="button-primary"
+                                                    onclick="savePrintNotation()">Сохранить</button>
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -2,6 +2,7 @@ var USER_DATA;
 var OBJECT_DATA;
 var DROPDOWN_NUM = 1; 
 var CURRENT_OBJECT_DATA = {};
+var OBJECT_TREE_TEMPLATES;
 
 $(document).ready(function() {
     sessionStorage.setItem('printMode', 'off');
@@ -16,17 +17,29 @@ $(document).ready(function() {
             return;
         }
         else {
-            $('#popup_background').fadeOut(200);
+            $('#popup_background, .popup-window').fadeOut(200);
         }
     });
+
+    $('#popup_background_layer2').on('click', (e) => {
+        if (e.target !== e.currentTarget) {
+            return;
+        }
+        else {
+            $('#popup_background_layer2, .popup-window_layer2').fadeOut(200);
+        }
+    });
+
     if (!sessionStorage.firstVisit) {
         getUserData([createCompanyDropdownMenu, getUpdateList]);
         $('#update_info_content').show();
-        $('#main_content').hide();
+        $('#info_page').addClass('active');
+        $('#obj_content').hide();
         sessionStorage.setItem('firstVisit', 'true');
     }
     else {
         getUserData([createCompanyDropdownMenu, initializationPopupControl, getUpdateList]);
+        $('#home_page').addClass('active');
     }
 
     $('#add_contact_phone_number').inputmask("(999)999-99-99");
@@ -43,12 +56,25 @@ $(document).ready(function() {
         }
     });
 
-    $('#sub_search_input').focus((e) => {
-        let valueLength = $('#sub_search_input').val().length;
-        if (valueLength >= 3) { 
-            $('#fast_search_menu').show();
+    // $('#sub_search_input').focus((e) => {
+    //     let valueLength = $('#sub_search_input').val().length;
+    //     if (valueLength >= 3) { 
+    //         $('#fast_search_menu').show();
+    //     }
+    // })
+
+    $('.main-menu li').on('click', function() {
+        if (!$(this).hasClass('active'))  {
+            $('.main-menu li').removeClass('active');
+            $(this).addClass('active');
         }
-    })
+    });
+
+    const currentCompany = getCookie('companyId');
+    if (currentCompany == undefined) {
+        $('#main_search_input').attr('disabled', true);
+        $('#main_search_input').val('Выбирете компанию');
+    }
 });
 
 // получение данных о пользователе
@@ -77,16 +103,18 @@ function showCurrentCompany() {
 
 // создание выпадающего меню со списком компаний
 function createCompanyDropdownMenu() {
-    let companiesData = USER_DATA.orgList;
-    for (company in companiesData) {
-        let companyName = companiesData[company][0];
-        let companyId = companiesData[company][1];
+    let companiesData = USER_DATA.org_list;
+    for (company of companiesData) {
+        let companyId = company.id;
+        let companyName = company.name;
         li = $('<li>', {id: companyId, class: 'dropdown-menu-item', onclick: `chooseCompany('${companyName}', '${companyId}')`}).appendTo('#jq-dropdown-company-list .jq-dropdown-menu');
         $('<a>', {text: companyName}).appendTo(li);
     }
 }
 
 function chooseCompany(companyName, companyId) {
+    $('#main_search_input').attr('disabled', false);
+    $('#main_search_input').val('');
     $('.li-change-events').removeClass('li-disabled');
     $('.object-list-tree').empty();
     $('#current_company').text(companyName);
@@ -108,14 +136,14 @@ function chooseCompany(companyName, companyId) {
 
 function openCloseMainMenu () {
     if ($('#menu_change_state i').text() == 'arrow_forward') {
-        $('.main-menu, #main_menu_content').width('220px');
-        $('#body_content, .popup-with-menu').width('calc(100% - 220px)');
+        $('.main-menu, #main_menu_content').width('260px');
+        $('#body_content, .popup-with-menu').width('calc(100% - 260px)');
         $('#menu_change_state i').text('arrow_back');
 
     }
     else {
-        $('.main-menu, #main_menu_content').width('70px');
-        $('#body_content, .popup-with-menu').width('calc(100% - 70px)');
+        $('.main-menu, #main_menu_content').width('56px');
+        $('#body_content, .popup-with-menu').width('calc(100% - 56px)');
         $('#menu_change_state i').text('arrow_forward');
     }
 }
@@ -134,14 +162,41 @@ function openPopupWindow(id) {
     }
 }
 
+function openPopupWindowLayer2(id) {
+    $('.popup-window-layer2').hide();
+    $(`#${id}, #popup_background_layer2`).fadeIn(200);
+
+    if (id == 'popup_search') {
+        setOffsetFastSearchMenu();
+    }
+}
+
 function closePopupWindow(popupId) {
     $(`#${popupId}, #popup_background`).fadeOut(200);
     $('#popup_report .popup-content').empty();
+    $('.main-menu li').removeClass('active');
+    $('#home_page').addClass('active');
+
+    if (popupId !== 'popup_add_task')  {
+        openHomePage();
+    }
+}
+
+function closePopupWindowLayer2(popupId) {
+    $(`#${popupId}, #popup_background_layer2`).fadeOut(200);
+    $('#popup_report .popup-content').empty();
+}
+
+function closePopupWindowWithConfirm(popupId) {
+    if (confirm(`Все внесенные изменения будут потеряны. Вы уверены, что хотите закрыть окно?`)) {
+        $(`#${popupId}, #popup_background`).fadeOut(200);
+        $('#popup_report .popup-content').empty();
+    }
 }
 
 function openPopupWithMenu(popupId) {
     $('.popup-with-menu').hide();
-    $(`#${popupId}`).fadeIn(200);
+    $(`#${popupId}`).css({ 'display': 'block' });
     let popup = $('#popup_object_list');
     if (popup.attr('state') == 'open') {
         $('#popup_object_content').hide();
@@ -161,7 +216,7 @@ function openCloseObjectList() {
     let popup = $('#popup_object_list');
     if (popup.attr('state') == 'close') {
         popup.css({'display': 'block'});
-        if ( $('.object-list-tree').children().length == 0 ) createObjectsTree();
+        if ( $('.object-list-tree').children().length == 0 ) getObjectsTreeData();
         popup.animate({ width: '35%' }, 200, function() {
             $('#popup_object_content').show();
             popup.attr('state', 'open');
@@ -173,106 +228,132 @@ function openCloseObjectList() {
             popup.css({'display': 'none'});
             popup.attr('state', 'close');
         });
+        $('.main-menu li').removeClass('active');
+        $('#home_page').addClass('active');
     }
 }
 
-function createObjectsTree() {
+function getObjectsTreeData() {
+    $('.object-list-tree').empty();
     createContentLoader('#object_list_tree');
     $.ajax({
         type: "POST",
         url: "/base_func",
         data: encodeURI("val_param=house_tree"),
         success: function (data) {
-            var objectTree = JSON.parse(data);
-
-            for (prop in objectTree) {
-                li = $('<li>', {text: prop, class: 'parent-li'}).appendTo('.object-list-tree');
-                parentUl = $('<ul>', {class: 'object-tree-ul hide'}).insertAfter(li);
-
-                for (i = 0; i < objectTree[prop].length; i++) {
-                    let apartData = objectTree[prop][i].split('&');
-                    let li = $('<li>', {class: 'object-tree-li', text: apartData[0], accid: apartData[1]}).appendTo(parentUl);
-                    if (apartData[2] !== 'white') {
-                        li.css({'color' : apartData[2]});
-                    }
-                }
-            }
+            createObjectsTree(data);
             removeContentLoader('#object_list_tree', '.object-list-tree');
-            $('#object_list_settings_left, #object_list_settings_right').show();
+        }
+    });
+}
 
-            $('.parent-li').click(function(event) {
-                if ($(this).hasClass('active')) {
-                    $(this).removeClass('active');
+function createObjectsTree(data) {
+    const templateSelect = $('#choose_template_select');
+
+    var objectTree = JSON.parse(data).object_tree;
+    const objectList = objectTree.object_list;
+    OBJECT_TREE_TEMPLATES = objectTree.templates;
+
+    for (prop in objectList) {
+        li = $('<li>', { text: prop, class: 'parent-li' }).appendTo('.object-list-tree');
+        parentUl = $('<ul>', { class: 'object-tree-ul hide' }).insertAfter(li);
+
+        for (i = 0; i < objectList[prop].length; i++) {
+            let apartData = objectList[prop][i].split('&');
+            let li = $('<li>', { class: 'object-tree-li', text: apartData[0], accid: apartData[1] }).appendTo(parentUl);
+            if (apartData[2] !== 'white') {
+                li.css({ 'color': apartData[2] });
+            }
+        }
+    }
+
+    templateSelect.empty();
+
+    for (template in OBJECT_TREE_TEMPLATES) {
+        const name = template;
+        $('<option>', { text: name }).appendTo('#choose_template_select');
+    }
+
+    const currentTemplateName = templateSelect.val();
+    const currentTemplateDescription = OBJECT_TREE_TEMPLATES[currentTemplateName];
+    $('#choose_template_description').text(currentTemplateDescription);
+
+
+    $('#object_list_settings_left, #object_list_settings_right').show();
+
+    $('.parent-li').click(function (event) {
+        if ($(this).hasClass('active')) {
+            $(this).removeClass('active');
+        }
+        else {
+            $('.parent-li').removeClass('active');
+            $(this).addClass('active');
+        }
+        let currentTarget = $(this).text();
+        let target = $(event.target).text();
+        let ulChild = $(this).next();
+        if (currentTarget == target) {
+            if (ulChild.hasClass('hide')) {
+                $('.object-tree-ul').removeClass('active').addClass('hide');
+                ulChild.removeClass('hide');
+                ulChild.removeClass('hide').addClass('active');
+            }
+            else if (ulChild.hasClass('active')) {
+                ulChild.removeClass('active').addClass('hide');
+            }
+        }
+    });
+
+    $('#object_list_search_input').on('click', function () {
+        $('.object-tree-ul.active').removeClass('active').addClass('hide');
+    });
+
+    $('.object-tree-li').each(function () {
+        $(this).on('click', function (e) {
+            if (getPrintMode()) {
+                let input = $(this).find('input');
+                if (e.target !== e.currentTarget) {
+                    return;
+                }
+                if (!input.prop('checked')) {
+                    input.prop('checked', true);
                 }
                 else {
-                    $('.parent-li').removeClass('active');
-                    $(this).addClass('active');
+                    input.prop('checked', false);
                 }
-                let currentTarget = $(this).text();
-                let target = $(event.target).text();
-                let ulChild = $(this).next();
-                if (currentTarget == target) {
-                    if (ulChild.hasClass('hide')) {
-                        $('.object-tree-ul').removeClass('active').addClass('hide');
-                        ulChild.removeClass('hide');
-                        ulChild.removeClass('hide').addClass('active');
-                    }
-                    else if (ulChild.hasClass('active')) {
-                        ulChild.removeClass('active').addClass('hide');                    
-                    }
+            }
+            else {
+                let accid = $(this).attr('accid');
+                CURRENT_OBJECT_DATA.apartNum = $(this).text();
+                CURRENT_OBJECT_DATA.adress = $(this).parent().prev().text();
+                CURRENT_OBJECT_DATA.accid = accid;
+
+                getObjectData();
+
+                if ($('#update_info_content').is(':visible')) {
+                    $('#update_info_content').hide();
+                    $('#obj_content').show();
                 }
-            });
 
-            $('#object_list_search_input').on('click', function() {
-                $('.object-tree-ul.active').removeClass('active').addClass('hide');  
-            });
+                if ($('#obj_info .header-icons').is(':hidden')) {
+                    $('#obj_info .header-icons').show();
+                }
 
-            $('.object-tree-li').each(function() {
-                $(this).on('click', function(e) {
-                    if (getPrintMode()) {
-                        let input = $(this).find('input');
-                        if (e.target !== e.currentTarget) {
-                            return;
-                        }
-                        if (!input.prop('checked')) {
-                            input.prop('checked', true);
-                        }
-                        else {
-                            input.prop('checked', false);
-                        }
-                    }
-                    else {
-                        let accid = $(this).attr('accid');
-                        CURRENT_OBJECT_DATA.apartNum = $(this).text();
-                        CURRENT_OBJECT_DATA.adress = $(this).parent().prev().text();
-                        CURRENT_OBJECT_DATA.accid = accid;
+                $('.jq-dropdown.dropdown-report').remove();
 
-                        getObjectData();
-
-                        if ($('#update_info_content').is(':visible')) {
-                            $('#update_info_content').hide();
-                            $('#main_content').show();
-                        }
-
-                        if ($('#main_content .header-icons').is(':hidden')) {
-                            $('#main_content .header-icons').show();
-                        }
-
-                        $('.jq-dropdown.dropdown-report').remove();                        
-
-                        $('.object-tree-li').removeClass('active');
-                        $(this).addClass('active');
-                        $('#current_adress').text(`${CURRENT_OBJECT_DATA.adress} - ${CURRENT_OBJECT_DATA.apartNum}`);
-                        let popup = $('#popup_object_list');
-                        $('#popup_object_content').hide();
-                        popup.animate({ width: '0' }, 200, function() {
-                            popup.css({'display': 'none'});
-                            popup.attr('state', 'close');
-                        });
-                    }
+                $('.object-tree-li').removeClass('active');
+                $(this).addClass('active');
+                $('.main-menu li').removeClass('active');
+                $('#home_page').addClass('active');
+                $('#obj_adress').text(`${CURRENT_OBJECT_DATA.adress} - ${CURRENT_OBJECT_DATA.apartNum}`);
+                let popup = $('#popup_object_list');
+                $('#popup_object_content').hide();
+                popup.animate({ width: '0' }, 200, function () {
+                    popup.css({ 'display': 'none' });
+                    popup.attr('state', 'close');
                 });
-            });
-        }
+            }
+        });
     });
 }
 
@@ -287,7 +368,7 @@ function getObjectData() {
 
             getObjectAgreementsData();
 
-            getObjectOwnersData();
+            getObjectRegistrationsData();
 
             getObjectInfoData();
 
@@ -333,9 +414,9 @@ function clickDropdownMenu() {
 
 
             if (repType == 'report') {
-                let content = '<table id="rep_range_table"><tr><td>Дата начала</td><td><input type="text" id="start_date"></td></tr>' +
-                    '<tr><td>Дата конца</td><td><input type="text" id="final_date"></td></tr></table>' +
-                    '<div class="content-center"><div class="notification">По умолчанию будет выбран период с 01.01.2005 по 01.12.2015</div><button id="pep_range_btn" class="button-main">Выполнить</button></div>';
+                let content = '<table id="rep_range_table"><tr><td>Дата начала</td><td><input type="text" id="start_date" class="input-main"></td></tr>' +
+                    '<tr><td>Дата конца</td><td><input type="text" id="final_date" class="input-main"></td></tr></table>' +
+                    '<div class="content-center"><div class="notification">По умолчанию будет выбран период с 01.01.2005 по 01.12.2015</div><button id="pep_range_btn" class="button-primary">Выполнить</button></div>';
                 formPopupNotFullscreen(repName, content);
                 openPopupWindow('popup_not_fullscreen');
 
@@ -358,14 +439,15 @@ function clickDropdownMenu() {
                 });
             }
             else {
+                createContentLoader('#popup_report .popup-content');
+                openPopupWindow('popup_report');
                 $.get(`/report?rnum=${repNum}&rtype=${repType}&accid=${accid}&humanid=${humanId}`, function (data) {
                     $('#popup_report .popup-name-fullscreen').text(repName);
                     $('#popup_report .popup-content').html(data);
                     if (repNum == '2' || repNum == '3') {
                         $('#popup_report table').addClass('export-table-border');
-                        createButtonToExport(createFileToExport);
+                        // createButtonToExport(createFileToExport);
                     }
-                    openPopupWindow('popup_report');
                 });
             }
         });
@@ -374,15 +456,19 @@ function clickDropdownMenu() {
 
 function setPrintNotation(reportId) {
     let reportsList = getCurrentCompanyReportsArray();
-    const printNotation = reportsList[reportId].print_notation;
-    sessionStorage.setItem('printNotation', printNotation);
+    for (report of reportsList) {
+        if (report.id == reportId) {
+            const printNotation = report.print_notation;
+            sessionStorage.setItem('printNotation', printNotation);
+        }
+    }
 }
 
 function getObjectAgreementsData() {
 
     $('#agreement_list_table').empty();
 
-    let agreementsData = OBJECT_DATA[0];
+    let agreementsData = OBJECT_DATA.agreements;
     let agreementsPeopleArr = [];
 
     $('<tr>').append(
@@ -395,8 +481,8 @@ function getObjectAgreementsData() {
         let propData = prop.split('&');
         tr = $('<tr>', { 'accid': propData[1], 'human_id': propData[2] }).appendTo('#agreement_list_table');
         tdButton = $('<td>').appendTo(tr);
-        button = $('<button>', { 'data-jq-dropdown': `#jq-dropdown-${DROPDOWN_NUM}`, class: 'owner-document-list-btn' }).appendTo(tdButton);
-        buttonIcon = $('<i>', { class: 'material-icons', text: 'event_note' }).appendTo(button);
+        // button = $('<button>', { 'data-jq-dropdown': `#jq-dropdown-${DROPDOWN_NUM}`, class: 'owner-document-list-btn' }).appendTo(tdButton);
+        buttonIcon = $('<i>', { class: 'material-icons', 'data-jq-dropdown': `#jq-dropdown-${DROPDOWN_NUM}`, text: 'event_note' }).appendTo(tdButton);
         td = $('<td>', { text: propData[0] }).appendTo(tr);
 
         agreementsPeopleArr.push(`${propData[0]}&${propData[2]}`);
@@ -413,11 +499,11 @@ function getObjectAgreementsData() {
 
 }
 
-function getObjectOwnersData() {
+function getObjectRegistrationsData() {
 
     $('#owners_table, #add_agreement_owner_select').empty();
 
-    let ownersData = OBJECT_DATA[1];
+    let registrationsData = OBJECT_DATA.registrations;
     let ownersPeopleArr = [];
 
     $('<tr>').append(
@@ -429,42 +515,38 @@ function getObjectOwnersData() {
         $('<th>'),
     ).appendTo('#owners_table');
 
-    for (prop in ownersData) {
-        let propData = prop.split('&');
-        tr = $('<tr>', { 'accid': propData[1], 'human_id': propData[2] }).append(
+    for (registrationKey in registrationsData) {
+        let registrationData = registrationKey.split('&');
+        const registrationValue = registrationsData[registrationKey];
+        tr = $('<tr>', { 'accid': registrationData[1], 'human_id': registrationData[2] }).append(
             $('<td>').append(
-                $('<button>', { 'data-jq-dropdown': `#jq-dropdown-${DROPDOWN_NUM}`, class: 'owner-document-list-btn' }).append(
-                    $('<i>', { class: 'material-icons', text: 'event_note' })
-                )
+                $('<i>', { 'data-jq-dropdown': `#jq-dropdown-${DROPDOWN_NUM}`, class: 'material-icons', text: 'event_note' })
             ),
-            $('<td>', { text: propData[0] })
+            $('<td>', { text: registrationData[0] }),
+            $('<td>', {text: registrationValue.birth_date}),
+            $('<td>', {text: registrationValue.registration_date})
         ).appendTo('#owners_table');
 
-        ownersPeopleArr.push(`${propData[0]}&${propData[2]}`);
+        const td = $('<td>').appendTo(tr);
 
-        $('<option>', {text: propData[0], humanId: propData[2]}).appendTo('#add_agreement_owner_select');
 
-        for (i = 0; i < ownersData[prop].length; i++) {
-            if (i == 2) {
-                let td =  $('<td>').appendTo(tr);
-                let ownerInfoArray = ownersData[prop][i];
-                if (ownerInfoArray[0] !== '') {
-                    $('<i>', {class: 'material-icons owner-info-unsubdate', text: 'domain_disabled', title: `Дата выписки: ${ownerInfoArray[0]}`}).appendTo(td);
-                }
-                if (ownerInfoArray[1] !== '') {
-                    $('<i>', {class: 'material-icons owner-info-birthplace', text: 'person_pin_circle', title: `Место рождения: ${ownerInfoArray[1]}`}).appendTo(td);
-                }
-            }
-            else {
-                $('<td>', { text: ownersData[prop][i] }).appendTo(tr);
-            }
+        if (registrationValue.unregistration_date !== '') {
+            $('<i>', {class: 'material-icons owner-info-unsubdate', text: 'domain_disabled', title: `Дата выписки: ${registrationValue.unregistration_date}`}).appendTo(td);
         }
 
+        if (registrationValue.birth_place !== '') {
+            $('<i>', {class: 'material-icons owner-info-birthplace', text: 'person_pin_circle', title: `Место рождения: ${registrationValue.birth_place}`}).appendTo(td);
+        }
+
+        ownersPeopleArr.push(`${registrationData[0]}&${registrationData[2]}`);
+
+        $('<option>', {text: registrationData[0], humanId: registrationData[2]}).appendTo('#add_agreement_owner_select');
+
         $('<td>', { text: '' }).append(
-            $('<i>', { class: 'material-icons owner-edit-icon', humanId: propData[2], text: 'edit', title: 'Редактировать' })
+            $('<i>', { class: 'material-icons owner-edit-icon', humanId: registrationData[2], text: 'edit', title: 'Редактировать' })
         ).appendTo(tr);
 
-        createDropdownMenu(DROPDOWN_NUM, propData[1], propData[2], getCurrentCompanyReportsArray());
+        createDropdownMenu(DROPDOWN_NUM, registrationData[1], registrationData[2], getCurrentCompanyReportsArray());
         DROPDOWN_NUM++;
     }
 
@@ -474,11 +556,11 @@ function getObjectOwnersData() {
 
 function getObjectInfoData() {
 
-    let data = OBJECT_DATA[2];
+    let data = OBJECT_DATA.information;
 
     $('#obj_info_content, #obj_info_notation, #edit_object_info_table').empty();
     for (prop in data) {
-        $('#middle_content .header').text(`ЛС: ${prop.replace('ls','')}`);
+        $('#obj_ls_info .header').text(`ЛС: ${prop.replace('ls','')}`);
         $('#report_fast_access_ls').val(`${prop.replace('ls','')}`);
 
         let infoData = data[prop];
@@ -521,7 +603,7 @@ function getObjectInfoData() {
 
 function getObjectContactsData() {
     $('#contacts_list, #edit_contact_select').empty();
-    let contactsData = OBJECT_DATA[3];
+    let contactsData = OBJECT_DATA.contacts;
 
     if (!isEmpty(contactsData)) {
         $('<table>', {id: 'object_contacts_table'}).append(
@@ -600,7 +682,7 @@ function getObjectNotationsData() {
 
     $('#notations_list').empty();
 
-    let notationsData = OBJECT_DATA[4];
+    let notationsData = OBJECT_DATA.notations;
 
     if (!isEmpty(notationsData)) {
         for (elem in notationsData) {
@@ -610,7 +692,7 @@ function getObjectNotationsData() {
             const author = notation.author;
             const creationTime = notation.creation_time;
 
-            $('<div>', {id: id, class: 'notation-block'}).append(
+            $('<div>', {id: id, class: 'obj-notation'}).append(
                 $('<div>', {class: 'notation-content', text: value}),
                 $('<div>', {class: 'notation-creation-time', text: `Добавил: ${author} ${creationTime}`})
             ).appendTo('#notations_list');
@@ -630,11 +712,7 @@ function addObjectNotation() {
     if (value !== '') {
         encodeURIstring = encodeURI(`/base_func?val_param=addchg_accnote&val_param1=${accid}&val_param2=add&val_param3=${value}`);
         $.post(encodeURIstring, function (data) {
-            console.log(data);
             refreshObjectData([getObjectNotationsData]);
-            // closePopupWindow();
-            // refreshObjectData([getObjectOwnersData, clickDropdownMenu]);
-            // $('#add_owner_name, #add_owner_birth_date').val('');
         });
     }
     else {
@@ -683,6 +761,17 @@ function createDropdownMenu(index, accid, humanid, reportsArr) {
     }
 }
 
+function createDropdownMenuForFile(menuNum, liArr, fileId, orgId) {
+    $('<div>', {id: `jq-dropdown-${menuNum}`, class: 'jq-dropdown jq-dropdown-tip jq-dropdown-anchor-right'}).append(
+        $('<ul>', {class: 'jq-dropdown-menu'})
+    ).appendTo($('body'));
+    for (template of liArr) {
+        $('<li>', {class: 'dropdown-menu-item', onclick: `initializationProcessedFileTemplate(${fileId}, ${orgId}, ${template.number})`}).append(
+            $('<a>', {text: template.name})
+        ).appendTo($(`#jq-dropdown-${menuNum} ul`));
+    }
+}
+
 function createDropdownMenuReportTree(index, reportsArr) {
     $('<div>', {id: `jq-dropdown-${index}`, class: 'jq-dropdown dropdown-report jq-dropdown-tip'}).append(
         $('<ul>', {class: 'jq-dropdown-menu'})
@@ -701,13 +790,15 @@ function formPopupNotFullscreen(header, content) {
 }
 
 function sendReportRange(repName, repNum, repType, accid, humanId, startDate, endDate) {
+    createContentLoader('#popup_report .popup-content');
+    openPopupWindow('popup_report');
+
     $.get(`/report?rnum=${repNum}&rtype=${repType}&accid=${accid}&humanid=${humanId}&dateb=${startDate}&datee=${endDate}`, function (data) {
         $('#popup_report .popup-name-fullscreen').text(repName);
         $('#popup_report .popup-content').html(data);
         if (repNum == '21') {
-            createButtonToExport(createFileToExport);
+            // createButtonToExport(createFileToExport);
         }
-        openPopupWindow('popup_report');
     });
 }
 
@@ -731,16 +822,26 @@ function logout() {
     }
 }
 
-function openCloseInfo() {
-    let info = $('#update_info_content');
-    if (info.is(":hidden")) {
-        $('#update_info_content').show();
-        $('#main_content').hide();
-    }
-    else {
-        $('#update_info_content').hide();
-        $('#main_content').show();
-    }
+// function openCloseInfo() {
+//     let info = $('#update_info_content');
+//     if (info.is(":hidden")) {
+//         $('#update_info_content').show();
+//         $('#obj_content').hide();
+//     }
+//     else {
+//         $('#update_info_content').hide();
+//         $('#obj_content').show();
+//     }
+// }
+
+function openHomePage() {
+    $('#update_info_content, .popup-with-menu').hide();
+    $('#obj_content').show();
+}
+
+function openInfoPage() {
+    $('#update_info_content').show();
+    $('#obj_content, .popup-with-menu').hide();
 }
 
 function openTabs(tabsId, elem, tabId) {
@@ -794,33 +895,35 @@ function deleteCookie(name) {
 
 function getProjectTaskList(projectId) {
     $('#tasks_list').empty();
-    createContentLoader('#redmine_content .info-block-content');
+    // createContentLoader('#redmine_content .info-block-content');
     $.get(`/redmine?request=/issues.json?project_id=${projectId}`, function (data) {
         let taskList = JSON.parse(data);
         for (elem in taskList.issues) {
             let task = taskList.issues[elem];
             let id = task.id, tracker = task.tracker, name = task.subject, description = task.description, priority = task.priority, author = task.author;
             
-            $('<table>', {id: `task_${id}`, class: 'task-table'}).append(
-                $('<tr>').append(
-                    $('<th>', {class: 'task-name', text: name, colspan: 3}),
-                ),
-                $('<tr>', {class: 'task-thead'}).append(
-                    $('<th>', {text: 'Тип'}),
-                    $('<th>', {text: 'Приоритет'}),
-                    $('<th>', {text: 'Автор'})
-                ),
-                $('<tr>').append(
-                    $('<td>', {text: tracker.name}),
-                    $('<td>', {text: priority.name}),
-                    $('<td>', {text: author.name})
-                ),
-                $('<tr>').append(
-                    $('<td>', {class: 'task-description', text: description, colspan: 3}),
+            $('<div>', {class: 'news-block'}).append(
+                $('<div>', {class: 'news-header', text: name}),
+                $('<div>', {class: 'task-content-table'}).append(
+                    $('<table>', {id: `task_${id}`, class: 'task-table'}).append(
+                        $('<tr>', {class: 'task-thead'}).append(
+                            $('<th>', {text: 'Тип'}),
+                            $('<th>', {text: 'Приоритет'}),
+                            $('<th>', {text: 'Автор'})
+                        ),
+                        $('<tr>').append(
+                            $('<td>', {text: tracker.name}),
+                            $('<td>', {text: priority.name}),
+                            $('<td>', {text: author.name})
+                        ),
+                        $('<tr>').append(
+                            $('<td>', {class: 'task-description', text: description, colspan: 3})
+                        )
+                    )
                 )
             ).appendTo('#tasks_list');
         }
-        removeContentLoader('#redmine_content .info-block-content', '#tasks_list');
+        // removeContentLoader('#redmine_content .info-block-content', '#tasks_list');
     });
 }
 
@@ -910,10 +1013,9 @@ function switchToggle(toggleId) {
 
         toggle.text('toggle_on');
         toggle.attr('state', 'on');
-        toggle.css({'color': 'green'});
-        $('<button>', {id: 'objects_list_reports', class: 'object-tree-btn'}).append(
-            $('<i>', { 'data-jq-dropdown': '#jq-dropdown-objects-list', class: 'material-icons object-search-icon', text: 'event_note'})
-        ).prependTo($('#object_list_settings_right'));
+        toggle.css({'color': '#0091EA'});
+
+        $('<i>', { id: 'objects_list_reports', 'data-jq-dropdown': '#jq-dropdown-objects-list', class: 'material-icons-outlined object-search-icon', text: 'print'}).prependTo($('#object_list_settings_right'));
         $('<div>', {id: 'print_mode_object_num'}).prependTo($('#object_list_settings_right'));
         $('#object_list_tree .parent-li').each(function() {
             $('<input>', {type: 'checkbox', class: 'object-tree-parent-li-input'}).prependTo($(this));
@@ -929,6 +1031,9 @@ function switchToggle(toggleId) {
                 let repNum = $(this).attr('rep_num');
                 let repType = $(this).attr('rep_type');
                 let accids = createAccidsArray().toString();
+                const reportId = `${repType}_${repNum}`;
+                console.log(reportId);
+                setPrintNotation(reportId);
 
                 createContentLoader('#popup_report .popup-content');
                 openPopupWindow('popup_report');
@@ -957,7 +1062,7 @@ function switchToggle(toggleId) {
 
         toggle.text('toggle_off');
         toggle.attr('state', 'off');
-        toggle.css({'color': 'black'});
+        toggle.css({'color': '#263238'});
         $('#objects_list_reports, #jq-dropdown-objects-list, #print_mode_object_num').remove();
         $('.object-tree-apartament-input, .object-tree-parent-li-input').remove();
     }
@@ -1049,7 +1154,7 @@ function editOwnerRequest() {
         $.post(encodeURIstring, function (data) {
             if (data == 'success') {
                 closePopupWindow();
-                refreshObjectData([getObjectOwnersData, clickDropdownMenu]);
+                refreshObjectData([getObjectRegistrationsData, clickDropdownMenu]);
             }
         });
     }
@@ -1073,7 +1178,7 @@ function addNewOwner() {
         $.post(encodeURIstring, function (data) {
             if (data == 'success') {
                 closePopupWindow();
-                refreshObjectData([getObjectOwnersData, clickDropdownMenu]);
+                refreshObjectData([getObjectRegistrationsData, clickDropdownMenu]);
                 $('#add_owner_name, #add_owner_birth_date').val('');
             }
         });
@@ -1391,7 +1496,7 @@ function getMainTable() {
     let accid = CURRENT_OBJECT_DATA.accid;
 
     $.post(`/base_func?val_param=account_history&val_param1=${accid}&val_param2=${date}`, function (data) {
-        $('#bottom_content').html(data);
+        $('#obj_main_table').html(data);
     });
 }
 
@@ -1508,7 +1613,7 @@ function removeLoadingMessage(id) {
 function getCurrentCompanyReportsArray() {
     let currentCompanyId = getCookie('companyId');
     companyKey = 'id' + currentCompanyId;
-    let companyReportsData = USER_DATA.reportsList;
+    let companyReportsData = USER_DATA.reports_list;
     return companyReportsData[companyKey];
 }
 
@@ -1520,7 +1625,7 @@ function fillSelectFromReportsArray(selectId, array) {
 
 function fillSelectFromCompanyArray(selectId, array) {
     for (company of array) {
-        $('<option>', {text: company[0], company_id: company[1]}).appendTo($(`#${selectId}`));
+        $('<option>', {text: company.name, company_id: company.id}).appendTo($(`#${selectId}`));
     }
 }
 
@@ -1531,8 +1636,7 @@ function initializationPopupControl() {
     $('#report_fast_access_reports_list, #control_files_list .block-content, #report_settings_select_menu ul, #proccess_file_company_select').empty();
     let reportsArr = getCurrentCompanyReportsArray();
     
-    for (elem in reportsArr) {
-        const report = reportsArr[elem];
+    for (report of reportsArr) {
         $('<tr>').append(
             $('<td>').append(
                 $('<input>', {type: 'checkbox', id: `report_fast_access_${report.rep_num}_${report.rep_type}`, rep_name: report.rep_name, rep_num: report.rep_num, rep_type: report.rep_type}),
@@ -1556,7 +1660,7 @@ function initializationPopupControl() {
     $('#print_notation_textarea').val(firstReportNotation.replace(/<br ?\/?>/g, '\n'));
 
 
-    let companyArr = USER_DATA.orgList;
+    let companyArr = USER_DATA.org_list;
     fillSelectFromCompanyArray('proccess_file_company_select', companyArr);
     $('#files_upload_input').change(function() {
         $('#number_of_uploaded_files').text('Выбрано файлов: ' + $(this).prop('files').length);
@@ -1578,6 +1682,8 @@ function initializationPopupControl() {
     });
 
     getControlFilesList();
+    getControlProcessedFilesList();
+    getControlPerformedFilesList();
     changeTabControlReportSettings();
 }
 
@@ -1616,9 +1722,9 @@ function getControlFilesList() {
             return dateB - dateA //сортировка по убывающей дате
         })
 
-        let table = $('<table>', {id: 'control_files_list_table'}).append(
+        let table = $('<table>', {id: 'control_files_list_table', class: 'block-table'}).append(
             $('<tr>').append(
-                $('<th>', {text: 'Имя файла'}),
+                $('<th>', {text: 'Имя'}),
                 $('<th>', {text: 'Загружено'}),
                 $('<th>', {text: 'Действия'})
             )
@@ -1662,17 +1768,287 @@ function getControlFilesList() {
                 $('<td>', {text: fileName}),
                 $('<td>', {text: fileUploadDate}),
                 $('<td>').append(
-                    $('<button>', {class: 'primary-btn', onclick: `chooseCompanyForFile('${fileName}')`}).append(
-                        $('<i>', {class: 'material-icons', text: 'file_upload', title: 'Обработать'})
-                    ),
-                    $('<button>', {class: 'primary-btn', onclick: `deleteControlFile('${fileName}')`}).append(
-                        $('<i>', {class: 'material-icons', text: 'delete_outline', title: 'Удалить файл'})
-                    )
+                    $('<i>', {class: 'material-icons file-table-icon', text: 'file_upload', title: 'Обработать', onclick: `chooseCompanyForFile('${fileName}')`}),
+                    $('<i>', {class: 'material-icons file-table-icon', text: 'delete_outline', title: 'Удалить файл', onclick: `deleteControlFile('${fileName}')`})
+
                 )
             ).appendTo(table);
         }
 
         $('#control_files_list .block-content').html(table);
+    });
+}
+
+function getControlProcessedFilesList() {
+    $.post('/base_func?val_param=loader_file_list', function(data) {
+        const files = JSON.parse(data).files;
+
+        let table = $('<table>', {id: 'control_processed_files_list_table', class: 'block-table'}).append(
+            $('<tr>').append(
+                $('<th>', {text: 'Имя'}),
+                $('<th>', {text: 'Лист'}),
+                $('<th>', {text: 'Компания'}),
+                $('<th>', {text: 'Загружено'}),
+                $('<th>', {text: 'Действия'})
+            )
+        );
+
+        if (!isEmpty(files)) {
+            for (file of files) {
+                const fileId = file.id;
+                const fileName = file.file_name;
+                const sheetName = file.sheet_name;
+                const creationTime = file.creation_time;
+                const orgName = file.org_name;
+                let orgId;
+
+                for (company of USER_DATA.org_list) {
+                    if (company.name == orgName) {
+                        orgId = company.id;
+                    }
+                }
+    
+                $('<tr>', {file_id: fileId}).append(
+                    $('<td>', {text: fileName}),
+                    $('<td>', {text: sheetName}),
+                    $('<td>', {text: orgName}),
+                    $('<td>', {text: creationTime}),
+                    $('<td>').append(
+                            $('<i>', {class: 'material-icons file-table-icon', text: 'remove_red_eye', title: 'Превью', 'data-jq-dropdown': `#jq-dropdown-${DROPDOWN_NUM}`}),
+                            $('<i>', {class: 'material-icons file-table-icon', text: 'delete_outline', title: 'Удалить файл', onclick: `deleteControlProcessedFile(${fileId}, '${fileName}')`})
+                    )
+                ).appendTo(table);
+
+                createDropdownMenuForFile(DROPDOWN_NUM, USER_DATA.head_company.bank_templates, fileId, orgId);
+
+                DROPDOWN_NUM++;
+            }
+        }
+
+        $('#control_processed_files_list .block-content').html(table);
+    })
+}
+
+function getControlPerformedFilesList() {
+    $.post('/base_func?val_param=document_list', function(data) {
+        const files = JSON.parse(data).files;
+
+        let table = $('<table>', {id: 'control_processed_files_list_table', class: 'block-table'}).append(
+            $('<tr>').append(
+                $('<th>', {text: 'Тип'}),
+                $('<th>', {text: 'Компания'}),
+                $('<th>', {text: 'Сумма'}),
+                $('<th>', {text: 'Загружено'}),
+                $('<th>', {text: 'Действия'})
+            )
+        );
+
+        if(!isEmpty(files)) {
+            for (file of files) {
+                const fileId = file.id;
+                const fileType = file.type;
+                const fileSum = file.summ;
+                const fileAuthor = file.author;
+                const baseFile = file.base_file;
+                const orgName = file.org_name;
+                const creationTime = file.creation_time;
+
+                $('<tr>', {file_id: fileId, title: baseFile}).append(
+                    $('<td>', {text: fileType}),
+                    $('<td>', {text: orgName}),
+                    $('<td>', {text: fileSum}),
+                    $('<td>', {text: creationTime}),
+                    $('<td>').append(
+                            $('<i>', {class: 'material-icons file-table-icon', text: 'remove_red_eye', title: 'Превью', onclick: `initializationPerformedFile('${fileId}', '${fileType}')`}),
+                            $('<i>', {class: 'material-icons file-table-icon', text: 'settings_backup_restore', title: 'Откатить файл', onclick: `deleteControlPerformedFile('${fileId}', '${fileType}')`})
+                    )
+                ).appendTo(table);
+            }
+        }
+
+        $('#control_performed_files_list .block-content').html(table);
+
+    });
+}
+
+function initializationProcessedFileTemplate(fileId, companyId, templateNum) {
+    let errorsCounter, rowsCounter, creditsCounter;
+    errorsCounter = rowsCounter = creditsCounter = 0;
+
+    const documentData = {};
+    
+    $('#template_table, #template_total_td').empty();
+    $('#popup_processed_file_template, #popup_background').fadeIn(200);
+    createContentLoader('#template_table');
+
+    $.get(`/bank_template?pid=${fileId}&orgid=${companyId}&templ_name=${templateNum}`, function (data) {
+        const tableData = JSON.parse(data);
+        const theadData = tableData.thead;
+        const tbodyData = tableData.tbody;
+
+        const table = $('<table>', {class: 'template-table'}).append(
+            $('<thead>').append(
+                $('<tr>').append(
+                    $('<th>')
+                )
+            ),
+            $('<tbody>')
+        )
+
+        for (cell of theadData) {
+            $('<th>', { text: cell }).appendTo(table.find('thead tr'))
+        }
+
+        for (row of tbodyData) {
+            documentData[row.id] = row.accid;
+
+            const tr = $('<tr>', {row_id: row.id, accid: row.accid, credit: row.credit})
+            $('<td>', {class: 'column-table-main'}).append(
+                $('<input>', {type: 'checkbox', class: 'template-checkbox'}).attr('checked', true)
+            ).appendTo(tr);
+
+            rowsCounter++;
+            creditsCounter += Number(row.credit);
+
+            for (cell of row.cells) {
+                if (cell == 'error') {
+                    $('<td>').append(
+                        $('<button>', {class: 'add-template-adress-btn button-primary', text: 'Добавить'})
+                    ).appendTo(tr);
+
+                    errorsCounter++;
+                }
+                else {
+                    $('<td>', {text: cell}).appendTo(tr);
+                }
+            }
+
+            tr.appendTo(table.find('tbody'));
+        }
+
+        initializationTemplateTotal(rowsCounter, creditsCounter, errorsCounter);
+
+        table.on('click', function(event) {
+            let target = event.target;
+            let parentTr = $(target).parent().parent();
+            const trCredit = parentTr.attr('credit');
+            const trId = parentTr.attr('row_id');
+
+            if ($(target).hasClass('template-checkbox')) {
+                const trAccid = parentTr.attr('accid');
+                let tagretChecked = $(target).prop('checked');
+                if (tagretChecked == false) {
+                    parentTr.addClass('tr-inactive');
+                    parentTr.find('button').attr('disabled', true);
+                    delete documentData[trId];
+
+                    rowsCounter--;
+                    creditsCounter -= Number(trCredit);
+
+                    if (trAccid == '') {
+                        errorsCounter--;
+                    }
+
+                    initializationTemplateTotal(rowsCounter, creditsCounter, errorsCounter);
+                }
+                else {
+                    parentTr.removeClass('tr-inactive');
+                    parentTr.find('button').attr('disabled', false);
+                    documentData[trId] = trAccid;
+
+                    rowsCounter++;
+                    creditsCounter += Number(trCredit);
+
+                    if (trAccid == '') {
+                        errorsCounter++;
+                    }
+
+                    initializationTemplateTotal(rowsCounter, creditsCounter, errorsCounter);
+                }
+            }
+            else if ($(target).hasClass('add-template-adress-btn button-primary')) {
+                let parentTd = $(target).parent();
+                openPopupWindowLayer2('popup_add_ardess_template');
+                $('#ardess_template_search_btn').on('click', function(event) {
+                    event.preventDefault();
+                    const adress = $(this).attr('adress');
+                    const accid = $(this).attr('accid');
+                    if (adress !== undefined) {
+                        parentTd.text(adress);
+                        parentTr.attr('accid', accid);
+                        documentData[trId] = accid;
+
+                        errorsCounter--;
+
+                        initializationTemplateTotal(rowsCounter, creditsCounter, errorsCounter);
+
+                        closePopupWindowLayer2('popup_add_ardess_template');
+                        $('#ardess_template_search_input').val('');
+                        $( "#ardess_template_search_btn").unbind( "click" );
+
+                    }
+                })
+            }
+            else if ($(target).is('td')) {
+                let parentTd = $(target).parent();
+                parentTd.find('.template-checkbox').trigger('click');           
+            }
+        });
+
+        $('#template_table').html(table);
+    });
+
+    function initializationTemplateTotal(rowsNum, creditsSum, errorsNum) {
+        const td = $('#template_total_td');
+
+        if (errorsNum !== 0) {
+            td.html(`<b>Итог:</b> выбрано строк - <b>${rowsNum}</b>, сумма - <b>${creditsSum.toFixed(2)}</b>, отсутствует адресов - <b style="color:red">${errorsNum}</b>`);
+        }
+        else {
+            if ($('#submit_template').length) {
+                td.html(`<b>Итог:</b> выбрано строк - <b>${rowsNum}</b>, сумма - <b>${creditsSum.toFixed(2)}</b>`);
+                $('<button>', { id:'submit_template', class: 'button-secondary', text: 'Провести платежный документ'}).appendTo(td);
+
+                $('#submit_template').on('click', function() {
+                    sendBankDocumentData();
+                })
+            }
+            else {
+                td.html(`<b>Итог:</b> выбрано строк - <b>${rowsNum}</b>, сумма - <b>${creditsSum.toFixed(2)}</b>`);
+                $('<button>', { id:'submit_template', class: 'button-secondary', text: 'Провести платежный документ'}).appendTo(td).fadeOut(150).fadeIn(150).fadeOut(150).fadeIn(150);
+
+                $('#submit_template').on('click', function() {
+                    sendBankDocumentData();
+                })
+            }
+        }
+    }
+
+    function sendBankDocumentData() {
+        const creditSum = creditsCounter.toFixed(2);
+        $.ajax({
+            type: 'POST',
+            url: `/bank_template?&doc_id=${fileId}&num=${templateNum}&doc_summ=${creditSum}`,
+            data: JSON.stringify(documentData),
+            success: function (data) {
+                if (data == 'success') {
+                    getControlProcessedFilesList();
+                    getControlPerformedFilesList();
+                    closePopupWindow('popup_processed_file_template');
+                }
+            }
+        });
+    }
+}
+
+function initializationPerformedFile(fileId, fileName) {
+    $('#popup_performed_file_template .popup-content').empty();
+    $('#popup_performed_file_template .popup-name').text(fileName);
+    $('#popup_performed_file_template, #popup_background').fadeIn(200);
+    createContentLoader('#popup_performed_file_template .popup-content');
+
+    $.post(`/base_func?val_param=document_rec&val_param1=${fileId}`, function (data) {
+        $('#popup_performed_file_template .popup-content').html(data);
     });
 }
 
@@ -1682,6 +2058,30 @@ function deleteControlFile(fileName) {
         $.post(encodeURIstring, function(data) {
             if (data == 'success') {
                 $(`#control_files_list_table tr[filename='${fileName}']`).remove();
+            }
+        });
+    }
+}
+
+function deleteControlProcessedFile(fileId, fileName) {
+    if (confirm(`Вы уверены, что хотите удалить файл ${fileName}?`)) {
+        let encodeURIstring = encodeURI(`/base_func?val_param=delfilepart&val_param1=${fileId}`);
+        $.post(encodeURIstring, function(data) {
+            if (data == 'success') {
+                $(`#control_processed_files_list_table tr[file_id='${fileId}']`).remove();
+            }
+        });
+    }
+}
+
+function deleteControlPerformedFile(fileId, fileName) {
+    if (confirm(`Вы уверены, что хотите удалить файл ${fileName}?`)) {
+        let encodeURIstring = encodeURI(`/base_func?val_param=rollback_bank&val_param1=${fileId}`);
+        $.post(encodeURIstring, function(data) {
+            if (data == 'success') {
+                // $(`#control_performed_files_list_table tr[file_id='${fileId}']`).remove();
+                getControlProcessedFilesList();
+                getControlPerformedFilesList();
             }
         });
     }
@@ -1706,13 +2106,15 @@ function clearForm(formName) {
 
 function processFile() {
     event.preventDefault();
-    let companyId = $('#proccess_control_file_select option:selected').attr('company_id');
+    let companyId = $('#proccess_file_company_select option:selected').attr('company_id');
     let fileName = $('#process_file_btn').attr('file_name');
     let encodeURIstring = encodeURI(`/opfile?attr=runformat&org_id=${companyId}&fname=${fileName}`);
     showLoadingMessage('file_process_loading_message','Подождите, файл обрабатывается...', 'process_file_btn');
     $.post(encodeURIstring, function(data) {
         if (data == 'success') {
+            $(`#control_files_list_table tr[filename='${fileName}']`).remove();
             closePopupWindow('popup_process_control_file');
+            getControlProcessedFilesList();
             removeLoadingMessage('file_process_loading_message');
         }
     });
@@ -1794,10 +2196,10 @@ function resizeTwoDiv(parentDiv, firstDiv, SecondDiv, error) {
     }
 }
 
-function keyupSearch() {
-    let input = $('#sub_search_input');
+function keyupSearch(inputId, menuId, searchBtnId) {
+    let input = $(`#${inputId}`);
     let valueLength = input.val().length;
-    let parentDiv = $('#fast_search_menu ul');
+    let parentDiv = $(`#${menuId} ul`);
 
     if (valueLength >= 3) {
         parentDiv.empty();
@@ -1815,30 +2217,87 @@ function keyupSearch() {
                     $('<li>', {text: name, accid: accid, adress: adress}).appendTo(parentDiv);
                 }
 
-                $('#fast_search_menu ul li').each(function() {
+                $(`#${menuId} ul li`).each(function() {
                     $(this).on('click', function() {
                         let value = $(this).text();
                         let adress = $(this).attr('adress');
                         let accid = $(this).attr('accid');
                         input.val(value);
-                        $('#sub_search_btn').attr('accid', accid);
-                        $('#sub_search_btn').attr('adress', adress);
+                        $(`#${searchBtnId}`).attr('accid', accid);
+                        $(`#${searchBtnId}`).attr('adress', adress);
 
-                        $('#fast_search_menu').hide();
+                        $(`#${menuId}`).hide();
                     });
                 })
 
-                $('#fast_search_menu').show();
+                $(`#${menuId}`).show();
             }
             else {
-                $('#fast_search_menu').hide();
+                $(`#${menuId}`).hide();
             }
         });
     }
     else {
         parentDiv.empty();
-        $('#fast_search_menu').hide();
+        $(`#${menuId}`).hide();
     }
+}
+
+function mainSearchKeyup(inputId, menuId) {
+    let input = $(`#${inputId}`);
+    let valueLength = input.val().length;
+    let parentDiv = $(`#${menuId} ul`);
+
+    if (valueLength >= 3) {
+        parentDiv.empty();
+        let searchValue = input.val();
+        let currentCompanyId = getCookie('companyId');
+        encodeURIstring = encodeURI(`/base_func?val_param=fast_find&val_param1=${searchValue}&val_param2=${currentCompanyId}`);
+        $.post(encodeURIstring, function (data) {
+            if (data !== '') {
+                let searchListArray = JSON.parse(data);
+                for (elem of searchListArray) {
+                    let dataArray = elem.split('&');
+                    let name = dataArray[0];
+                    let accid = dataArray[1];
+                    let adress = dataArray[2];
+                    $('<li>', {text: name, accid: accid, adress: adress}).appendTo(parentDiv);
+                }
+
+                $(`#${menuId} ul li`).each(function() {
+                    $(this).on('click', function() {
+                        // let value = $(this).text();
+                        let adress = $(this).attr('adress');
+                        let accid = $(this).attr('accid');
+                        input.val('');
+                        openHomePage();
+
+                        CURRENT_OBJECT_DATA.accid = accid;
+                        getObjectData();
+                        $('#obj_adress').text(adress);
+                        if ($('#obj_info .header-icons').is(':hidden')) {
+                            $('#obj_info .header-icons').show();
+                        }
+
+                        $(`#${menuId}`).hide();
+                    });
+                })
+
+                $(`#${menuId}`).show();
+            }
+            else {
+                $(`#${menuId}`).hide();
+            }
+        });
+    }
+    else {
+        parentDiv.empty();
+        $(`#${menuId}`).hide();
+    }
+
+    // input.focusout(function() {
+    //     $(`#${menuId}`).hide();
+    // });
 }
 
 function setOffsetFastSearchMenu() {
@@ -1858,7 +2317,7 @@ function clickFastSearch() {
         let adress = $('#sub_search_btn').attr('adress');
         CURRENT_OBJECT_DATA.accid = accid;
         getObjectData();
-        $('#current_adress').text(adress);
+        $('#obj_adress').text(adress);
     
         if ($('#main_content .header-icons').is(':hidden')) {
             $('#main_content .header-icons').show();
@@ -1904,7 +2363,7 @@ function getNewsList() {
 
 function getUpdateList() {
     createContentLoader('#updates_content .info-block-content');
-    const headCompanyId = USER_DATA.head_company;
+    const headCompanyId = USER_DATA.head_company.id;
 
     $.post(`/base_func?val_param=news_portal&val_param1=${headCompanyId}`, function (data) {
         let updatesList = JSON.parse(data).news;
@@ -1964,4 +2423,40 @@ function clearFormInputs([inputsArray]) {
     for (input of inputsArray) {
         input.val('');
     }
+}
+
+function applyTemplateObjectList() {
+    event.preventDefault();
+    closePopupWindow('popup_object_list_settings');
+
+    const name = $('#choose_template_select').val();
+
+    $('.object-list-tree').empty();
+    createContentLoader('#object_list_tree');
+    $.ajax({
+        type: "POST",
+        url: "/base_func",
+        data: encodeURI(`val_param=house_tree&val_param1=${name}`),
+        success: function (data) {
+            createObjectsTree(data);
+            removeContentLoader('#object_list_tree', '.object-list-tree');
+            $('#current_template_name').text(name);
+            $('#clear_template_btn').attr('disabled', false);
+        }
+    });
+}
+
+function changeTemplateSelect() {
+    const name = $('#choose_template_select').val();
+    const description = OBJECT_TREE_TEMPLATES[name];
+    $('#choose_template_description').text(description);
+}
+
+function clearTemplateObjectList() {
+    event.preventDefault();
+    $('.object-list-tree').empty();
+    closePopupWindow('popup_object_list_settings');
+    $('#current_template_name').text('Отсутствует');
+    $('#clear_template_btn').attr('disabled', true);
+    getObjectsTreeData();
 }
