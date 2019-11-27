@@ -30,28 +30,20 @@
                     <ul>
                         <li id="home_page" class="has-subnav" title="Главная" onclick="openHomePage()">
                             <a>
-                                <i class="left-menu-icon material-icons-round">home</i>
+                                <i class="left-menu-icon material-icons">home</i>
                                 <span class="nav-text">
                                     Главная
                                 </span>
                             </a>
                         </li>
-                        <li class="has-subnav" title="Список компаний" data-jq-dropdown="#jq-dropdown-company-list">
+                        <li class="has-subnav" title="КОМПАНИИ" data-jq-dropdown="#jq-dropdown-company-list">
                             <a>
                                 <i class="left-menu-icon material-icons">account_balance</i>
                                 <span class="nav-text">
-                                    Список компаний
+                                    КОМПАНИИ
                                 </span>
                             </a>
                         </li>
-                        <!-- <li class="has-subnav li-change-events" title="Быстрый поиск" onclick="openPopupWindow('popup_search')">
-                            <a>
-                                <i class="left-menu-icon material-icons">search</i>
-                                <span class="nav-text">
-                                    Быстрый поиск
-                                </span>
-                            </a>
-                        </li> -->
                         <li class="has-subnav li-change-events" title="Список объектов" onclick="openCloseObjectList()">
                             <a>
                                 <i class="left-menu-icon material-icons">list</i>
@@ -62,7 +54,7 @@
                         </li>
                         <li class="has-subnav li-change-events" title="Управление" onclick="openPopupWithMenu('popup_control')">
                             <a>
-                                <i class="left-menu-icon material-icons-outlined">assessment</i>
+                                <i class="left-menu-icon material-icons">assessment</i>
                                 <span class="nav-text">
                                     Управление
                                 </span>
@@ -94,13 +86,13 @@
                 <div id="popup_object_content">
                         <div id="object_list_settings">
                             <div id="object_list_settings_left">
-                                <span class="object-tree-btn" onclick="switchToggle('object_list_toggle')"><i id="object_list_toggle" class="material-icons-outlined object-search-icon" state="off">toggle_off</i>Режим печати</span>
+                                <span class="object-tree-btn" onclick="switchToggle('object_list_toggle')"><i id="object_list_toggle" class="material-icons object-search-icon" state="off">toggle_off</i>Режим печати</span>
                             </div>
                             <div id="object_list_settings_right">
                                 <!-- <button class="object-tree-btn" onclick="openPopupWindow('popup_object_list_settings')"><i class="material-icons object-search-icon" title="Настройки списка объектов">
                                         settings
                                     </i></button> -->
-                                <i class="material-icons-outlined object-search-icon" title="Настройки списка объектов" onclick="openPopupWindow('popup_object_list_settings')">
+                                <i class="material-icons object-search-icon" title="Настройки списка объектов" onclick="openPopupWindow('popup_object_list_settings')">
                                     settings_applications
                                 </i>
                             </div>
@@ -142,7 +134,7 @@
                             </a>
                         </div>
                         <div id="profile_button">
-                            <i class="material-icons-outlined" onclick="openPopupWithMenu('popup_profile')">account_circle</i>
+                            <i class="material-icons" onclick="openPopupWithMenu('popup_profile')" title="Профиль">account_circle</i>
                         </div>
                     </div>
                 </div>
@@ -152,47 +144,54 @@
                         <div id="obj_info">
                             <div id="obj_agreements_info">
                                 <div class="block-header-icons">
-                                    <div class="header">Договора</div>
-                                    <div class="header-icons"><i class="material-icons" title="Добавить договор"
-                                            onclick="openPopupWindow('popup_add_agreement')">add</i></div>
-                                </div>
-                                <div class="main-table-content">
-                                    <table id="agreement_list_table"></table>
-                                </div>
-                            </div>
-                            <div id="obj_owners_info">
-                                <div class="block-header-icons">
-                                    <div class="header">Прописанные</div>
+                                    <div class="header">
+                                        <input id="agreements_radio" type="radio" name="agreements_owners" value="agreements"  checked><label for="agreements_radio">Договора</label> /
+                                        <input id="owners_radio" type="radio" name="agreements_owners" value="owners"><label for="owners_radio">Прописанные</label>
+                                    </div>
                                     <div class="header-icons">
-                                        <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-owners" title="Справка"
-                                            onclick="">help_outline</i>
-                                        <i class="material-icons" title="Добавить прописанного" onclick="openPopupWindow('popup_add_owner')">add</i>
+                                        <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-owners" title="Справка" onclick="">help_outline</i>
+                                        <i id="add_agreement_owner_icon" class="material-icons" title="Добавить">add</i>
                                     </div>
                                 </div>
                                 <div class="main-table-content">
+                                    <table id="agreement_list_table"></table>
                                     <table id="owners_table"></table>
+                                </div>
+                            </div>
+                            <div id="obj_additional_info">
+                                <div class="block-header-icons">
+                                    <div class="header">Дополнительная информация</div>
+                                    <div class="header-icons">
+                                        <!-- <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-owners" title="Справка"
+                                            onclick="">help_outline</i>
+                                        <i class="material-icons" title="Добавить прописанного" onclick="openPopupWindow('popup_add_owner')">add</i> -->
+                                    </div>
+                                </div>
+                                <div class="main-table-content">
+                                    <!-- <table id="owners_table"></table> -->
+                                    <table id="obj_additional_info_table"></table>
                                 </div>
                             </div>
                             <div id="obj_ls_info">
                                 <div class="block-header-icons">
-                                    <div class="header">Дополнительная информация</div>
+                                    <div class="header">ЛС</div>
                                     <div class="header-icons">
                                         <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-info" title="Справка"
                                             onclick="">help_outline</i>
                                         <i class="material-icons" title="Настройки панели дополнительной информации"
                                             onclick="alert('Недостаточно прав')">settings</i>
-                                        <i class="material-icons" title="Примечания к адресу"
-                                            onclick="openPopupWindow('popup_object_notations')">comment</i>
-                                        <i class="material-icons" title="Редактировать дополнительную информацию"
-                                            onclick="openPopupWindow('popup_edit_object_info')">edit</i>
+                                        <div class="icon-with-count" id="obj_notations_icon">
+                                            <i class="material-icons" title="Примечания к адресу"
+                                                onclick="openPopupWindow('popup_object_notations')">comment</i>
+                                        </div>
+                                        <!-- <i class="material-icons" title="Редактировать дополнительную информацию"
+                                            onclick="openPopupWindow('popup_edit_object_info')">edit</i> -->
                                         <i class="material-icons" title="Контакты" onclick="openPopupWindow('popup_object_contacts')">call</i>
                                         <i class="material-icons" title="Создать уведомление" onclick="alert('Недостаточно прав')">add_alert</i>
                                     </div>
                                 </div>
-                                <div id="obj_additional_info">
-                                    <div id="obj_info_content"></div>
+                                <div id="calendar_navigation">
                                     <div id="main_calendar"></div>
-                                    <div id="obj_info_notation"></div>
                                 </div>
                                 <div id="obj_main_table"></div>
                             </div>
@@ -678,7 +677,7 @@
             </div>
             <div class="popup-content">
                 <form id="sub_search_form">
-                    <input id="ardess_template_search_input" class="input-search" type="text" placeholder="Введите данные для поиска (ФИО, ЛС)" onkeyup="keyupSearch('ardess_template_search_input', 'ardess_template_search_menu', 'ardess_template_search_btn')">
+                    <input id="ardess_template_search_input" class="input-main" type="text" placeholder="Введите данные для поиска (ФИО, ЛС)" onkeyup="keyupSearch('ardess_template_search_input', 'ardess_template_search_menu', 'ardess_template_search_btn')">
                     <div id="ardess_template_search_menu">
                         <ul class="obj-search-ul"></ul>
                     </div>
@@ -727,12 +726,11 @@
             </div>
             <div class="popup-content">
                 <div class="tabs" id="control_tabs">
-                    <button class="tab-button active"
-                        onclick="openTabs('control_tabs', this,'control_reports')">Справки</button>
-                    <button class="tab-button" onclick="openTabs('control_tabs', this,'control_files')">Работа с
-                        файлами</button>
-                    <button class="tab-button" onclick="openTabs('control_tabs', this,'control_report_settings')">Настройка
-                        справок</button>
+                    <button class="tab-button active" onclick="openTabs('control_tabs', this,'control_reports')">Справки</button>
+                    <button class="tab-button" onclick="openTabs('control_tabs', this,'control_report_settings')">Настройка справок</button>
+                    <button class="tab-button" onclick="openTabs('control_tabs', this,'control_files')">Работа с файлами</button>
+                    <button class="tab-button" onclick="openTabs('control_tabs', this,'control_registry')">Реестры</button>
+                    <button class="tab-button" onclick="openTabs('control_tabs', this,'control_documents')">Отчеты</button>
                 </div>
                 <div class="popup-background-with-tabs">
                     <div id="control_tabs_content" class="tabs-content">
@@ -905,6 +903,8 @@
                                 </div>
                             </div>
                         </div>
+                        <div id="control_registry" class="tab-content"></div>
+                        <div id="control_documents" class="tab-content"></div>
                     </div>
                 </div>
             </div>

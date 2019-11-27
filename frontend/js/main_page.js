@@ -73,14 +73,49 @@ $(document).ready(function() {
     const currentCompany = getCookie('companyId');
     if (currentCompany == undefined) {
         $('#main_search_input').attr('disabled', true);
-        $('#main_search_input').val('Выбирете компанию');
+        $('#main_search_input').val('Выберите компанию');
+        $('.li-change-events').addClass('li-disabled');
     }
+
+    $('#add_agreement_owner_icon').on('click', function() {
+        openPopupWindow('popup_add_agreement');
+    })
+
+    $('input[name=agreements_owners]').change(function() {
+        if (this.value == 'agreements') {
+            $('#owners_table').hide();
+            $('#agreement_list_table').show();
+
+            $('#add_agreement_owner_icon').off('click');
+            $('#add_agreement_owner_icon').on('click', function() {
+                openPopupWindow('popup_add_agreement');
+            });
+        }
+        else if (this.value == 'owners') {
+            $('#owners_table').show();
+            $('#agreement_list_table').hide();
+
+            $('#add_agreement_owner_icon').off('click');
+            $('#add_agreement_owner_icon').on('click', function() {
+                openPopupWindow('popup_add_owner');
+            });
+        }
+    });
 });
 
 // получение данных о пользователе
 function getUserData(callback) {
     $.get( "/web_request?query=", function( data ) {
         USER_DATA = JSON.parse(data);
+
+        const companiesData = USER_DATA.org_list;
+
+        if (companiesData.length == 1) {
+            const companyName = companiesData[0].name;
+            const companyId = companiesData[0].id;
+
+            chooseCompany(companyName, companyId);
+        }
 
         if (!isEmpty(callback)) {
             for (func of callback) {
@@ -93,11 +128,11 @@ function getUserData(callback) {
 function showCurrentCompany() {
     let currentCompany = sessionStorage['currentCompany'];
     if(currentCompany) {
-        $('#current_company').text(currentCompany);
+        // $('#current_company').text(currentCompany);
         $('#popup_control .popup-fullscreen-name').text('Управление ' + currentCompany);
     }
     else {
-        $('.li-change-events').addClass('li-disabled');
+        // $('.li-change-events').addClass('li-disabled');
     }
 }
 
@@ -336,7 +371,7 @@ function createObjectsTree(data) {
                 }
 
                 if ($('#obj_info .header-icons').is(':hidden')) {
-                    $('#obj_info .header-icons').show();
+                    $('#obj_info .header-icons, #agreements_radio, #owners_radio').show();
                 }
 
                 $('.jq-dropdown.dropdown-report').remove();
@@ -470,6 +505,8 @@ function getObjectAgreementsData() {
 
     let agreementsData = OBJECT_DATA.agreements;
     let agreementsPeopleArr = [];
+    const agreementsCount = Object.keys(agreementsData).length;
+    $("label[for='agreements_radio']").text(`Договора (${agreementsCount})`); 
 
     $('<tr>').append(
         $('<th>'),
@@ -505,6 +542,8 @@ function getObjectRegistrationsData() {
 
     let registrationsData = OBJECT_DATA.registrations;
     let ownersPeopleArr = [];
+    const registrationsCount = Object.keys(registrationsData).length;
+    $("label[for='owners_radio']").text(`Прописанные (${registrationsCount})`); 
 
     $('<tr>').append(
         $('<th>'),
@@ -558,7 +597,7 @@ function getObjectInfoData() {
 
     let data = OBJECT_DATA.information;
 
-    $('#obj_info_content, #obj_info_notation, #edit_object_info_table').empty();
+    $('#obj_additional_info_table').empty();
     for (prop in data) {
         $('#obj_ls_info .header').text(`ЛС: ${prop.replace('ls','')}`);
         $('#report_fast_access_ls').val(`${prop.replace('ls','')}`);
@@ -566,37 +605,43 @@ function getObjectInfoData() {
         let infoData = data[prop];
 
         for (prop in infoData) {
-            if (prop == 'Примечание из старой системы') {
-                $('<div>').append(
-                    $('<span>', {class: 'obj-info-key', text: `${prop}: `}),
-                    $('<span>', {class: 'obj-info-value', text: infoData[prop]})
-                ).appendTo($('#obj_info_notation'));
-            }
-            else {
-                if (prop == 'Образования задолженности') {
-                    if (infoData[prop] !== '') CURRENT_OBJECT_DATA.debtDate = infoData[prop];
 
-                    $('<tr>').append(
-                        $('<td>', {text: prop, class: 'table-input-name'}),
-                        $('<td>').append(
-                            $('<input>', {currentValue: infoData[prop], value: RemakeDateFormatToInput(infoData[prop]), class: 'input-main', type: 'date'})
-                        )
-                    ).appendTo('#edit_object_info_table');
-                }
+            $('<tr>').append(
+                $('<td>', {text: prop}),
+                $('<td>', {text: infoData[prop]})
+            ).appendTo('#obj_additional_info_table');
 
-                if (prop == '№ СП или № ИЛ') {
-                    $('<tr>').append(
-                        $('<td>', {text: prop, class: 'table-input-name'}),
-                        $('<td>').append(
-                            $('<input>', {currentValue: infoData[prop], value: infoData[prop], class: 'input-main', type: 'text'})
-                        )
-                    ).appendTo('#edit_object_info_table');
-                }
-                $('<div>', {class: 'obj-info-block'}).append(
-                    $('<span>', {class: 'obj-info-key', text: `${prop}: `}),
-                    $('<span>', {class: 'obj-info-value', text: infoData[prop]})
-                ).appendTo($('#obj_info_content'));
-            }
+            // if (prop == 'Примечание из старой системы') {
+            //     $('<div>').append(
+            //         $('<span>', {class: 'obj-info-key', text: `${prop}: `}),
+            //         $('<span>', {class: 'obj-info-value', text: infoData[prop]})
+            //     ).appendTo($('#obj_info_notation'));
+            // }
+            // else {
+            //     if (prop == 'Образования задолженности') {
+            //         if (infoData[prop] !== '') CURRENT_OBJECT_DATA.debtDate = infoData[prop];
+
+            //         $('<tr>').append(
+            //             $('<td>', {text: prop, class: 'table-input-name'}),
+            //             $('<td>').append(
+            //                 $('<input>', {currentValue: infoData[prop], value: RemakeDateFormatToInput(infoData[prop]), class: 'input-main', type: 'date'})
+            //             )
+            //         ).appendTo('#edit_object_info_table');
+            //     }
+
+            //     if (prop == '№ СП или № ИЛ') {
+            //         $('<tr>').append(
+            //             $('<td>', {text: prop, class: 'table-input-name'}),
+            //             $('<td>').append(
+            //                 $('<input>', {currentValue: infoData[prop], value: infoData[prop], class: 'input-main', type: 'text'})
+            //             )
+            //         ).appendTo('#edit_object_info_table');
+            //     }
+            //     $('<div>', {class: 'obj-info-block'}).append(
+            //         $('<span>', {class: 'obj-info-key', text: `${prop}: `}),
+            //         $('<span>', {class: 'obj-info-value', text: infoData[prop]})
+            //     ).appendTo($('#obj_info_content'));
+            // }
         }
     }
 }
@@ -681,6 +726,7 @@ function  getObjectPeopleArr() {
 function getObjectNotationsData() {
 
     $('#notations_list').empty();
+    $('#obj_notations_icon .icon-count').remove();
 
     let notationsData = OBJECT_DATA.notations;
 
@@ -697,6 +743,8 @@ function getObjectNotationsData() {
                 $('<div>', {class: 'notation-creation-time', text: `Добавил: ${author} ${creationTime}`})
             ).appendTo('#notations_list');
         }
+
+        $('<div>', {class: 'icon-count', text: Object.keys(notationsData).length}).appendTo('#obj_notations_icon');
     }
     else {
         $('<div>', {class: 'notification', text: 'Примечания отсутствуют'}).appendTo('#notations_list');
@@ -714,6 +762,17 @@ function addObjectNotation() {
         $.post(encodeURIstring, function (data) {
             refreshObjectData([getObjectNotationsData]);
         });
+
+        const notationCount = $('.icon-with-count .icon-count');
+
+        if (notationCount) {
+            notationCount.text(Number(notationCount.text())++);
+        }
+        else {
+            $('<div>', {class: 'icon-count', text: '1'}).appendTo('#obj_notations_icon');
+        }
+
+        $('#add_object_notation_input').val('');
     }
     else {
         $('#add_object_notation_input').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
@@ -1636,28 +1695,31 @@ function initializationPopupControl() {
     $('#report_fast_access_reports_list, #control_files_list .block-content, #report_settings_select_menu ul, #proccess_file_company_select').empty();
     let reportsArr = getCurrentCompanyReportsArray();
     
-    for (report of reportsArr) {
-        $('<tr>').append(
-            $('<td>').append(
-                $('<input>', {type: 'checkbox', id: `report_fast_access_${report.rep_num}_${report.rep_type}`, rep_name: report.rep_name, rep_num: report.rep_num, rep_type: report.rep_type}),
-                $('<label>', {for: `report_fast_access_${report.rep_num}_${report.rep_type}`, text: report.rep_name})
-            )
-        ).appendTo($('#report_fast_access_reports_list'));
+    if (!isEmpty(reportsArr)) {
+        for (report of reportsArr) {
+            $('<tr>').append(
+                $('<td>').append(
+                    $('<input>', {type: 'checkbox', id: `report_fast_access_${report.rep_num}_${report.rep_type}`, rep_name: report.rep_name, rep_num: report.rep_num, rep_type: report.rep_type}),
+                    $('<label>', {for: `report_fast_access_${report.rep_num}_${report.rep_type}`, text: report.rep_name})
+                )
+            ).appendTo($('#report_fast_access_reports_list'));
+    
+            $('<li>', {rep_name: report.rep_name, rep_num: report.rep_num, rep_type: report.rep_type, print_notation: report.print_notation}).append(
+                $('<a>').append(
+                    $('<span>', {text: report.rep_name})
+                )
+            ).appendTo('#report_settings_select_menu ul');
+        }
 
-        $('<li>', {rep_name: report.rep_name, rep_num: report.rep_num, rep_type: report.rep_type, print_notation: report.print_notation}).append(
-            $('<a>').append(
-                $('<span>', {text: report.rep_name})
-            )
-        ).appendTo('#report_settings_select_menu ul');
+        const reportsSettingsFirstreportLi = $('#report_settings_select_menu ul li:first-child');
+        reportsSettingsFirstreportLi.addClass('active');
+        const firstReportRepNum = reportsSettingsFirstreportLi.attr('rep_num');
+        const firstReportRepType = reportsSettingsFirstreportLi.attr('rep_type');
+        const firstReportNotation = reportsSettingsFirstreportLi.attr('print_notation');
+        getReportPreview(firstReportRepNum, firstReportRepType);
+        $('#print_notation_textarea').val(firstReportNotation.replace(/<br ?\/?>/g, '\n'));
+
     }
-
-    const reportsSettingsFirstreportLi = $('#report_settings_select_menu ul li:first-child');
-    reportsSettingsFirstreportLi.addClass('active');
-    const firstReportRepNum = reportsSettingsFirstreportLi.attr('rep_num');
-    const firstReportRepType = reportsSettingsFirstreportLi.attr('rep_type');
-    const firstReportNotation = reportsSettingsFirstreportLi.attr('print_notation');
-    getReportPreview(firstReportRepNum, firstReportRepType);
-    $('#print_notation_textarea').val(firstReportNotation.replace(/<br ?\/?>/g, '\n'));
 
 
     let companyArr = USER_DATA.org_list;
@@ -2135,16 +2197,6 @@ function uploadFiles() {
 
     let files = $('#files_upload_input').prop('files');
     if (files.length > 0) {
-        let loader = $('<div>', {style: 'height: 30px; padding-top: 4px;'}).append(
-            $('<div>', {style: 'width: 35%; float: left; text-align: right'}).append(
-                $('<div>', {class: 'loading-circle-small', style: 'float: right'})
-            ),
-            $('<div>', {style: 'width: 65%; float: left; text-align: left; padding-left: 5px; padding-top: 3px;'}).append(
-                $('<span>', {id: 'uploaded_files_number', style: 'color: green'})
-            )
-        );
-    
-        loader.appendTo('form[name = "files_upload"]');
 
         let uploadedFilesNum = 0;
         for (file of files) {
@@ -2161,14 +2213,12 @@ function uploadFiles() {
                 success: (data) => {
                     if (data == 'success') {
                         uploadedFilesNum++;
-                        $('#uploaded_files_number').text(`Файлов загружено: ${uploadedFilesNum}`);
+                        $('#number_of_uploaded_files').text(`Файлов загружено: ${uploadedFilesNum}`);
                         getControlFilesList();
                     }
                 }
             });
         }
-        $('#number_of_uploaded_files').text('Выбрано файлов: 0');
-        loader.fadeOut(2000, () => {loader.remove()});
     }
     else {
         $('#number_of_uploaded_files').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
@@ -2459,4 +2509,17 @@ function clearTemplateObjectList() {
     $('#current_template_name').text('Отсутствует');
     $('#clear_template_btn').attr('disabled', true);
     getObjectsTreeData();
+}
+
+function getRegistriesData(callback) {
+    $.post( "/base_func?val_param=registries_list", function( data ) {
+        registriesData = JSON.parse(data);
+        console.log(registriesData);
+
+        if (!isEmpty(callback)) {
+            for (func of callback) {
+                func();
+            }
+        }
+    });
 }

@@ -14,6 +14,26 @@ body {
     font-size: 24px;
 }
 
+.icon-with-count {
+    height: 100%;
+    float: right;
+    position: relative;
+}
+
+.icon-count {
+    position: absolute;
+    font-size: 12px;
+    width: 18px;
+    left: 15px;
+    top: 3px;
+    height: 18px;
+    color: white;
+    background-color: #0091EA;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 18px;
+}
+
 #main_menu_content {
     width: 56px;
     height: 100%;
@@ -583,17 +603,17 @@ form {
 }
 
 #obj_agreements_info {
-    width: 40%;
-    height: 245px;
+    width: 60%;
+    height: 200px;
     float: left;
     margin: 16px;
     border: 1px solid #D9E0E3;
     border-radius: 5px;
 }
 
-#obj_owners_info {
-    width: calc(60% - 48px);
-    height: 245px;
+#obj_additional_info {
+    width: calc(40% - 48px);
+    height: 200px;
     float: left;
     margin: 16px;
     margin-left: 0;
@@ -605,7 +625,7 @@ form {
     width: calc(100% - 32px);
     margin: 16px;
     margin-top: 0;
-    height: calc(100% - 293px);
+    height: calc(100% - 223px);
     float: left;
     border: 1px solid #D9E0E3;
     border-radius: 5px;
@@ -615,23 +635,32 @@ div {
     box-sizing: border-box;
 }
 
-#obj_additional_info {
+/* #obj_additional_info {
     width: 100%;
-    height: 195px;
+    height: 140px;
+}
+
+#obj_additional_info_left {
+    height: 100%;
+    width: calc(100% - 330px);
+    float: left;
+} */
+
+#calendar_navigation {
+    width: 100%;
+    height: 80px;
 }
 
 #main_calendar {
-    width: 330px;
-    height: 146px;
-    float: left;
-    border-left:  1px solid #F0F2F4;
-    border-bottom:  1px solid #F0F2F4;
+    width: calc(100% - 20px);
+    height: 100%;
+    float: right;
     text-align: center;
 }
 
-#obj_info_content {
-    height: 146px;
-    width: calc(100% - 330px);
+/* #obj_info_content {
+    height: 105px;
+    width: 100%;
     float: left;
     display: flex;
     flex-direction: column;
@@ -643,18 +672,18 @@ div {
 
 #obj_info_notation {
     padding-left: 20px;
-    padding-top: 17px;
+    padding-top: 11px;
     padding-right: 5px;
-    height: 49px;
+    height: 35px;
     float: left;
     border-bottom: 1px solid #F0F2F4;
     width: 100%;
-}
+} */
 
 .obj-info-block {
     height: calc(100% / 3);
     padding-left: 20px;
-    padding-top: 17px;
+    padding-top: 11px;
     padding-right: 5px;
     box-sizing: border-box;
     border-right: 1px solid #F0F2F4;
@@ -678,7 +707,7 @@ div {
 
 #obj_main_table {
     width: 100%;
-    height: calc(100% - 243px);
+    height: calc(100% - 128px);
     overflow: auto;
 }
 
@@ -798,12 +827,12 @@ div {
 
 #obj_adress {
     width: 100%;
-    height: 60px;
+    height: 35px;
     border-bottom: 2px solid #F4F6F8;
     color: #263238;
     font-size: 20px;
     padding-left: 22px;
-    padding-top: 17px;
+    padding-top: 5px;
 }
 
 #obj_info {
@@ -828,17 +857,36 @@ div {
     float: left;
 }
 
-#owners_table, #agreement_list_table, #object_contacts_table {
+#owners_table {
+    display: none;
+}
+
+#owners_table,
+#agreement_list_table,
+#object_contacts_table,
+#obj_additional_info_table {
     width: 100%;
     box-sizing: border-box;
     border-collapse: collapse;
     text-align: center;
 }
 
+#obj_additional_info_table td:first-child {
+    font-weight: bold;
+    text-align: left;
+    padding-left: 5px;
+    width: 50%;
+}
+
+#agreements_radio, #owners_radio {
+    display: none;
+}
+
 #owners_table td, #agreement_list_table td,
-#owners_table th, #agreement_list_table th {
+#owners_table th, #agreement_list_table th,
+#obj_additional_info_table td {
     border: 1px solid #F4F6F8;
-    height: 50px;
+    height: 30px;
     font-size: 12px;
     color: #263238;
 }
@@ -945,7 +993,8 @@ div {
 
 #object_list_toggle {
     vertical-align: middle;
-    padding-right: 10px;
+    padding-right: 5px;
+    padding-bottom: 3px;
 }
 
 #object_list_header {
@@ -1164,7 +1213,7 @@ div {
 }
 
 .block-header-icons .header {
-    width: calc(100% - 250px);
+    width: 70%;
     padding-left: 19px;
     padding-top: 14px;
     height: 100%;
@@ -1174,7 +1223,7 @@ div {
 }
 
 .block-header-icons .header-icons {
-    width: 250px;
+    width: 30%;
     float: left;
     height: 100%;
     text-align: right;
@@ -1547,7 +1596,7 @@ p {
 }
 
 .template-table tr:hover {
-    background-color: lightblue;
+    outline: 1px solid #0091EA;
 }
 
 .template-table tr:last-child td {
@@ -1581,7 +1630,6 @@ p {
 }
 
 #clear_object_btn {
-    margin-right: 18px;
     margin-left: 4px;
 }
 
@@ -1637,7 +1685,7 @@ p {
 #main_calendar .ui-datepicker {
     width: 300px;
     margin: auto;
-    margin-top: 12px;
+    margin: 10px;
     height: 120px;
     background: #F4F6F8;
     border-radius: 5px;
@@ -1645,6 +1693,9 @@ p {
 
 #main_calendar .ui-widget.ui-widget-content {
     border: 0;
+    float: right;
+    width: 100%;
+    height: 60px;
 }
 
 /* #main_calendar .ui-widget-content {
@@ -1660,7 +1711,7 @@ p {
 
 #main_calendar .ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-current,
 #main_calendar .ui-datepicker .ui-datepicker-buttonpane button {
-    float: none;
+    float: right;
 }
 
 #main_calendar .ui-datepicker-buttonpane button {
@@ -1674,15 +1725,17 @@ p {
     width: 212px;
     height: 30px;
     margin: 0;
-    margin-top: 14px;
+    margin-top: 12px;
 }
 
 #main_calendar .ui-datepicker .ui-datepicker-header {
     height: 40px;
+    width: 300px;
     background: none;
     border: 0;
     padding: 0;
-    margin-top: 18px;
+    margin-top: 6px;
+    float: right;
 }
 
 .ui-datepicker select.ui-datepicker-month,
@@ -1705,10 +1758,11 @@ p {
 .ui-datepicker .ui-datepicker-prev, 
 .ui-datepicker .ui-datepicker-next {
     position: absolute;
-    top: 6px;
+    top: 2px;
     width: 1.8em;
     height: 1.8em;
     background: #E2E5E8;
+    margin: 5px;
 }
 
 .ui-datepicker .ui-datepicker-prev:hover, 
@@ -1733,7 +1787,7 @@ p {
 #receipt_main_table td {
     border: 1px solid #F4F6F8;
     height: 33px;
-    font-size: 12px;
+    font-size: 14px;
     color: #263238;
 }
 
@@ -1745,13 +1799,19 @@ p {
     z-index: 0;
     font-weight: bold;
     border: 1px solid #F4F6F8;
-    height: 50px;
-    font-size: 12px;
+    height: 30px;
+    font-size: 14px;
     color: #263238;
 }
 
 #receipt_main_table td:first-child {
     text-align: left;
+    border-left: 0;
+    padding-left: 5px;
+}
+
+#receipt_main_table td:last-child {
+    border-right: 0;
 }
 
 #receipt_main_table td:not(:first-child) {
@@ -2048,20 +2108,35 @@ form[name="add_object_notation"] td:first-child {
     width: 100%;
     resize: none;
     font-size: 16px;
+    border: 1px solid #D9E0E3;
+    border-radius: 5px;
 }
 
 textarea {
     font-family: 'Roboto', sans-serif;
 }
 
-#fast_search_menu, #ardess_template_search_menu{
+/* #fast_search_menu {
     max-height: 250px;
     width: 658px;
     position: absolute;
     background-color: white;
-    border: 1px solid lightgray;
     overflow-y: auto;
     display: none;
+} */
+
+#ardess_template_search_menu {
+    max-height: 250px;
+    width: 630px;
+    position: absolute;
+    background-color: #FFFFFF;
+    overflow-y: auto;
+    display: none;
+    box-shadow: 0px 4px 4px rgba(58, 58, 58, 0.3);
+    border-radius: 5px;
+    border: 1px solid transparent;
+    color: #263238;
+    z-index: 1;
 }
 
 #main_search_menu {
@@ -2087,7 +2162,8 @@ textarea {
     text-align: left;
 }
 
-.obj-search-ul li {
+.obj-search-ul li,
+#ardess_template_search_menu ul li {
     padding: 5px 16px;
     cursor: pointer;
 }
@@ -2096,7 +2172,7 @@ textarea {
     background: #F4F6F8;
 }
 
-#fast_search_menu ul li, 
+/* #fast_search_menu ul li, 
 #ardess_template_search_menu ul li {
     padding: 3px 0px;
     border-bottom: 1px solid lightgray;
@@ -2106,11 +2182,15 @@ textarea {
 #ardess_template_search_menu ul li:hover {
     cursor: pointer;
     background-color: lightblue;
-}
+} */
 
 #fast_search_menu ul li:first-child,
 #ardess_template_search_menu ul li:first-child {
     border-top: 1px solid lightgray;
+}
+
+#ardess_template_search_btn {
+    margin-top: 10px;
 }
 
 .dropdown-help {
@@ -2258,3 +2338,7 @@ textarea {
     border: 1px solid black;
 }
 
+#notations_list {
+    max-height: 237px;
+    overflow: auto;
+}
