@@ -4,7 +4,9 @@ var DROPDOWN_NUM = 1;
 var CURRENT_OBJECT_DATA = {};
 var OBJECT_TREE_TEMPLATES;
 
+
 $(document).ready(function() {
+    createContentLoader('body');
     sessionStorage.setItem('printMode', 'off');
     getProjectTaskList("web_deb");
     getNewsList();
@@ -31,14 +33,14 @@ $(document).ready(function() {
     });
 
     if (!sessionStorage.firstVisit) {
-        getUserData([createCompanyDropdownMenu, getUpdateList]);
+        getUserData([getUserRightsData, createCompanyDropdownMenu, getUpdateList]);
         $('#update_info_content').show();
         $('#info_page').addClass('active');
         $('#obj_content').hide();
         sessionStorage.setItem('firstVisit', 'true');
     }
     else {
-        getUserData([createCompanyDropdownMenu, initializationPopupControl, getUpdateList]);
+        getUserData([getUserRightsData, createCompanyDropdownMenu, initializationPopupControl, getUpdateList]);
         $('#home_page').addClass('active');
     }
 
@@ -122,6 +124,16 @@ function getUserData(callback) {
                 func();
             }
         }
+    });
+}
+
+function getUserRightsData() {
+    $.get( "/web_request?query=user_rights", function( data ) {
+        const userRightsData = JSON.parse(data);
+        USER_DATA = Object.assign(USER_DATA, userRightsData);
+        acceptColorTheme();
+        showUserLogin();
+        removeContentLoader('body', '#page_body');
     });
 }
 
@@ -291,16 +303,54 @@ function createObjectsTree(data) {
 
     for (prop in objectList) {
         li = $('<li>', { text: prop, class: 'parent-li' }).appendTo('.object-list-tree');
+        $('<input>', {type: 'checkbox', class: 'object-tree-parent-li-input'}).prependTo(li);
         parentUl = $('<ul>', { class: 'object-tree-ul hide' }).insertAfter(li);
 
         for (i = 0; i < objectList[prop].length; i++) {
             let apartData = objectList[prop][i].split('&');
             let li = $('<li>', { class: 'object-tree-li', text: apartData[0], accid: apartData[1] }).appendTo(parentUl);
+            $('<input>', {type: 'checkbox', class: 'object-tree-apartament-input'}).prependTo(li);
             if (apartData[2] !== 'white') {
                 li.css({ 'color': apartData[2] });
             }
         }
     }
+
+    $('<i>', { id: 'objects_list_reports', 'data-jq-dropdown': '#jq-dropdown-objects-list', class: 'material-icons-outlined object-search-icon', text: 'print'}).appendTo($('#object_list_settings_right'));
+    $('<div>', {id: 'print_mode_object_num'}).appendTo($('#object_list_settings_right'));
+
+    createDropdownMenuReportTree('objects-list', getCurrentCompanyReportsArray());
+
+    $('#jq-dropdown-objects-list .dropdown-menu-item').each(function() {
+        $(this).click(function() {
+            let repNum = $(this).attr('rep_num');
+            let repType = $(this).attr('rep_type');
+            let accids = createAccidsArray().toString();
+            const reportId = `${repType}_${repNum}`;
+            setPrintNotation(reportId);
+
+            createContentLoader('#popup_report .popup-content');
+            openPopupWindow('popup_report');
+            $.get(`/report?multi=true&rnum=${repNum}&rtype=${repType}&accid=${accids}&humanid=`, function (data) {
+                $('#popup_report .popup-name-fullscreen').text('');
+                $('#popup_report .popup-content').html(data);
+            });
+        });
+    });
+
+    $('.object-tree-parent-li-input').each(function() {
+        $(this).on('click', function() {
+            let childInputs = ($(this).parent().next().find('.object-tree-apartament-input'));
+            if ($(this).prop('checked')) {
+                childInputs.prop('checked', true);
+            }
+            else {
+                childInputs.prop('checked', false);
+            }
+        });
+    });
+
+    showSelectedObjectNum();
 
     templateSelect.empty();
 
@@ -1064,66 +1114,27 @@ function clearObjectSearchInput() {
 }
 
 function switchToggle(toggleId) {
+
     let toggle = $(`#${toggleId}`);
     let state = toggle.attr('state');
     if (state == 'off') {
-        $('.object-tree-li').removeClass('active');
+
+        // $('.object-tree-li').removeClass('active');
         sessionStorage.setItem('printMode', 'on');
 
-        toggle.text('toggle_on');
+        toggle.text('radio_button_checked');
         toggle.attr('state', 'on');
         toggle.css({'color': '#0091EA'});
 
-        $('<i>', { id: 'objects_list_reports', 'data-jq-dropdown': '#jq-dropdown-objects-list', class: 'material-icons-outlined object-search-icon', text: 'print'}).prependTo($('#object_list_settings_right'));
-        $('<div>', {id: 'print_mode_object_num'}).prependTo($('#object_list_settings_right'));
-        $('#object_list_tree .parent-li').each(function() {
-            $('<input>', {type: 'checkbox', class: 'object-tree-parent-li-input'}).prependTo($(this));
-        });
-        $('#object_list_tree .object-tree-li').each(function() {
-            $('<input>', {type: 'checkbox', class: 'object-tree-apartament-input'}).prependTo($(this));
-        });
-
-        createDropdownMenuReportTree('objects-list', getCurrentCompanyReportsArray());
-
-        $('#jq-dropdown-objects-list .dropdown-menu-item').each(function() {
-            $(this).click(function() {
-                let repNum = $(this).attr('rep_num');
-                let repType = $(this).attr('rep_type');
-                let accids = createAccidsArray().toString();
-                const reportId = `${repType}_${repNum}`;
-                console.log(reportId);
-                setPrintNotation(reportId);
-
-                createContentLoader('#popup_report .popup-content');
-                openPopupWindow('popup_report');
-                $.get(`/report?multi=true&rnum=${repNum}&rtype=${repType}&accid=${accids}&humanid=`, function (data) {
-                    $('#popup_report .popup-name-fullscreen').text('');
-                    $('#popup_report .popup-content').html(data);
-                });
-            });
-        });
-
-        $('.object-tree-parent-li-input').each(function() {
-            $(this).on('click', function() {
-                let childInputs = ($(this).parent().next().find('.object-tree-apartament-input'));
-                if ($(this).prop('checked')) {
-                    childInputs.prop('checked', true);
-                }
-                else {
-                    childInputs.prop('checked', false);
-                }
-            });
-        });
-        showSelectedObjectNum();
+        $('#objects_list_reports, #print_mode_object_num, .object-tree-apartament-input, .object-tree-parent-li-input').show();
     }
     else {
         sessionStorage.setItem('printMode', 'off');
 
-        toggle.text('toggle_off');
+        toggle.text('radio_button_unchecked');
         toggle.attr('state', 'off');
         toggle.css({'color': '#263238'});
-        $('#objects_list_reports, #jq-dropdown-objects-list, #print_mode_object_num').remove();
-        $('.object-tree-apartament-input, .object-tree-parent-li-input').remove();
+        $('#objects_list_reports, #print_mode_object_num, .object-tree-apartament-input, .object-tree-parent-li-input').hide();
     }
 }
 
@@ -2360,23 +2371,23 @@ function setOffsetFastSearchMenu() {
     menu.css({top: top, left: left});
 }
 
-function clickFastSearch() {
-    event.preventDefault();
-    if ($('#sub_search_input').val() !== '') {
-        let accid = $('#sub_search_btn').attr('accid');
-        let adress = $('#sub_search_btn').attr('adress');
-        CURRENT_OBJECT_DATA.accid = accid;
-        getObjectData();
-        $('#obj_adress').text(adress);
+// function clickFastSearch() {
+//     event.preventDefault();
+//     if ($('#sub_search_input').val() !== '') {
+//         let accid = $('#sub_search_btn').attr('accid');
+//         let adress = $('#sub_search_btn').attr('adress');
+//         CURRENT_OBJECT_DATA.accid = accid;
+//         getObjectData();
+//         $('#obj_adress').text(adress);
     
-        if ($('#main_content .header-icons').is(':hidden')) {
-            $('#main_content .header-icons').show();
-        }
+//         if ($('#main_content .header-icons').is(':hidden')) {
+//             $('#main_content .header-icons').show();
+//         }
     
-        closePopupWindow('popup_search');
-        $('#sub_search_input').val('');
-    }
-}
+//         closePopupWindow('popup_search');
+//         $('#sub_search_input').val('');
+//     }
+// }
 
 function changeTabHelpMenu(tabId) {
     let tabContent = $(`#dropdown_help_menu_${tabId}`);
@@ -2514,7 +2525,6 @@ function clearTemplateObjectList() {
 function getRegistriesData(callback) {
     $.post( "/base_func?val_param=registries_list", function( data ) {
         registriesData = JSON.parse(data);
-        console.log(registriesData);
 
         if (!isEmpty(callback)) {
             for (func of callback) {
@@ -2522,4 +2532,144 @@ function getRegistriesData(callback) {
             }
         }
     });
+}
+
+function chooseDarkTheme() {
+    const checkbox = $('#dark_theme_checkbox');
+
+    if (checkbox.prop('checked')) {
+        $(document.documentElement).attr('theme', 'dark');
+        $('#default_theme_checkbox').prop('checked', false);
+        localStorage.setItem('color_theme', 'dark');
+        changeColorTheme('dark');
+    }
+    else {
+        checkbox.prop('checked', true);
+    }
+}
+
+function chooseDefaultTheme() {
+    const checkbox = $('#default_theme_checkbox');
+
+    if (checkbox.prop('checked')) {
+        $(document.documentElement).removeAttr('theme')
+        $('#dark_theme_checkbox').prop('checked', false);
+        localStorage.setItem('color_theme', 'default');
+        changeColorTheme('default');
+    }
+    else {
+        checkbox.prop('checked', true);
+    }
+}
+
+function changeColorTheme(theme) {
+    encodeURIstring = encodeURI(`/base_func?val_param=chg_user_attr&val_param1=color_theme&val_param2=${theme}`);
+    $.post(encodeURIstring, function (data) {
+        console.log(data);
+    });
+}
+
+function acceptColorTheme() {
+    const theme = USER_DATA.color_theme;
+
+    if (theme) {
+        if ( theme == 'dark') {
+            $('#dark_theme_checkbox').prop('checked', true);
+            $(document.documentElement).attr('theme', 'dark');
+            $('#default_theme_checkbox').prop('checked', false);
+            localStorage.setItem('color_theme', 'dark');
+        }
+    }
+}
+
+function changeUserPassword() {
+    event.preventDefault();
+
+    const currentPassword = $('#change_login_input');
+    const newPassword = $('#change_password_input');
+    const newPasswordRepeat = $('#change_password_repeat_input');
+
+    const validateinputsArray = [currentPassword, newPassword, newPasswordRepeat ];
+
+    if (validateFormInputs([validateinputsArray])) {
+        if (newPassword.val() == newPasswordRepeat.val()){
+            const encodeURIstring = encodeURI(`/base_func?val_param=chg_passwd&val_param1=${currentPassword.val()}&val_param2=${newPassword.val()}`);
+            $.post(encodeURIstring, function (data) {
+                console.log(data);
+                if (data == 'wrong_pwd') {
+                    showPopupNotification('Текущий пароль введен не верно!');
+                }
+                else if (data == 'success') {
+                    showPopupNotification('Пароль успешно изменен! Вы будете перенаправлены на страницу входа.');
+                    clearFormInputs([validateinputsArray]);
+                    setTimeout(logout, 4000);
+
+                    function logout() {
+                        location.reload();
+                    }
+                }
+            });
+        }
+        else {
+            showPopupNotification('Новый пароль и подтверждение пароля не совпадают!');
+        }
+    }
+}
+
+function cancelUserPassword() {
+    event.preventDefault();
+
+    const currentPassword = $('#change_login_input');
+    const newPassword = $('#change_password_input');
+    const newPasswordRepeat = $('#change_password_repeat_input');
+
+    const validateinputsArray = [currentPassword, newPassword, newPasswordRepeat ];
+
+    clearFormInputs([validateinputsArray]);
+}
+
+function showUserLogin() {
+    $('#popup_profile .popup-fullscreen-name').text(`Профиль пользователя ${USER_DATA.user_login}`);
+}
+
+function createPopupNotification(message) {
+    const notification = $('<div>', { class: 'popup-notification' }).append(
+        $('<span>', {class: 'icon'}).append(
+            $('<i>', {class: 'material-icons', text: 'notification_important'})
+        ),
+        $('<span>', {class: 'content', text: message})
+    );
+    return notification;
+}
+
+function showPopupNotification(message) {
+    const notification = createPopupNotification(message);
+
+    if ($('.popup-notification').length) {
+        $('.popup-notification').animate({
+            bottom: '+=52'
+        }, 500, function () {
+            addPopupNotification();
+        });
+    }
+    else {
+        addPopupNotification();
+    }
+
+    function addPopupNotification() {
+        notification.appendTo('body');
+        notification.animate({
+            right: 0
+        }, 500, () => {
+            setTimeout(removePopupNotification, 4000);
+        });
+    }
+
+    function removePopupNotification() {
+        notification.animate({
+            opacity: 0
+        }, 500, () => {
+            notification.remove();
+        });
+    }
 }

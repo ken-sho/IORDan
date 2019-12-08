@@ -1,3 +1,25 @@
+:root {
+    --first-color: #002F6C;
+    --second-color: #19437A;
+    --third-color: #01579B;
+    --fourth-color: #0277BD;
+
+    --element-color: #0091EA;
+    --element-hover-color: #0088DB;
+    --element-active-color: #1A9CED;
+}
+
+:root[theme='dark'] {
+    --first-color: #111C29;
+    --second-color: #222A33;
+    --third-color: #374452;
+    --fourth-color: #4B5A6B;
+
+    --element-color: #004ECB;
+    --element-hover-color: #0045B2;
+    --element-active-color: #1661D9;  
+}
+
 body {
     margin: 0;
     font-family: 'Roboto', sans-serif;
@@ -5,6 +27,7 @@ body {
 }
 
 #page_body {
+    display: none;
     margin: auto;
     width: 534px;
     height: 100%;
@@ -52,7 +75,7 @@ body {
     height: 48px;
     margin-top: 51px;
     margin-bottom: 53px;
-    background: #0091EA;
+    background: var(--element-color);
     border: 0;
     border-radius: 5px;
     transition: 0.2s;
@@ -64,11 +87,11 @@ body {
 }
 
 #login_form_btn:hover {
-    background: #0088DB;
+    background: var(--element-hover-color);
 }
 
 #login_form_btn:active {
-    background: #1A9CED;
+    background: var(--element-active-color);
 }
 
 button {
@@ -137,7 +160,7 @@ button {
 }
 
 .checkmark.active {
-    border: 2px solid #0091EA;
+    border: 2px solid var(--element-color);
 }
 
 /* On mouse-over, add a grey background color */
@@ -162,7 +185,7 @@ button {
     left: 5px;
     width: 5px;
     height: 10px;
-    border: solid #0091EA;
+    border: solid var(--element-color);
     border-width: 0 2px 2px 0;
     -webkit-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
@@ -240,7 +263,7 @@ input:focus 		{ outline:none; }
 input:focus ~ label, input:valid ~ label 		{
   top:-20px;
   font-size:14px;
-  color:#0091EA;
+  color: var(--element-color);
 }
 
 /* BOTTOM BARS ================================= */
@@ -251,7 +274,7 @@ input:focus ~ label, input:valid ~ label 		{
   width:0;
   bottom:1px; 
   position:absolute;
-  background:#0091EA; 
+  background: var(--element-color); 
   transition:0.2s ease all; 
   -moz-transition:0.2s ease all; 
   -webkit-transition:0.2s ease all;

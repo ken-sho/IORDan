@@ -86,12 +86,9 @@
                 <div id="popup_object_content">
                         <div id="object_list_settings">
                             <div id="object_list_settings_left">
-                                <span class="object-tree-btn" onclick="switchToggle('object_list_toggle')"><i id="object_list_toggle" class="material-icons object-search-icon" state="off">toggle_off</i>Режим печати</span>
+                                <span class="object-tree-btn" onclick="switchToggle('object_list_toggle')"><i id="object_list_toggle" class="material-icons object-search-icon" state="off">radio_button_unchecked</i>Режим печати</span>
                             </div>
                             <div id="object_list_settings_right">
-                                <!-- <button class="object-tree-btn" onclick="openPopupWindow('popup_object_list_settings')"><i class="material-icons object-search-icon" title="Настройки списка объектов">
-                                        settings
-                                    </i></button> -->
                                 <i class="material-icons object-search-icon" title="Настройки списка объектов" onclick="openPopupWindow('popup_object_list_settings')">
                                     settings_applications
                                 </i>
@@ -234,24 +231,6 @@
     <!-- <div id="info_content_btn" class="circle-button" title="Информация" onclick="openCloseInfo()"><i class="material-icons">help</i></div> -->
 
     <div id="popup_background">
-        <div id="popup_search" class="popup-window">
-            <div class="popup-header">
-                <div class="popup-name">Быстрый поиск</div>
-                <div class="popup-close" onclick="closePopupWindow('popup_search')"><i class="material-icons">close</i></div>
-            </div>
-            <div class="popup-content">
-                <form id="sub_search_form">
-                    <input id="sub_search_input" class="input-search" type="text" placeholder="Введите данные для поиска (ФИО, ЛС)" onkeyup="keyupSearch('sub_search_input', 'fast_search_menu', 'sub_search_btn')">
-                    <div id="fast_search_menu">
-                        <ul class="obj-search-ul"></ul>
-                    </div>
-                    <div class="content-center">
-                        <button id="sub_search_btn" class="button-primary" onclick="clickFastSearch()">Найти</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
         <div id="popup_object_list_settings" class="popup-window">
             <div class="popup-header">
                 <div class="popup-name">Список объектов</div>
@@ -700,19 +679,83 @@
                 <button class="tab-button active"
                     onclick="openTabs('profile_tabs', this,'profile_settings')">Настройки</button>
             </div>
-            <div class="popup-background-with-tabs">
-                <div id="profile_left_content">
+            <div id="profile_tabs_area">
+                <div class="popup-background-with-tabs">
                     <div id="profile_tabs_content" class="tabs-content">
-                        <div id="profile_settings" class="tab-content active">Настройки</div>
+                        <div id="profile_settings" class="tab-content active">
+                            <div>
+                                <h3>Основные данные</h3>
+                            </div>
+                            <div>
+                                <h3>Смена пароля</h3>
+                                <form name="change_login_password">
+                                    <table class="table-form">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <input id="change_login_input" type="password" class="input-main" placeholder="Текущий пароль">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <input id="change_password_input" type="password" class="input-main" placeholder="Новый пароль">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <input id="change_password_repeat_input" type="password" class="input-main" placeholder="Подтвердить пароль">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <button id="save_login_password" class="button-primary" onclick="changeUserPassword()">Сохранить</button>
+                                                    <button id="cancel_login_passford" class="button-secondary" onclick="cancelUserPassword()">Отменить</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </form>
+                            </div>
+                            <div></div>
+                            <div>
+                                <h3>Цветовая схема</h3>
+                                <div id="color_theme_setting">
+                                    <div>
+                                        <label class="checkbox-container">
+                                            По умолчанию
+                                            <input id="default_theme_checkbox" class="checkbox" type="checkbox" checked onclick="chooseDefaultTheme()">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                        <div id="color_palette_default" class="color-palette">
+                                            <div class="palette-color-1"></div>
+                                            <div class="palette-color-2"></div>
+                                            <div class="palette-color-3"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="checkbox-container">
+                                            Ночной режим
+                                            <input id="dark_theme_checkbox" class="checkbox" type="checkbox" onclick="chooseDarkTheme()">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                        <div id="color_palette_dark" class="color-palette">
+                                            <div class="palette-color-1"></div>
+                                            <div class="palette-color-2"></div>
+                                            <div class="palette-color-3"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div id="profile_right_content">
-                    <div id="profile_chat">
-                        <div class="block-header">
-                            <div class="header">Чат</div>
-                        </div>
-                        <div id="chat_content"></div>
+            </div>
+            <div id="profile_chat_area">
+                <div id="profile_chat">
+                    <div class="block-header">
+                        <div class="header">Чат</div>
                     </div>
+                    <div id="chat_content"></div>
                 </div>
             </div>
         </div>

@@ -24,6 +24,16 @@ function loginSubmit() {
 }
 
 $(document).ready(function() {
+    const colorTheme = localStorage.getItem('color_theme');
+
+    if (colorTheme) {
+        if ( colorTheme == 'dark') {
+            $(document.documentElement).attr('theme', 'dark');
+        }
+    }
+
+    $('#page_body').show();
+
     $('#remember_me_checkbox').on('click', function() {
         const label = $('#remember_me .checkbox-container');
         const checkbox = $('#remember_me .checkbox-container .checkmark');
@@ -37,3 +47,17 @@ $(document).ready(function() {
         }
     });
 })
+
+function createContentLoader(parentDivSelector) {
+    $('<div>', {class: 'content-loading', parent_div: parentDivSelector}).append(
+        $('<div>', {class: 'loading'}).append(
+            $('<div>', {class: 'loading-circle'}),
+            $('<div>', {class: 'loading-header', text: 'Загрузка...'})
+        )
+    ).appendTo($(parentDivSelector));
+}
+
+function removeContentLoader(parentDivSelector, contentDivSelector) {
+    $(`[parent_div='${parentDivSelector}']`).remove();
+    $(contentDivSelector).show();
+}

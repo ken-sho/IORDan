@@ -5,6 +5,29 @@
  * @license: MIT license: http://opensource.org/licenses/MIT
  *
  */
+
+:root {
+  --default-first-color: #002F6C;
+  --default-second-color: #19437A;
+  --default-third-color: #01579B;
+  --default-fourth-color: #0277BD;
+
+  --default-element-color: #0091EA;
+  --default-element-hover-color: #0088DB;
+  --default-element-active-color: #1A9CED;
+}
+
+:root[theme='dark'] {
+  --default-first-color: #111C29;
+  --default-second-color: #222A33;
+  --default-third-color: #374452;
+  --default-fourth-color: #4B5A6B;
+
+  --default-element-color: #004ECB;
+  --default-element-hover-color: #0045B2;
+  --default-element-active-color: #1661D9;  
+}
+
  .jq-dropdown {
     position: absolute;
     z-index: 1039;
@@ -22,7 +45,7 @@
     overflow: visible;
     padding: 4px 0;
     margin: 0;
-    background: #01579B;
+    background: var(--default-third-color);
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
     border-radius: 5px;
     color: #FFFFFF;
@@ -51,7 +74,7 @@
     content: "";
     border-left: 6px solid transparent;
     border-right: 6px solid transparent;
-    border-bottom: 6px solid #01579B;
+    border-bottom: 6px solid var(--default-third-color);
     display: inline-block;
   }
   .jq-dropdown.jq-dropdown-tip.jq-dropdown-anchor-right:before {
@@ -86,7 +109,7 @@
   }
   .jq-dropdown .jq-dropdown-menu li > a:hover,
   .jq-dropdown .jq-dropdown-menu label:hover {
-    background: #0277BD;
+    background: var(--default-fourth-color);
     color: #FFFFFF;
     font-weight: bold;
     cursor: pointer;
