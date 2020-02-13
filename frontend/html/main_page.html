@@ -15,14 +15,17 @@
     <script src="/js/main_page.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="/js/datepicker-ru.js"></script>
-    <script src="/js/xlsx.core.min.js"></script>
-    <script src="/js/FileSaver.js"></script>
-    <script src="/js/tableexport.js"></script>
     <script src="/js/jquery.inputmask.js"></script>
     <script src="/js/gifplayer.js"></script>
 </head>
 
 <body>
+    <div class="center-content" parent_div="body">
+        <div class="loading">
+            <div class="loading-circle"></div>
+            <div class="loading-header">Загрузка...</div>
+        </div>
+    </div>
     <div id="page_body">
         <div id="main_menu_content">
             <div id="main_menu">
@@ -40,7 +43,10 @@
                             <a>
                                 <i class="left-menu-icon material-icons">account_balance</i>
                                 <span class="nav-text">
-                                    КОМПАНИИ
+                                    <div id="main_menu_company_name">КОМПАНИИ</div>
+                                    <i class="material-icons">
+                                        keyboard_arrow_down
+                                    </i>
                                 </span>
                             </a>
                         </li>
@@ -89,9 +95,15 @@
                                 <span class="object-tree-btn" onclick="switchToggle('object_list_toggle')"><i id="object_list_toggle" class="material-icons object-search-icon" state="off">radio_button_unchecked</i>Режим печати</span>
                             </div>
                             <div id="object_list_settings_right">
+                                <i class="material-icons object-search-icon" title="Закрыть" onclick="closeObjectList()">
+                                    close
+                                </i>
                                 <i class="material-icons object-search-icon" title="Настройки списка объектов" onclick="openPopupWindow('popup_object_list_settings')">
                                     settings_applications
                                 </i>
+                                <i id="objects_list_reports" data-jq-dropdown="#jq-dropdown-objects-list"
+                                    class="material-icons-outlined object-search-icon">print</i>
+                                <div id="print_mode_object_num"></div>
                             </div>
                         </div>
                     <div id="object_list_header">
@@ -140,51 +152,53 @@
                         <div id="obj_adress"></div>
                         <div id="obj_info">
                             <div id="obj_agreements_info">
-                                <div class="block-header-icons">
+                                <div class="block-header-with-manipulation">
                                     <div class="header">
-                                        <input id="agreements_radio" type="radio" name="agreements_owners" value="agreements"  checked><label for="agreements_radio">Договора</label> /
-                                        <input id="owners_radio" type="radio" name="agreements_owners" value="owners"><label for="owners_radio">Прописанные</label>
-                                    </div>
-                                    <div class="header-icons">
+                                        <button id="obj_agreements_btn" class="button-primary" disabled>Договора</button>
+                                        <button id="obj_owners_btn" class="button-secondary" disabled>Прописанные</button>
+                                        </div>
+                                    <div class="header-manipulation">
                                         <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-owners" title="Справка" onclick="">help_outline</i>
                                         <i id="add_agreement_owner_icon" class="material-icons" title="Добавить">add</i>
                                     </div>
                                 </div>
-                                <div class="main-table-content">
-                                    <table id="agreement_list_table"></table>
-                                    <table id="owners_table"></table>
+                                <div class="block-content full-area">
+                                    <div id="agreements_owners_content"></div>
                                 </div>
                             </div>
                             <div id="obj_additional_info">
-                                <div class="block-header-icons">
+                                <div class="block-header-with-manipulation">
                                     <div class="header">Дополнительная информация</div>
-                                    <div class="header-icons">
+                                    <div class="header-manipulation">
                                         <!-- <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-owners" title="Справка"
                                             onclick="">help_outline</i>
                                         <i class="material-icons" title="Добавить прописанного" onclick="openPopupWindow('popup_add_owner')">add</i> -->
                                     </div>
                                 </div>
-                                <div class="main-table-content">
-                                    <!-- <table id="owners_table"></table> -->
+                                <div class="block-content full-area">
                                     <table id="obj_additional_info_table"></table>
                                 </div>
                             </div>
                             <div id="obj_ls_info">
-                                <div class="block-header-icons">
+                                <div class="block-header-with-manipulation">
                                     <div class="header">ЛС</div>
-                                    <div class="header-icons">
+                                    <div class="header-manipulation">
                                         <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-info" title="Справка"
                                             onclick="">help_outline</i>
                                         <i class="material-icons" title="Настройки панели дополнительной информации"
                                             onclick="alert('Недостаточно прав')">settings</i>
                                         <div class="icon-with-count" id="obj_notations_icon">
-                                            <i class="material-icons" title="Примечания к адресу"
-                                                onclick="openPopupWindow('popup_object_notations')">comment</i>
+                                            <i class="material-icons" title="Примечания" onclick="openPopupWindow('popup_object_notations')">comment</i>
                                         </div>
                                         <!-- <i class="material-icons" title="Редактировать дополнительную информацию"
                                             onclick="openPopupWindow('popup_edit_object_info')">edit</i> -->
-                                        <i class="material-icons" title="Контакты" onclick="openPopupWindow('popup_object_contacts')">call</i>
+                                        <div class="icon-with-count" id="obj_contacts_icon">
+                                            <i class="material-icons" title="Контакты" onclick="openPopupWindow('popup_object_contacts')">call</i>
+                                        </div>
                                         <i class="material-icons" title="Создать уведомление" onclick="alert('Недостаточно прав')">add_alert</i>
+                                        <div class="icon-with-count" id="obj_communications_icon">
+                                            <i class="material-icons" title="Коммуникации" onclick="openPopupWindow('popup_object_communications')">contacts</i>
+                                        </div>
                                     </div>
                                 </div>
                                 <div id="calendar_navigation">
@@ -227,8 +241,6 @@
             </div>
         </div>
     </div>
-
-    <!-- <div id="info_content_btn" class="circle-button" title="Информация" onclick="openCloseInfo()"><i class="material-icons">help</i></div> -->
 
     <div id="popup_background">
         <div id="popup_object_list_settings" class="popup-window">
@@ -366,6 +378,20 @@
                     <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
                     <div class="form-submit-btn">
                         <button id="add_agreement_btn" class="button-primary" onclick="addNewAgreement()">Добавить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="popup_add_edit_registry_entry" class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name">Добавить запись в реестр</div>
+                <div class="popup-close" onclick="closePopupWindow('popup_add_edit_registry_entry')"><i class="material-icons">close</i></div>
+            </div>
+            <div class="popup-content">
+                <form name="add_registry_entry">
+                    <div class="form-submit-btn">
+                        <button id="add_registry_entry_btn" class="button-primary">Добавить</button>
                     </div>
                 </form>
             </div>
@@ -557,14 +583,115 @@
                             <tbody>
                                 <tr>
                                     <td><input id="add_object_notation_input" type="text" class="input-main"></td>
-                                    <td><button id="add_object_notation_btn" class="button-primary"onclick="addObjectNotation()">Добавить</button></td>
+                                    <td><button id="add_object_notation_btn" class="button-primary table-form-button" onclick="addObjectNotation()">Добавить</button></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <h3>Список примечаний</h3>
-                    <div class="block-primary">
-                        <div id="notations_list"></div>  
+                </form>
+                <h3>Список примечаний</h3>
+                <div class="block-primary">
+                    <div id="object_notations_list"></div>  
+                </div>
+            </div>
+        </div>
+
+        <div id="popup_object_communications" class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name">Коммуникации</div>
+                <div class="popup-close" onclick="closePopupWindow('popup_object_communications')"><i class="material-icons">close</i></div>
+            </div>
+            <div class="popup-content">
+                <form name="add_object_notation">
+                    <h3>Добавить коммуникацию</h3>
+                    <div>
+                        <table class="table-form">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <select id="object_communication_select" class="table-form-select">
+                                            <option>Квартира брошена, никто не живет</option>
+                                            <option>Арендаторы</option>
+                                            <option>Алкоголики, маргиналы</option>
+                                            <option>Отказ общения</option>
+                                            <option>Новый собственник</option>
+                                            <option>Никого нет дома</option>
+                                            <option>Другое</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button id="add_object_communication_btn" class="button-primary table-form-button" onclick="addObjectCommunication()">Добавить</button>
+                                    </td>
+                                    <tr id="object_communication_textarea_tr">
+                                        <td colspan="2">
+                                            <textarea id="object_communication_textarea" class="table-form-textarea" placeholder="Укажите свой вариант..."></textarea>
+                                        </td>
+                                    </tr>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+                <h3>Список коммуникаций</h3>
+                <div class="block-primary">
+                    <div id="object_communications_list"></div>  
+                </div>
+            </div>
+        </div>
+
+        <div id="popup_objects_group_users" class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name">Управление пользователями</div>
+                <div class="popup-close" onclick="closePopupWindow('popup_objects_group_users')"><i class="material-icons">close</i></div>
+            </div>
+            <div class="popup-content">
+                <h3>Список привязанных пользователей</h3>
+                <div class="block-primary">
+                    <div id="objects_group_users_list"></div>  
+                </div>
+                <h3>Добавить пользователя</h3>
+                <form name="add_objects_group_user">
+                    <div>
+                        <table class="table-form">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <select id="add_objects_group_user_select" class="table-form-select">
+                                            <option selected disabled>Выберете пользователя...</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button id="add_objects_group_user_btn" class="button-primary table-form-button">Добавить</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="popup_create_object_group" class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name">Создать группу</div>
+                <div class="popup-close" onclick="closePopupWindow('popup_create_object_group')"><i class="material-icons">close</i></div>
+            </div>
+            <div class="popup-content">
+                <div id="create_object_group_objects_list"></div>
+                <form name="add_object_group">
+                    <table class="table-form">
+                        <tbody>
+                            <tr>
+                                <td class="table-input-name">Название группы *</td>
+                                <td>
+                                    <input id="object_group_name" type="text" class="input-main">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
+                    <div class="form-submit-btn">
+                        <button id="add_object_group_btn" class="button-primary" onclick="createObjectGroup()">Создать</button>
                     </div>
                 </form>
             </div>
@@ -577,6 +704,20 @@
                     <div class="popup-report-operation">
                         <button class="button-primary" onclick="printReport()">Печать</button>
                         <i class="material-icons" title="Закрыть" onclick="closePopupWindow('popup_report')">close</i>
+                    </div>
+                </div>
+                <div class="popup-content">
+                </div>
+            </div>
+        </div>
+
+        <div id="popup_objects_group" class="popup-fullscreen">
+            <div class="popup-background">
+                <div class="popup-header-fullscreen">
+                    <div class="popup-name"></div>
+                    <div class="popup-report-operation">
+                        <button class="button-primary" onclick="printObjectsGroup()">Печать</button>
+                        <i class="material-icons" title="Закрыть" onclick="closePopupWindow('popup_objects_group')">close</i>
                     </div>
                 </div>
                 <div class="popup-content">
@@ -661,7 +802,7 @@
                         <ul class="obj-search-ul"></ul>
                     </div>
                     <div class="content-center">
-                        <button id="ardess_template_search_btn" class="button-primary" onclick="">Добавить</button>
+                        <button id="ardess_template_search_btn" class="button-primary">Добавить</button>
                     </div>
                 </form>
             </div>
@@ -771,9 +912,11 @@
                 <div class="tabs" id="control_tabs">
                     <button class="tab-button active" onclick="openTabs('control_tabs', this,'control_reports')">Справки</button>
                     <button class="tab-button" onclick="openTabs('control_tabs', this,'control_report_settings')">Настройка справок</button>
-                    <button class="tab-button" onclick="openTabs('control_tabs', this,'control_files')">Работа с файлами</button>
-                    <button class="tab-button" onclick="openTabs('control_tabs', this,'control_registry')">Реестры</button>
+                    <button id="control_files_tab" class="tab-button default-hidden" onclick="openTabs('control_tabs', this,'control_files')">Работа с файлами</button>
+                    <button id="control_registry_tab" class="tab-button default-hidden" onclick="openTabs('control_tabs', this,'control_registry')">Реестры</button id="control_registry_tab">
                     <button class="tab-button" onclick="openTabs('control_tabs', this,'control_documents')">Отчеты</button>
+                    <button class="tab-button" onclick="openTabs('control_tabs', this,'control_object_groups')">Группы объектов</button>
+
                 </div>
                 <div class="popup-background-with-tabs">
                     <div id="control_tabs_content" class="tabs-content">
@@ -798,8 +941,11 @@
                                                     <tr>
                                                         <td class="table-input-name">Справки</td>
                                                         <td>
-                                                            <table id="report_fast_access_reports_list"></table>
+                                                            <div id="report_fast_access_reports_list_div">
+                                                                <table id="report_fast_access_reports_list"></table>
+                                                            </div>
                                                         </td>
+
                                                     </tr>
                                                     <tr>
                                                         <td class="table-input-name">ЛС *</td>
@@ -913,26 +1059,27 @@
                             </div>
                         </div>
                         <div id="control_report_settings" class="tab-content">
-                            <div id="report_settings_select_menu">
+                            <div id="report_settings_select_menu" class="main-list">
                                 <ul></ul>
                             </div>
-                            <div id="report_settings_content">
+                            <div id="report_settings_content" class="main-content">
                                 <div id="report_settings_preview" class="block">
                                     <div class="block-header">
                                         <div class="header">Превью справки</div>
                                     </div>
                                     <div class="block-content"></div>
                                 </div>
-                                <div id="report_settings_print_notation" class="block">
-                                    <div class="block-header-icons">
-                                        <div class="header">Примечание для печати</div>
-                                        <div class="header-icons" style="display: block;">
+                                <div id="report_settings" class="block">
+                                    <div class="block-header-with-manipulation">
+                                        <div class="header">Настройки</div>
+                                        <div class="header-manipulation" style="display: block;">
                                             <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-print-notation"
                                                 title="Справка" onclick="">help_outline</i>
                                         </div>
                                     </div>
                                     <div class="block-content">
-                                        <div id="form_settings_tab1">
+                                        <!-- <div class="setting-item">
+                                            <h5>Примечание для печати</h5>
                                             <textarea id="print_notation_textarea" class="fixed-textarea" rows="2"
                                                 disabled></textarea>
                                             <p>
@@ -941,20 +1088,56 @@
                                                 <button id="save_print_notation" class="button-primary"
                                                     onclick="savePrintNotation()">Сохранить</button>
                                             </p>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div id="control_registry" class="tab-content"></div>
+                        <div id="control_registry" class="tab-content">
+                            <div id="registry_settings_select_menu" class="main-list">
+                                <div id="registry_settings_calendar"></div>
+                                <ul></ul>
+                            </div>
+                            <div id="registry_settings_content" class="main-content">
+                                <div class="block">
+                                    <div class="block-header-with-manipulation">
+                                        <div class="header"></div>
+                                        <div class="header-manipulation">
+                                            <i class="material-icons" data-jq-dropdown="" title="Справка" onclick="">help_outline</i>
+                                            <button class="button-primary" style="float: right" onclick="openAddRegistryEntryPopup()" title="Добавить запись в реестр">Добавить запись</button>
+                                            <i id="registry_print_icon" class="material-icons" title="Печать" onclick="">print</i>
+                                            <i class="material-icons" title="Блокировка" onclick="">lock</i>
+                                        </div>
+                                    </div>
+                                    <div class="block-content no-padding"></div>
+                                </div>
+                            </div>
+                        </div>
                         <div id="control_documents" class="tab-content"></div>
+                        <div id="control_object_groups" class="tab-content">
+                            <div class="block">
+                                <div class="block-header-with-manipulation">
+                                    <div class="header">Список групп</div>
+                                    <div class="header-manipulation">
+                                        <button id="" class="button-primary" onclick="openPopupWindow('popup_create_object_group')">Создать группу</button>
+                                    </div>
+                                </div>
+                                <div class="block-content full-area">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="jq-dropdown-company-list" class="jq-dropdown jq-dropdown-tip">
+    <div id="jq-dropdown-company-list" class="jq-dropdown">
+        <ul class="jq-dropdown-menu">
+        </ul>
+    </div>
+
+    <div id="jq-dropdown-objects-list" class="jq-dropdown dropdown-report jq-dropdown-tip">
         <ul class="jq-dropdown-menu">
         </ul>
     </div>
@@ -997,7 +1180,7 @@
                         <div class="help-text">
                             <ol>
                                 <li>Нажмите на кнопку "<i class="material-icons help-menu-icon">event_note</i>" в таблице "Прописанные";</li>
-                                <li>Выберите из списка нужную справку;</li>
+                                <li>Выберете из списка нужную справку;</li>
                                 <li>Укажите период для выполнения справки (если требуется);</li>
                                 <li>Нажмите на кнопку "Выполнить".</li>
                             </ol>
@@ -1035,7 +1218,7 @@
                             <ol>
                                 <li>Нажмите на иконку "<i class="material-icons help-menu-icon">call</i>" в панели "Дополнительная информация";</li>
                                 <li>Нажмите на вкладку "Редактировать";</li>
-                                <li>Выберите контакт из списка контактов;</li>
+                                <li>Выберете контакт из списка контактов;</li>
                                 <li>Заполните все необходимые поля в форме;</li>
                                 <li>Нажмите на кнопку "Сохранить".</li>
                             </ol>

@@ -2,8 +2,8 @@ function loginSubmit() {
     $("#login_form").submit(function (event) {
         event.preventDefault();
     });
-    let email = document.getElementById("login_email").value;
-    let password = document.getElementById("login_password").value;
+    const email = document.getElementById("login_email").value;
+    const password = document.getElementById("login_password").value;
     $.ajax({
         type: "POST",
         url: "/",
