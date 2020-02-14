@@ -1,0 +1,16 @@
+{
+	"xls" : {
+		"caption" : "Сценарий загрузки Excel (xls)",
+		"FileName" : "*.xls",
+		"TabCount" : "",
+		"TabNames" : ["*","*","*"],
+		"exec"	   : "test.py"
+	},
+	"xlsx" : {
+		"caption" : "Сценарий загрузки Excel (xlsx)",
+		"FileName" : "*.xlsx",
+		"TabCount" : "",
+		"TabNames" : ["*"],
+		"exec"	   : "test.py"
+	}
+}

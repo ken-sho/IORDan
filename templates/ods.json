@@ -1,0 +1,7 @@
+{
+	"ods" : {
+		"caption" : "Сценарий загрузки Таблицы (ods)",
+		"FileName" : "*.ods",
+		"exec"	   : "test.py"
+	}
+}

@@ -1,0 +1,7 @@
+{
+	"csv" : {
+		"caption" : "Сценарий загрузки csv",
+		"FileName" : "*.csv",
+		"exec"	   : "test.py"
+	}
+}
