@@ -3626,3 +3626,11 @@ function deleteObjectsGroup(groupName) {
         });
     }
 }
+
+function changeRegistryLock(registryId) {
+    const status = $('registry_lock_icon').attr('lock');
+    encodeURIstring = encodeURI(`/base_func?val_param=chg_ree_reestrs_stt&val_param1=${status}&val_param2=${registryId}`);
+    $.post(encodeURIstring, function (data) {
+
+    });
+}
