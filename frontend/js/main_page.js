@@ -186,8 +186,8 @@ function getUserRightsData() {
         showUserLogin();
 
         if (getCookie('companyId')) {
-            initializationPopupControl();
             if (USER_DATA.org_list.length > 1) {
+                initializationPopupControl();
                 getObjectsTreeData();
                 initializeUserRight();
             }
@@ -1978,7 +1978,6 @@ function fillSelectFromCompanyArray(selectId, array) {
 }
 
 function initializationPopupControl() {
-
     resizeTwoDiv('control_reports', `reports_list`, 'report_fast_access', '11');
 
     $('#report_fast_access_reports_list, #report_settings_select_menu ul, #proccess_file_company_select').empty();
