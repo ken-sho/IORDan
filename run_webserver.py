@@ -415,7 +415,7 @@ application = tornado.web.Application([
     (r"/redmine", RedmineHandler),
     (r"/css/(.*)", tornado.web.StaticFileHandler, {'path': 'frontend/css'}),
     (r"/js/(.*)", tornado.web.StaticFileHandler, {'path': 'frontend/js'}),
-    (r"/icon/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/material-design-icons/iconfont'}),
+    (r"/icon/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/material-design-icons'}),
     (r"/images/(.*)", tornado.web.StaticFileHandler, {'path': 'frontend/images'}),
 #], **settings)
 ], **settings, debug=True)
