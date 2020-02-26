@@ -208,7 +208,7 @@ class ReportHandler(BaseHandler):
         conn = db_conn.db_connect('web_receivables')
         cur = conn.cursor()
         if rtype == 'certificate' and multi=='':
-            q_sql = "select report.sprav"+ rnum +"('','"+ accid +"','"+ humanid +"')"
+            q_sql = "select report.sprav"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"')"
             print(q_sql)
             cur.execute(q_sql)
             for row in cur:
@@ -219,7 +219,7 @@ class ReportHandler(BaseHandler):
         elif rtype == 'report' and multi=='':
             dateb = self.get_argument('dateb')
             datee = self.get_argument('datee')
-            q_sql = "select report.rep"+ rnum +"('','"+ accid +"','"+ humanid +"','"+ dateb +"','"+ datee +"')"
+            q_sql = "select report.rep"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"','"+ dateb +"','"+ datee +"')"
             print(q_sql)
             cur.execute(q_sql)
             for row in cur:
@@ -228,21 +228,25 @@ class ReportHandler(BaseHandler):
             encoded = base64.b64encode(q_sql.encode()).decode()
             logg_web.add_log(asid,encoded,'Выполнение отчёта')
         elif multi=='true':
-            q_sql = "select report.rep_multi('','"+ accid +"','"+ rtype +"','"+ rnum +"')"
+            q_sql = "select report.rep_multi('"+ asid +"','"+ accid +"','"+ rtype +"','"+ rnum +"')"
             #print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
                 self.write(res)
+            encoded = base64.b64encode(q_sql.encode()).decode()
+            logg_web.add_log(asid,encoded,'Выполнение массового отчёта/справки')
         elif multi!='true' and multi!='':
             dateb = self.get_argument('dateb')
             datee = self.get_argument('datee')
-            q_sql = "select report.rep_fast_access('','"+ accid +"','"+ rtype +"','"+ dateb +"','"+ datee +"','"+ multi +"')"
-            #print(q_sql)
+            q_sql = "select report.rep_fast_access('"+ asid +"','"+ accid +"','"+ rtype +"','"+ dateb +"','"+ datee +"','"+ multi +"')"
+            print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
                 self.write(res)
+            encoded = base64.b64encode(q_sql.encode()).decode()
+            logg_web.add_log(asid,encoded,'Выполнение групового отчёта/справки')
         cur.close()
         conn.close()
 

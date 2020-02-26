@@ -14,7 +14,7 @@
     font-family: 'Material Icons';
     font-weight: normal;
     font-style: normal;
-    font-size: 24px;
+    font-size: 24px;  /* Preferred icon size */
     display: inline-block;
     line-height: 1;
     text-transform: none;
@@ -22,12 +22,16 @@
     word-wrap: normal;
     white-space: nowrap;
     direction: ltr;
-  
+
+    /* Support for all WebKit browsers. */
     -webkit-font-smoothing: antialiased;
+    /* Support for Safari and Chrome. */
     text-rendering: optimizeLegibility;
-  
+
+    /* Support for Firefox. */
     -moz-osx-font-smoothing: grayscale;
-  
+
+    /* Support for IE. */
     font-feature-settings: 'liga';
 }
 
@@ -1016,7 +1020,7 @@ div {
     color: #263238;
 }
 
-#owners_table th, #agreement_list_table th, #object_contacts_table th {
+#owners_table th, #agreement_list_table th {
     position: sticky;
     background-color: #FFFFFF;
     top: 0;
@@ -1540,7 +1544,6 @@ div {
     display: none;
     box-sizing: border-box;
     width: 100%;
-    height: 100%;
 }
 
 .tab-content.active {
@@ -2218,7 +2221,7 @@ form[name="add_objects_group_user"] td:first-child {
     outline: 1px solid var(--element-color);
 }
 
-.block-table tr:first-child:hover {
+.block-table th:hover {
     outline: none;
 }
 
@@ -2760,7 +2763,7 @@ textarea {
 
 .popup-notification {
     width: 300px;
-    height: 40px;
+    height: 46px;
     position: fixed;
     right: -312px;
     bottom: 0;
@@ -2788,7 +2791,7 @@ textarea {
 .popup-notification i {
     font-size: 24px !important;
     text-align: center;
-    color: #A8ADAF;
+    color: white;
     cursor: default;
 }
 
@@ -2984,6 +2987,10 @@ textarea {
 }
 
 #control_object_groups table tr:not(:first-child) {
+    cursor: pointer;
+}
+
+#control_documents_list_table tr {
     cursor: pointer;
 }
 

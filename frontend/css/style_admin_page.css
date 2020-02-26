@@ -1,10 +1,23 @@
 :root {
     --color-primary: #01579B;
     --color-header-text: #A8ADAF;
+    --element-color: #0091EA;
 
     --text-color: #263238;
     --text-large: 16px;
     --text-default: 14px;
+}
+
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src: url(/icon/iconfont/MaterialIcons-Regular.eot);
+    src: local('Material Icons'),
+         local('MaterialIcons-Regular'),
+         url(/icon/iconfont/MaterialIcons-Regular.woff2) format('woff2'),
+         url(/icon/iconfont/MaterialIcons-Regular.woff) format('woff'),
+         url(/icon/iconfont/MaterialIcons-Regular.ttf) format('truetype');
 }
 
 html {
@@ -17,6 +30,30 @@ body {
     height: 100%;
     margin: 0;
     font-family: 'Roboto', sans-serif
+}
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'liga';
+    cursor: pointer;
+}
+
+.material-icons:hover {
+    color: var(--element-color);
+    transition: .15s;
 }
 
 div {
@@ -78,11 +115,13 @@ div {
 #main_content {
     width: 100%;
     height: calc(100% - 100px);
+    padding: 15px;
 }
 
 .tab-content {
     width: 100%;
     height: 100%;
+    display: none;
 }
 
 .main-table {
@@ -94,4 +133,53 @@ div {
 .main-table th,
 .main-table td {
     border: 1px solid gray;
+}
+
+.block {
+    width: 100%;
+    height: 100%;
+    border: 1px solid #D9E0E3;
+    border-radius: 5px;
+}
+
+.block-header, .block-header-with-manipulation, .popup-window-layer2 .popup-header {
+    height: 35px;
+    background: #D9E0E3;
+}
+
+.block-header-with-manipulation .header {
+    width: 70%;
+    padding-left: 19px;
+    padding-top: 8px;
+    height: 100%;
+    float: left;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.block-header-with-manipulation .header-manipulation {
+    width: 30%;
+    float: left;
+    height: 100%;
+    text-align: right;
+}
+
+.block-content {
+    padding: 5px;
+    height: calc(100% - 35px);
+    overflow: auto;
+}
+
+.block-content.full-area {
+    padding: 0;
+}
+
+.header-manipulation i {
+    transition: .15s;
+    margin-right: 13px;
+    margin-top: 5px;
+    color: #323232;
+    vertical-align: middle;
+    font-size: 24px;
+    float: right;
 }

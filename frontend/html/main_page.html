@@ -101,7 +101,7 @@
                                     settings_applications
                                 </i>
                                 <i id="objects_list_reports" data-jq-dropdown="#jq-dropdown-objects-list"
-                                    class="material-icons-outlined object-search-icon">print</i>
+                                    class="material-icons object-search-icon">print</i>
                                 <div id="print_mode_object_num"></div>
                             </div>
                         </div>
@@ -194,7 +194,7 @@
                                         <div class="icon-with-count" id="obj_contacts_icon">
                                             <i class="material-icons" title="Контакты" onclick="openPopupWindow('popup_object_contacts')">call</i>
                                         </div>
-                                        <i class="material-icons" title="Создать уведомление" onclick="alert('Недостаточно прав')">add_alert</i>
+                                        <i id="obj_create_reminder" class="material-icons" title="Создать уведомление">add_alert</i>
                                         <div class="icon-with-count" id="obj_communications_icon">
                                             <i class="material-icons" title="Коммуникации" onclick="openPopupWindow('popup_object_communications')">contacts</i>
                                         </div>
@@ -441,6 +441,7 @@
             </div>
             <div class="popup-content">
                 <form name="edit_owner">
+                    <div id="edit_owner_creation_time" class="notification"></div>
                     <table class="table-form">
                         <tbody>
                             <tr>
@@ -609,6 +610,8 @@
                                 <tr>
                                     <td>
                                         <select id="object_communication_select" class="table-form-select">
+                                            <option>Успешный звонок</option>
+                                            <option>Визит в офис</option>
                                             <option>Квартира брошена, никто не живет</option>
                                             <option>Арендаторы</option>
                                             <option>Алкоголики, маргиналы</option>
@@ -656,7 +659,7 @@
                                 <tr>
                                     <td>
                                         <select id="add_objects_group_user_select" class="table-form-select">
-                                            <option selected disabled>Выберете пользователя...</option>
+                                            <option selected disabled>Выберите пользователя...</option>
                                         </select>
                                     </td>
                                     <td>
@@ -1112,7 +1115,24 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="control_documents" class="tab-content"></div>
+                        <div id="control_documents" class="tab-content">
+                            <div class="block">
+                                <div class="block-header-with-manipulation">
+                                    <div class="header">Список отчетов</div>
+                                    <div class="header-manipulation"></div>
+                                </div>
+                                <div class="block-content full-area">
+                                    <table id="control_documents_list_table" class="block-table">
+                                        <tr>
+                                            <td>Отчёт по активностям пользователей</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Отчёт по поступившим средствам за период</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                         <div id="control_object_groups" class="tab-content">
                             <div class="block">
                                 <div class="block-header-with-manipulation">
@@ -1179,7 +1199,7 @@
                         <div class="help-text">
                             <ol>
                                 <li>Нажмите на кнопку "<i class="material-icons help-menu-icon">event_note</i>" в таблице "Прописанные";</li>
-                                <li>Выберете из списка нужную справку;</li>
+                                <li>Выберите из списка нужную справку;</li>
                                 <li>Укажите период для выполнения справки (если требуется);</li>
                                 <li>Нажмите на кнопку "Выполнить".</li>
                             </ol>
@@ -1217,7 +1237,7 @@
                             <ol>
                                 <li>Нажмите на иконку "<i class="material-icons help-menu-icon">call</i>" в панели "Дополнительная информация";</li>
                                 <li>Нажмите на вкладку "Редактировать";</li>
-                                <li>Выберете контакт из списка контактов;</li>
+                                <li>Выберите контакт из списка контактов;</li>
                                 <li>Заполните все необходимые поля в форме;</li>
                                 <li>Нажмите на кнопку "Сохранить".</li>
                             </ol>

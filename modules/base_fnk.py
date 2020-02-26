@@ -171,6 +171,7 @@ def fnk_lst (asid,orgid,val_param,val_param1,val_param2,val_param3,val_param4,va
             res=(row[0])
     elif val_param=='addchg_ree_recodrs':
         q_sql = "select main.addchg_ree_recodrs('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"','"+ val_param3 +"','"+ val_param4 +"','"+ val_param5 +"','"+ val_param6 +"','"+ val_param7 +"','"+ val_param8 +"')"
+        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])

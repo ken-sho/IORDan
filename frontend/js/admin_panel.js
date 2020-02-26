@@ -22,6 +22,16 @@ export function createLayout() {
             $('<div>', { id: `${tab.id}_content`, class: 'tab-content' }).appendTo('#main_content');
         }
     }());
+
+    (function toggleTab() {
+        $('.main-tab').each(function() {
+            $(this).on('click', function() {
+                const id = $(this).attr('id');
+                $('.tab-content').hide();
+                $(`#${id}_content`).show();
+            });
+        })
+    }());
 }
 
 export function initializeFunctions() {
@@ -38,7 +48,25 @@ export function initializeFunctions() {
             tableHead.appendTo(table);
 
             $.post(`${PRIMARY_DATA.url_endpoint}?fnk_name=${func.name}`, (data) => {
-                const requestData = JSON.parse(data);
+                let requestData = JSON.parse(data);
+                console.log(requestData)
+
+                if (func.table_sorting) {
+
+                    console.log(Object.entries(requestData).sort((a, b) => b.date_cre - a.date_cre));
+
+                    // const sortProperty = func.table_sorting.property;
+                    // let sortedRequestData = Object.values(requestData).sort(function (a, b) {
+                    //     console.log(a, b)
+                    //     var dateA = new Date(a.date_cre), dateB = new Date(b.date_cre)
+                    //     return dateB - dateA //сортировка по убывающей дате
+                    // })
+
+                    // console.log(sortedRequestData)
+                    // requestData = sortedRequestData
+                }
+
+
 
                 for (const elem in requestData) {
                     const row = $('<tr>');
@@ -51,7 +79,7 @@ export function initializeFunctions() {
                     row.appendTo(table);
                 }
 
-                $(`#${func.parent_tab}`).html(table);
+                $(`#${func.parent_tab} .block-content`).html(table);
             })
         }
     }

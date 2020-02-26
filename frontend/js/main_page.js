@@ -88,34 +88,13 @@ $(document).ready(function() {
     const currentCompany = getCookie('companyId');
     if (currentCompany == undefined) {
         $('#main_search_input').attr('disabled', true);
-        $('#main_search_input').val('Выберете компанию');
+        $('#main_search_input').val('Выберите компанию');
         $('.li-change-events').addClass('li-disabled');
     }
 
     $('#add_agreement_owner_icon').on('click', function() {
         openPopupWindow('popup_add_agreement');
-    })
-
-    // $('input[name=agreements_owners]').change(function() {
-    //     if (this.value == 'agreements') {
-    //         $('#owners_table').hide();
-    //         $('#agreement_list_table').show();
-
-    //         $('#add_agreement_owner_icon').off('click');
-    //         $('#add_agreement_owner_icon').on('click', function() {
-    //             openPopupWindow('popup_add_agreement');
-    //         });
-    //     }
-    //     else if (this.value == 'owners') {
-    //         $('#owners_table').show();
-    //         $('#agreement_list_table').hide();
-
-    //         $('#add_agreement_owner_icon').off('click');
-    //         $('#add_agreement_owner_icon').on('click', function() {
-    //             openPopupWindow('popup_add_owner');
-    //         });
-    //     }
-    // });
+    });
 
     $('#obj_agreements_btn').click(function() {
         if ($(this).hasClass('button-secondary')) {
@@ -147,7 +126,6 @@ $(document).ready(function() {
         }
     });
 
-
     $('#object_communication_select').change(function() {
         if (this.value == 'Другое') {
             $('#object_communication_textarea_tr').show();
@@ -156,12 +134,32 @@ $(document).ready(function() {
             $('#object_communication_textarea_tr').hide();
         }
     });
+
+    $('#control_documents_list_table tr').each(function() {
+        $(this).on('click', function() {
+            const name = $(this).text()
+            let content = '<table id="rep_range_table"><tr><td>Дата начала</td><td><input type="text" id="start_date" class="input-main"></td></tr>' +
+                '<tr><td>Дата конца</td><td><input type="text" id="final_date" class="input-main"></td></tr></table>' +
+                '<div class="content-center"><div class="notification">По умолчанию будет выбран период с 01.01.2005 по 01.12.2015</div><button id="pep_range_btn" class="button-primary">Выполнить</button></div>';
+            formPopupNotFullscreen(name, content);
+            openPopupWindow('popup_not_fullscreen');
+        });
+    });
 });
 
 // получение данных о пользователе
 function getUserData(callback) {
     $.get( "/web_request?query=", function( data ) {
         USER_DATA = JSON.parse(data);
+
+        $('#obj_create_reminder').on('click', function() {
+            if (USER_DATA.user_login == 'demo') {
+                alert('Разного рода уведомления. По типу квартиросъёмщик «попросил связаться завтра», «обещал внести оплату такого-то числа» или любое другое по требованию заказчика. Программа напомнит об этом событии пользователю.');
+            }
+            else {
+                alert('Недостаточно прав');
+            }
+        });
 
         if (USER_DATA.org_list.length == 1) {
             const companyName = USER_DATA.org_list[0].name;
@@ -318,7 +316,7 @@ function closePopupWindow(popupId) {
     $('.main-menu li').removeClass('active');
     $('#home_page').addClass('active');
 
-    if (popupId !== 'popup_add_task' && popupId !== 'popup_process_control_file' && popupId != 'popup_objects_group_users' && popupId != 'popup_objects_group' && popupId !== 'popup_add_edit_registry_entry' && popupId !== 'popup_processed_file_template' && popupId !== 'popup_performed_file_template' && popupId !== 'popup_report' && popupId !== 'popup_create_object_group')  {
+    if (popupId !== 'popup_add_task' && popupId !== 'popup_process_control_file' && popupId !== 'popup_not_fullscreen' && popupId != 'popup_objects_group_users' && popupId != 'popup_objects_group' && popupId !== 'popup_add_edit_registry_entry' && popupId !== 'popup_processed_file_template' && popupId !== 'popup_performed_file_template' && popupId !== 'popup_report' && popupId !== 'popup_create_object_group')  {
         openHomePage();
     }
 }
@@ -683,6 +681,8 @@ function setPrintNotation(reportId) {
 
 function getObjectAgreementsData() {
 
+    $('#agreement_list_table').remove();
+
     const table = $('<table>', {id: 'agreement_list_table'});
 
     if ($('#obj_agreements_btn').hasClass('button-secondary')) table.hide();
@@ -724,6 +724,8 @@ function getObjectAgreementsData() {
 
 function getObjectRegistrationsData() {
 
+    $('#owners_table').remove();
+
     let registrationsData = OBJECT_DATA.registrations;
     let ownersPeopleArr = [];
     const registrationsCount = Object.keys(registrationsData).length;
@@ -745,7 +747,7 @@ function getObjectRegistrationsData() {
     for (const registrationKey in registrationsData) {
         let registrationData = registrationKey.split('&');
         const registrationValue = registrationsData[registrationKey];
-        tr = $('<tr>', { 'accid': registrationData[1], 'human_id': registrationData[2] }).append(
+        tr = $('<tr>', { 'accid': registrationData[1], 'human_id': registrationData[2], 'author': registrationValue.author, 'creation_time': registrationValue.creation_time}).append(
             $('<td>').append(
                 $('<i>', { 'data-jq-dropdown': `#jq-dropdown-${DROPDOWN_NUM}`, class: 'material-icons', text: 'event_note' })
             ),
@@ -758,7 +760,7 @@ function getObjectRegistrationsData() {
 
 
         if (registrationValue.unregistration_date !== '') {
-            $('<i>', {class: 'material-icons owner-info-unsubdate', text: 'domain_disabled', title: `Дата выписки: ${registrationValue.unregistration_date}`}).appendTo(td);
+            $('<i>', {class: 'material-icons owner-info-unsubdate', text: 'business', title: `Дата выписки: ${registrationValue.unregistration_date}`}).appendTo(td);
         }
 
         if (registrationValue.birth_place !== '') {
@@ -1120,10 +1122,6 @@ function printObjectsGroup() {
     printWindow.document.write('</head><body id="report_print">');
     printWindow.document.write(printingContent);
     printWindow.document.write('</body></html>');
-
-    console.log(printWindow);
-
-
     printWindow.document.close(); // necessary for IE >= 10
     printWindow.focus(); // necessary for IE >= 10*/
 }
@@ -1135,9 +1133,6 @@ function printRegistry() {
     printWindow.document.write('</head><body id="report_print">');
     printWindow.document.write(printingContent);
     printWindow.document.write('</body></html>');
-
-    console.log(printWindow);
-
     printWindow.document.close(); // necessary for IE >= 10
     printWindow.focus(); // necessary for IE >= 10*/
 }
@@ -1404,11 +1399,13 @@ function isActivePrintMode() {
 
 function clickIconEditOwner() {
     $('.owner-edit-icon').on('click', function() {
-        let ownerName = $(this).parent().prevAll().eq(3).text();
-        let ownerBirthDate = $(this).parent().prevAll().eq(2).text();
-        let subDate = $(this).parent().prevAll().eq(1).text();
+        const ownerName = $(this).parent().prevAll().eq(3).text();
+        const ownerBirthDate = $(this).parent().prevAll().eq(2).text();
+        const subDate = $(this).parent().prevAll().eq(1).text();
         let unsubDate = '';
         let birthPlace = '';
+        const author = $(this).parent().parent().attr('author');
+        const creationTime = $(this).parent().parent().attr('creation_time');
         if ($(this).parent().prev().find('.owner-info-unsubdate').length > 0) {
             unsubDate = $('.owner-info-unsubdate').attr('title').replace('Дата выписки: ', '');
         }
@@ -1422,6 +1419,7 @@ function clickIconEditOwner() {
         $('#edit_owner_subscribe_date').val(RemakeDateFormatToInput(subDate));
         $('#edit_owner_unsubscribe_date').val(RemakeDateFormatToInput(unsubDate));
         $('#edit_owner_birth_place').val(birthPlace);
+        $('#edit_owner_creation_time').text(`Добавил: ${author} ${creationTime}`)
         openPopupWindow('popup_edit_owner');
     });
 }
@@ -1455,8 +1453,12 @@ function editOwnerRequest() {
         encodeURIstring = encodeURI(`/base_func?val_param=addchg_human&val_param1=${accid}&val_param2=${name}&val_param3=${date}&val_param4=chg&val_param5=${humanId}&val_param6=${subDate}&val_param7=${unsubDate}&val_param8=${birthPlace}`);
         $.post(encodeURIstring, function (data) {
             if (data == 'success') {
+                showPopupNotification('Прописанный успешно отредактирован!');
                 closePopupWindow();
                 refreshObjectData([getObjectRegistrationsData, clickDropdownMenu]);
+            }
+            else if (data == 'lock_value') {
+                showPopupNotification('Прописанного редактировать нельзя, так как с момента его добавления прошло более 24 часов!');
             }
         });
     }
@@ -1631,7 +1633,10 @@ function editContact() {
         $.post(encodeURIstring, function (data) {
             if (data == 'success') {
                 refreshObjectData([getObjectContactsData]);
-                showSuccessMessage('Контакт успешно сохранен!', 'edit_contact_btn');
+                showPopupNotification('Контакт успешно сохранен!');
+            }
+            else if (data == 'lock_value') {
+                showPopupNotification('Контакт редактировать нельзя, так как с момента его добавления прошло более 24 часов!');
             }
         });
     }
@@ -2071,6 +2076,7 @@ function savePrintNotation(reportId) {
 
 function getControlFilesList() {
     $.get('/filelist', function( data ) {
+
         let filesList = JSON.parse(data);
 
         let sortedfilesList = filesList.sort(function (a, b) {
@@ -2125,7 +2131,7 @@ function getControlFilesList() {
                 $('<td>', {text: fileUploadDate}),
                 $('<td>').append(
                     $('<i>', {class: 'material-icons file-table-icon', text: 'file_upload', title: 'Обработать', onclick: `chooseCompanyForFile('${fileName}')`}),
-                    $('<i>', {class: 'material-icons file-table-icon', text: 'delete_outline', title: 'Удалить файл', onclick: `deleteControlFile('${fileName}')`})
+                    $('<i>', {class: 'material-icons file-table-icon', text: 'delete', title: 'Удалить файл', onclick: `deleteControlFile('${fileName}')`})
 
                 )
             ).appendTo(table);
@@ -2171,7 +2177,7 @@ function getControlProcessedFilesList() {
                     $('<td>', {text: creationTime}),
                     $('<td>').append(
                             $('<i>', {class: 'material-icons file-table-icon', text: 'remove_red_eye', title: 'Превью', 'data-jq-dropdown': `#jq-dropdown-${DROPDOWN_NUM}`}),
-                            $('<i>', {class: 'material-icons file-table-icon', text: 'delete_outline', title: 'Удалить файл', onclick: `deleteControlProcessedFile(${fileId}, '${fileName}')`})
+                            $('<i>', {class: 'material-icons file-table-icon', text: 'delete', title: 'Удалить файл', onclick: `deleteControlProcessedFile(${fileId}, '${fileName}')`})
                     )
                 ).appendTo(table);
 
@@ -3143,7 +3149,7 @@ function showUserLogin() {
 function createPopupNotification(message) {
     const notification = $('<div>', { class: 'popup-notification' }).append(
         $('<span>', {class: 'icon'}).append(
-            $('<i>', {class: 'material-icons', text: 'notification_important'})
+            $('<i>', {class: 'material-icons', text: 'notifications'})
         ),
         $('<span>', {class: 'content', text: message})
     );
@@ -3155,7 +3161,7 @@ function showPopupNotification(message) {
 
     if ($('.popup-notification').length) {
         $('.popup-notification').animate({
-            bottom: '+=52'
+            bottom: '+=58'
         }, 500, function () {
             addPopupNotification();
         });
@@ -3219,11 +3225,18 @@ function getRegistryList() {
 }
 
 function getObjectsGroupsList() {
-    $('#control_object_groups .block-content').empty();
+    $('#control_object_groups .block-content, #add_objects_group_user_select').empty();
     createContentLoader('#control_object_groups .block-content');
     $.post('/base_func?val_param=house_group_list', (data) => {
         const objectsGroupsData = JSON.parse(data);
         console.log(objectsGroupsData)
+
+        if(!isEmpty(objectsGroupsData.users_list)) {
+            for (const user of objectsGroupsData.users_list) {
+                const userData = user.split('&');
+                $('<option>', {text: userData[0], user_id: userData[1]}).appendTo('#add_objects_group_user_select');
+            }
+        }
 
         if (!isEmpty(objectsGroupsData.house_groups)) {
             const table = $('<table>', {class: 'block-table'}).append(
@@ -3248,7 +3261,7 @@ function getObjectsGroupsList() {
                 $('<i>', {class: 'material-icons', text: 'supervisor_account', title: 'Управление пользователями', onclick: `showObjectGroupUsers(${groupData.number})`}).appendTo(manipulationTd);
 
                 if (groupData.author == USER_DATA.user_login) {
-                    $('<i>', {class: 'material-icons', text: 'delete_outline', title: 'Удалить', onclick: `deleteObjectsGroup('${group}')`}).appendTo(manipulationTd);
+                    $('<i>', {class: 'material-icons', text: 'delete', title: 'Удалить', onclick: `deleteObjectsGroup('${group}')`}).appendTo(manipulationTd);
                 }
 
                 manipulationTd.appendTo(tr);
@@ -3264,13 +3277,6 @@ function getObjectsGroupsList() {
             }
     
             $('#control_object_groups .block-content').html(table);
-
-            if(!isEmpty(objectsGroupsData.users_list)) {
-                for (const user of objectsGroupsData.users_list) {
-                    const userData = user.split('&');
-                    $('<option>', {text: userData[0], user_id: userData[1]}).appendTo('#add_objects_group_user_select');
-                }
-            }
         }
         else {
             showTextCenter('control_object_groups .block-content', 'Группы объектов отсутствуют');
@@ -3332,7 +3338,7 @@ function getObjectsGroupUsersList(groupNumber) {
                 $('<div>', {class: 'objects-group-user'}).append(
                     $('<div>', {class: 'objects-group-user-name', text: user[0]}),
                     $('<div>', {class: 'objects-group-user-delete'}).append(
-                        $('<i>', {class: 'material-icons', text: 'delete_outline', title: 'Удалить', onclick: `deleteObjectsGroupUser(${groupNumber}, '${user[0]}', ${user[1]})`})
+                        $('<i>', {class: 'material-icons', text: 'delete', title: 'Удалить', onclick: `deleteObjectsGroupUser(${groupNumber}, '${user[0]}', ${user[1]})`})
                     )
                 ).appendTo('#objects_group_users_list');
             }
@@ -3374,7 +3380,7 @@ function addObjectsGroupUser(groupNumber) {
         });
     }
     else {
-        showPopupNotification('Выберете пользователя из списка!');
+        showPopupNotification('Выберите пользователя из списка!');
     }
 }
 
@@ -3417,6 +3423,7 @@ function displayRegistry(data, registryId) {
         $('<tr>'),
         $('<tr>'),
         $('<tr>'),
+        $('<tr>'),
         $('<tr>')
     );
 
@@ -3440,7 +3447,10 @@ function displayRegistry(data, registryId) {
             }
         }
         else if (th.name == 'Итого') {
-            $('<td>', {id: 'add_entry_total_sum', text: `Итого=`, colspan: thead.length, class: 'td-bold'}).appendTo(addEntryTable.find('tr:nth-child(5)'));
+            $('<td>', {text: `Итого`, colspan: thead.length, class: 'td-bold'}).appendTo(addEntryTable.find('tr:nth-child(5)'));
+            $('<td>', {colspan: thead.length}).append(
+                $('<input>', {id: 'add_entry_total_sum', type: 'text', class: 'table-td-input', name: th.name})
+            ).appendTo(addEntryTable.find('tr:nth-child(6)'));
         }
         else {
             if (th.name !== 'Автор' && th.name !== 'адрес') {
@@ -3452,18 +3462,27 @@ function displayRegistry(data, registryId) {
         }
     }
 
+
     $('<th>', {text: 'Действия'}).appendTo(table.find('thead tr'));
 
     if (!isEmpty(tbody)) {
-        for (const row of tbody) {
+        for (const entry of tbody) {
             const tr = $('<tr>');
-            for (const td of row) {
+            for (const td of entry.data) {
                 $('<td>', { text: td }).appendTo(tr);
             }
-            $('<td>').append(
-                $('<i>', { class: 'material-icons', text: 'edit', title: 'Изменить', onclick: 'openEditRegistryEntryPopup()' }),
-                $('<i>', { class: 'material-icons', text: 'delete_outline', title: 'Удалить' })
-            ).appendTo(tr);
+
+            const tdOperation = $('<td>');
+            tdOperation.appendTo(tr)
+
+            if (entry.status == 'delete') {
+                tr.find('td').css({'text-decoration': 'line-through', 'background': '#D9E0E3'});
+            }
+            else {
+                $('<i>', { class: 'material-icons', text: 'edit', title: 'Изменить', onclick: `openEditRegistryEntryPopup()` }).appendTo(tdOperation);
+                $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить', onclick: `deleteRegistryEntry('${registryId}','${entry.id}')` }).appendTo(tdOperation);
+            }
+
             tr.appendTo(table.find('tbody'));
         }
     }
@@ -3496,8 +3515,31 @@ function displayRegistry(data, registryId) {
     const inputCollection = $(addEntryTable.find('tr:nth-child(4) input'));
     inputCollection.each(function() {
         $(this).keyup(function() {
-            $('#add_entry_total_sum').text(`Итого=${sumUpInputValues(inputCollection)}`);
+            $('#add_entry_total_sum').val(sumUpInputValues(inputCollection));
+            inputCollection.each(function() {
+                if ($(this).val() !== '') {
+                    $('#add_entry_total_sum').attr('disabled', true);
+                    return false;
+                }
+                else {
+                    $('#add_entry_total_sum').attr('disabled', false);
+                }
+            });
+
         });
+    });
+
+    $('#add_entry_total_sum').keyup(function() {
+        if ($(this).val() !== '') {
+            inputCollection.each(function() {
+                $(this).attr('disabled', true);
+            });
+        }
+        else {
+            inputCollection.each(function() {
+                $(this).attr('disabled', false);
+            });
+        }
     });
 }
 
@@ -3507,9 +3549,12 @@ function openAddRegistryEntryPopup() {
     openPopupWindow('popup_add_edit_registry_entry');
 }
 
-function openEditRegistryEntryPopup() {
+function openEditRegistryEntryPopup(entryData) {
     $('#popup_add_edit_registry_entry .popup-name').text('Изменить запись в реестре');
     $('#add_registry_entry_btn').text('Сохранить');
+
+    console.log();
+
     openPopupWindow('popup_add_edit_registry_entry')
 }
 
@@ -3522,6 +3567,10 @@ function sumUpInputValues(inputCollection) {
         if  (value !== '') {
             totalSum += Number(value);
         }
+    }
+
+    if (totalSum == 0) {
+        return '';
     }
 
     return totalSum;
@@ -3537,6 +3586,7 @@ function addRegistryEntry(registryId) {
     let year;
     let notation;
     let sumArr = [];
+    const totalSum = $('#add_entry_total_sum').val();
 
     $('#add_registry_entry_table input').each(function() {
         const input = $(this);
@@ -3561,12 +3611,14 @@ function addRegistryEntry(registryId) {
             notation = input.val();
         }
         else {
-            sumArr.push(input.val());
+            if (input.attr('id') !== 'add_entry_total_sum') {
+                sumArr.push(input.val());
+            }
         }
     });
 
     if (validateFormInputs(validateinputsArray)) {
-        const encodeURIstring = encodeURI(`/base_func?val_param=addchg_ree_recodrs&val_param1=${registryId}&val_param2=${ls}&val_param3=${month}&val_param4=${year}&val_param5=${paymentNum}&val_param6=${notation}&val_param7=${sumArr}&val_param8=add`);
+        const encodeURIstring = encodeURI(`/base_func?val_param=addchg_ree_recodrs&val_param1=${registryId}&val_param2=${ls}&val_param3=${month}&val_param4=${year}&val_param5=${paymentNum}&val_param6=${notation}&val_param7=${sumArr}&val_param8=add&val_param9=${totalSum}`);
 
         $.post(encodeURIstring, (data) => {
             if (data == 'wrong_ls') {
@@ -3581,6 +3633,27 @@ function addRegistryEntry(registryId) {
     }
     else {
         showPopupNotification('Отсутствует значение ЛС, Месяц или Год!');
+    }
+}
+
+function deleteRegistryEntry(registryId, entryId) {
+    if (confirm(`Вы уверены, что хотите удалить запись из реестра?`)) {
+        const encodeURIstring = encodeURI(`/base_func?val_param=addchg_ree_recodrs&val_param1=${entryId}&val_param2=&val_param3=&val_param4=&val_param5=&val_param6=&val_param7=&val_param8=del&val_param9=`);
+    
+        $.post(encodeURIstring, (data) => {
+            console.log(data);
+            if (data == 'success') {
+                getRegistryData(registryId);
+                showPopupNotification('Запись из реестра успешно удалена!');
+            }
+            else if (data == 'wrong_user') {
+                showPopupNotification('У Вас нет прав на удаление этой записи!')
+            }
+            else if (data == 'already_deleted') {
+                getRegistryData(registryId);
+                showPopupNotification('Данная запись из реестра уже удалена!'); 
+            }
+        });
     }
 }
 
