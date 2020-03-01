@@ -3401,7 +3401,7 @@ function getRegistryData(registryId) {
     createContentLoader('#registry_settings_content .block-content');
     $.post(`/base_func?val_param=ree_recodrs&val_param1=${registryId}&val_param2=jlt_bank`, (data) => {
         registryData = JSON.parse(data);
-        console.log(registryData)
+        console.log(registryData);
         displayRegistry(registryData, registryId);
     });
 }
@@ -3410,6 +3410,8 @@ function displayRegistry(data, registryId) {
     const thead = data.thead;
     const tbody = data.tbody;
     const tfoot = data.tfooter;
+
+    let theadData = [];
 
     const table = $('<table>', {id: 'registry_table', class: 'main-table'}).append(
         $('<thead>').append(
@@ -3427,10 +3429,13 @@ function displayRegistry(data, registryId) {
         $('<tr>')
     );
 
-    const firstRowElems = ['ЛС','Месяц','Год','Номер платёжки','Примечание'];
+    const firstRowElems = ['ЛС', 'Месяц', 'Год', 'Номер платёжки', 'Дата платёжки', 'Примечание'];
 
     for (const th of thead) {
         $('<th>', {text: th.name}).appendTo(table.find('thead tr'));
+
+        const nameProp = { 'name': th.name };
+        theadData.push(nameProp);
 
         if (inObject(th.name, firstRowElems)) {
             if (th.name == 'Примечание') {
@@ -3463,13 +3468,23 @@ function displayRegistry(data, registryId) {
     }
 
 
+
     $('<th>', {text: 'Действия'}).appendTo(table.find('thead tr'));
 
     if (!isEmpty(tbody)) {
         for (const entry of tbody) {
             const tr = $('<tr>');
-            for (const td of entry.data) {
-                $('<td>', { text: td }).appendTo(tr);
+
+            let editEntryData = theadData.slice();
+            for (const index in entry.data) {
+                console.log(index, editEntryData[index])
+                $('<td>', { text: entry.data[index] }).appendTo(tr);
+                editEntryData[index].value = entry.data[index];
+            }
+
+            let entryData = {};
+            for (const elem of editEntryData) {
+                entryData[elem.name] = elem.value;
             }
 
             const tdOperation = $('<td>');
@@ -3479,7 +3494,10 @@ function displayRegistry(data, registryId) {
                 tr.find('td').css({'text-decoration': 'line-through', 'background': '#D9E0E3'});
             }
             else {
-                $('<i>', { class: 'material-icons', text: 'edit', title: 'Изменить', onclick: `openEditRegistryEntryPopup()` }).appendTo(tdOperation);
+                const editEntryIcon = $('<i>', { class: 'material-icons', text: 'edit', title: 'Изменить' }).appendTo(tdOperation);
+                editEntryIcon.on('click', function() {
+                    openEditRegistryEntryPopup(registryId, entry.id, entryData);
+                });
                 $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить', onclick: `deleteRegistryEntry('${registryId}','${entry.id}')` }).appendTo(tdOperation);
             }
 
@@ -3506,11 +3524,11 @@ function displayRegistry(data, registryId) {
         printRegistry();
     });
 
-
-    $('#add_registry_entry_btn').off('click');
-    $('#add_registry_entry_btn').on('click', () => {
-        addRegistryEntry(registryId);
+    $('#registy_add_entry_btn').off('click');
+    $('#registy_add_entry_btn').on('click', () => {
+        openAddRegistryEntryPopup(registryId);
     });
+
 
     const inputCollection = $(addEntryTable.find('tr:nth-child(4) input'));
     inputCollection.each(function() {
@@ -3532,6 +3550,7 @@ function displayRegistry(data, registryId) {
     $('#add_entry_total_sum').keyup(function() {
         if ($(this).val() !== '') {
             inputCollection.each(function() {
+                $(this).val('');
                 $(this).attr('disabled', true);
             });
         }
@@ -3543,17 +3562,32 @@ function displayRegistry(data, registryId) {
     });
 }
 
-function openAddRegistryEntryPopup() {
+function openAddRegistryEntryPopup(registryId) {
     $('#popup_add_edit_registry_entry .popup-name').text('Добавить запись в реестр');
     $('#add_registry_entry_btn').text('Добавить');
+    $('#add_registry_entry_table input').val('');
+
+    $('#add_registry_entry_btn').off('click');
+    $('#add_registry_entry_btn').on('click', () => {
+        addRegistryEntry(registryId);
+    });
+
     openPopupWindow('popup_add_edit_registry_entry');
 }
 
-function openEditRegistryEntryPopup(entryData) {
+function openEditRegistryEntryPopup(registryId, entryId, entryData) {
     $('#popup_add_edit_registry_entry .popup-name').text('Изменить запись в реестре');
     $('#add_registry_entry_btn').text('Сохранить');
 
-    console.log();
+    $('#add_registry_entry_btn').off('click');
+    $('#add_registry_entry_btn').on('click', () => {
+        editRegistryEntry(registryId, entryId);
+    });
+
+    $('#add_registry_entry_table input').each(function() {
+        const inputName = $(this).attr('name');
+        $(this).val(entryData[inputName]);
+    });
 
     openPopupWindow('popup_add_edit_registry_entry')
 }
@@ -3581,6 +3615,7 @@ function addRegistryEntry(registryId) {
     const validateinputsArray = [];
 
     let paymentNum;
+    let paymentData;
     let ls;
     let month;
     let year;
@@ -3594,6 +3629,10 @@ function addRegistryEntry(registryId) {
 
         if (inputName == 'Номер платёжки') {
             paymentNum = input.val();
+        }
+        else if (inputName == 'Дата платёжки') {
+            paymentData = input.val();
+            validateinputsArray.push(input);
         }
         else if (inputName == 'ЛС') {
             ls = input.val();
@@ -3618,7 +3657,7 @@ function addRegistryEntry(registryId) {
     });
 
     if (validateFormInputs(validateinputsArray)) {
-        const encodeURIstring = encodeURI(`/base_func?val_param=addchg_ree_recodrs&val_param1=${registryId}&val_param2=${ls}&val_param3=${month}&val_param4=${year}&val_param5=${paymentNum}&val_param6=${notation}&val_param7=${sumArr}&val_param8=add&val_param9=${totalSum}`);
+        const encodeURIstring = encodeURI(`/base_func?val_param=addchg_ree_recodrs&val_param1=${registryId}&val_param2=${ls}&val_param3=${month}&val_param4=${year}&val_param5=${paymentNum}&val_param6=${paymentData}&val_param7=${notation}&val_param8=${sumArr}&val_param9=add&val_param10=${totalSum}`);
 
         $.post(encodeURIstring, (data) => {
             if (data == 'wrong_ls') {
@@ -3628,6 +3667,78 @@ function addRegistryEntry(registryId) {
                 closePopupWindow('popup_add_edit_registry_entry');
                 getRegistryData(registryId);
                 showPopupNotification('Запись в реестр успешно добавлена!');
+            }
+        });
+    }
+    else {
+        showPopupNotification('Отсутствует значение ЛС, Месяц или Год!');
+    }
+}
+
+function editRegistryEntry(registryId,entryId) {
+    event.preventDefault();
+    const validateinputsArray = [];
+
+    let paymentNum;
+    let paymentData;
+    let ls;
+    let month;
+    let year;
+    let notation;
+    let sumArr = [];
+    const totalSum = $('#add_entry_total_sum').val();
+
+    $('#add_registry_entry_table input').each(function() {
+        const input = $(this);
+        const inputName = $(this).prop('name');
+
+        if (inputName == 'Номер платёжки') {
+            paymentNum = input.val();
+        }
+        else if (inputName == 'Дата платёжки') {
+            paymentData = input.val();
+            validateinputsArray.push(input);
+        }
+        else if (inputName == 'ЛС') {
+            ls = input.val();
+            validateinputsArray.push(input);
+        }
+        else if (inputName == 'Месяц') {
+            month = input.val();
+            validateinputsArray.push(input);
+        }
+        else if (inputName == 'Год') {
+            year = input.val();
+            validateinputsArray.push(input);
+        }
+        else if (inputName == 'Примечание') {
+            notation = input.val();
+        }
+        else {
+            if (input.attr('id') !== 'add_entry_total_sum') {
+                sumArr.push(input.val());
+            }
+        }
+    });
+
+    if (validateFormInputs(validateinputsArray)) {
+        const encodeURIstring = encodeURI(`/base_func?val_param=addchg_ree_recodrs&val_param1=${entryId}&val_param2=${ls}&val_param3=${month}&val_param4=${year}&val_param5=${paymentNum}&val_param6=${paymentData}&val_param7=${notation}&val_param8=${sumArr}&val_param9=chg&val_param10=${totalSum}`);
+
+        $.post(encodeURIstring, (data) => {
+            if (data == 'wrong_ls') {
+                showPopupNotification('Значение ЛС не найдено в базе данных!');
+            }
+            else if (data == 'success') {
+                closePopupWindow('popup_add_edit_registry_entry');
+                getRegistryData(registryId);
+                showPopupNotification('Запись в реестре успешно изменена!');
+            }
+            else if (data == 'wrong_user') {
+                showPopupNotification('У Вас нет прав на изменение этой записи!')
+            }
+            else if (data == 'already_deleted') {
+                getRegistryData(registryId);
+                showPopupNotification('Данная запись уже удалена из реестра!'); 
             }
         });
     }
@@ -3651,7 +3762,7 @@ function deleteRegistryEntry(registryId, entryId) {
             }
             else if (data == 'already_deleted') {
                 getRegistryData(registryId);
-                showPopupNotification('Данная запись из реестра уже удалена!'); 
+                showPopupNotification('Данная запись уже удалена из реестра!'); 
             }
         });
     }
