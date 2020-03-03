@@ -10,6 +10,11 @@
          url(/icon/iconfont/MaterialIcons-Regular.ttf) format('truetype');
 }
 
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
 .material-icons {
     font-family: 'Material Icons';
     font-weight: normal;
@@ -296,7 +301,6 @@ nav ul, nav li {
     margin: 5% auto 5% auto;
     width: 670px;
     max-height: 85%;
-    height: max-content;
     background-color: white;
     border-radius: 5px;
     display: none;
@@ -436,13 +440,14 @@ nav ul, nav li {
 
 .popup-window .popup-content,
 .popup-window-layer2 .popup-content {
-    padding-top: 5px; 
+    padding-top: 5px;
     padding-left: 10px;
     padding-right: 10px;
     padding-bottom: 10px;
     width: 100%;
     box-sizing: border-box;
-    height: calc(100% - 35px);
+    height: auto;
+    max-height: calc(85% - 35px);
     overflow: auto;
 }
 
@@ -1349,7 +1354,7 @@ div {
 }
 
 .block-header-with-manipulation .header {
-    width: 70%;
+    width: max-content;
     padding-left: 19px;
     padding-top: 8px;
     height: 100%;
@@ -1359,8 +1364,8 @@ div {
 }
 
 .block-header-with-manipulation .header-manipulation {
-    width: 30%;
-    float: left;
+    width: max-content;
+    float: right;
     height: 100%;
     text-align: right;
 }
@@ -1544,6 +1549,7 @@ div {
     display: none;
     box-sizing: border-box;
     width: 100%;
+    height: 100%;
 }
 
 .tab-content.active {
@@ -2553,8 +2559,10 @@ textarea {
 
 .setting-item {
     height: max-content;
-    border-bottom: 2px solid #F4F6F8;
-    padding-bottom: 5px;
+    margin-bottom: 5px;
+    padding: 5px;
+    background-color: whitesmoke;
+    border: 1px solid #D9E0E3;
 }
 
 .setting-item .checkbox-container  {
@@ -3021,4 +3029,8 @@ textarea {
 
 #popup_objects_group .report-table td:first-child  {
     min-width: 200px;
+}
+
+#registry_column_settings_table td {
+    text-align: center;
 }

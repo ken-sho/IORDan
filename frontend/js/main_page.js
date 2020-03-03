@@ -13,6 +13,7 @@ $(document).ready(function() {
     getNewsList();
     showCurrentCompany();
     setInputRadio();
+    createRegistryCalendar();
     $('.gifplayer').gifplayer({ label: '<i class="material-icons help-gif-icon">play_arrow</i>' });
 
     $('#popup_background').on('click', (e) => {
@@ -209,7 +210,6 @@ function initializeUserRight() {
             $('#control_files_tab').removeClass('default-hidden');
         }
         if (userRights.includes(2)) {
-            createRegistryCalendar();
             getRegistryList();
             $('#control_registry_tab').removeClass('default-hidden');
         }    
@@ -218,7 +218,6 @@ function initializeUserRight() {
         getControlFilesList();
         getControlProcessedFilesList();
         getControlPerformedFilesList();
-        createRegistryCalendar();
         getRegistryList();
         $('.default-hidden').removeClass('default-hidden');
     }
@@ -238,7 +237,7 @@ function createCompanyDropdownMenu() {
     for (const company of companiesData) {
         let companyId = company.id;
         let companyName = company.name;
-        const li = $('<li>', {id: companyId, class: 'dropdown-menu-item', onclick: `chooseCompany('${companyName}', '${companyId}')`}).appendTo('#jq-dropdown-company-list .jq-dropdown-menu');
+        const li = $('<li>', {id: companyId, class: 'dropdown-menu-item', onclick: `chooseCompany(this, '${companyName}', '${companyId}')`}).appendTo('#jq-dropdown-company-list .jq-dropdown-menu');
         $('<a>', {text: companyName}).appendTo(li);
     }
 
@@ -250,27 +249,21 @@ function createCompanyDropdownMenu() {
     });
 }
 
-function chooseCompany(companyName, companyId) {
-    $('#main_search_input').attr('disabled', false);
-    $('#main_search_input').val('');
-    $('.li-change-events').removeClass('li-disabled');
-    $('.object-list-tree').empty();
-    $('#main_menu_company_name').text(companyName);
-    $('#popup_control .popup-fullscreen-name').text('Управление ' + companyName);
-    setCookie('companyId', companyId);
-    initializationPopupControl();
-    initializeUserRight();
-    getObjectsTreeData();
-    sessionStorage.setItem('currentCompanyId', companyId);
-    sessionStorage.setItem('currentCompany', companyName);
-    // let popup = $('#popup_object_list');
-    // if (popup.attr('state') == 'open') {
-    //     $('#popup_object_content').hide();
-    //     popup.animate({ width: '0' }, 200, function() {
-    //         popup.css({'display': 'none'});
-    //         popup.attr('state', 'close');
-    //     });
-    // }
+function chooseCompany(li, companyName, companyId) {
+    if(!$(li).hasClass('active')) {
+        $('#main_search_input').attr('disabled', false);
+        $('#main_search_input').val('');
+        $('.li-change-events').removeClass('li-disabled');
+        $('.object-list-tree').empty();
+        $('#main_menu_company_name').text(companyName);
+        $('#popup_control .popup-fullscreen-name').text('Управление ' + companyName);
+        setCookie('companyId', companyId);
+        initializationPopupControl();
+        initializeUserRight();
+        getObjectsTreeData();
+        sessionStorage.setItem('currentCompanyId', companyId);
+        sessionStorage.setItem('currentCompany', companyName);
+    }
 }
 
 function openCloseMainMenu () {
@@ -316,9 +309,9 @@ function closePopupWindow(popupId) {
     $('.main-menu li').removeClass('active');
     $('#home_page').addClass('active');
 
-    if (popupId !== 'popup_add_task' && popupId !== 'popup_process_control_file' && popupId !== 'popup_not_fullscreen' && popupId != 'popup_objects_group_users' && popupId != 'popup_objects_group' && popupId !== 'popup_add_edit_registry_entry' && popupId !== 'popup_processed_file_template' && popupId !== 'popup_performed_file_template' && popupId !== 'popup_report' && popupId !== 'popup_create_object_group')  {
-        openHomePage();
-    }
+    // if (popupId !== 'popup_add_task' && popupId !== 'popup_process_control_file' && popupId !== 'popup_not_fullscreen' && popupId != 'popup_objects_group_users' && popupId != 'popup_objects_group' && popupId !== 'popup_add_edit_registry_entry' && popupId !== 'popup_processed_file_template' && popupId !== 'popup_performed_file_template' && popupId !== 'popup_report' && popupId !== 'popup_create_object_group')  {
+    //     openHomePage();
+    // }
 }
 
 function closePopupWindowLayer2(popupId) {
@@ -1833,15 +1826,14 @@ function createRegistryCalendar() {
 }
 
 function registryCalendarChangeDate() {
-    $('#registry_settings_calendar .ui-datepicker-prev, #registry_settings_calendar .ui-datepicker-next, #registry_settings_calendar .ui-datepicker-current').click(function() {
-        getRegistryList();
-        registryCalendarChangeDate();
-    });
 
-    $('#registry_settings_calendar .ui-datepicker-month, #registry_settings_calendar .ui-datepicker-year').change(function () {
+    const handler = function() {
         getRegistryList();
         registryCalendarChangeDate();
-    });
+    }
+
+    $('#registry_settings_calendar .ui-datepicker-prev, #registry_settings_calendar .ui-datepicker-next, #registry_settings_calendar .ui-datepicker-current').on('click', handler)
+    $('#registry_settings_calendar .ui-datepicker-month, #registry_settings_calendar .ui-datepicker-year').on('change', handler);
 }
 
 // Задать обработчики для инпутов radio
@@ -3190,13 +3182,16 @@ function showPopupNotification(message) {
 
 function getRegistryList() {
     const calendarValue = getCalendarValue('registry_settings_calendar');
-    const registryUl = $('#registry_settings_select_menu ul')
+    const registryUl = $('#registry_settings_select_menu ul');
+    $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon').remove();
     registryUl.empty();
     $.post(`/base_func?val_param=ree_reestrs&val_param1=regular&val_param2=${calendarValue}`, (data) => {
         if (data !== '') {
             const registryList = JSON.parse(data);
 
             if (!isEmpty(registryList)) {
+                createRegistrySettingsPopup();
+
                 for (const registry of registryList) {
                     const li = $('<li>', {registry_id: registry.id}).append(
                         $('<a>').append(
@@ -3223,6 +3218,22 @@ function getRegistryList() {
         }
     });
 }
+
+function createRegistrySettingsPopup() {
+    if ($('#popup_registry_settings').length) {
+        $('#popup_registry_settings').remove();
+    }
+
+    $('<div>', {id: 'popup_registry_settings', class: 'popup-window'}).append(
+        $('<div>', {class: 'popup-header'}).append(
+            $('<div>', {class: 'popup-name'}),
+            $('<div>', {class: 'popup-close'}).append(
+                $('<i>',  {class: 'material-icons', text: 'close'}).on('click', () => {closePopupWindow('popup_registry_settings')})
+            )
+        ),
+        $('<div>',  {class: 'popup-content'})
+    ).appendTo('#popup_background')
+} 
 
 function getObjectsGroupsList() {
     $('#control_object_groups .block-content, #add_objects_group_user_select').empty();
@@ -3394,12 +3405,91 @@ function deleteObjectsGroupUser(groupNumber, userName, userId) {
     }
 }
 
+function initializeRegistrySettings(registryId, registryData) {
+    $('#popup_registry_settings .popup-content').empty();
+    const div = $('<div>', {style: 'height: 500px; overflow: auto'});
+    const table = $('<table>', {id: 'registry_column_settings_table', class: 'table-form'});
+
+    $('<tr>').append(
+        $('<th>', {text: 'Столбец'}),
+        $('<th>', {text: 'Отображение'})
+    ).appendTo(table);
+
+    for (const elem of registryData) {
+        $('<tr>').append(
+            $('<td>', {text: elem.name}),
+            $('<td>').append(
+                $('<label>', {class: 'checkbox-container', text: 'Вкл.', style: 'float: left; margin-right: 10px'}).append(
+                    $('<input>', {id: '', class: 'checkbox', type: 'checkbox', value: 'on'}),
+                    $('<span>', {class: 'checkmark'})
+                ),
+                $('<label>', {class: 'checkbox-container', text: 'Выкл.', style: 'float: left; margin-right: 10px'}).append(
+                    $('<input>', {id: '',class: 'checkbox', type: 'checkbox',  value: 'off'}),
+                    $('<span>', {class: 'checkmark'})
+                )
+            )
+        ).appendTo(table);
+
+        const tr = $('<tr>');
+        $('<td>', {text: elem.name}).appendTo(tr);
+        const td = $('<td>').appendTo(tr);
+        const labelOn = $('<label>', {class: 'checkbox-container', text: 'Вкл.', style: 'float: left; margin-right: 10px'}).appendTo(td);
+        const inputOn = $('<input>', {id: '', class: 'checkbox', type: 'checkbox', value: 'on'}).appendTo(labelOn);
+        $('<span>', {class: 'checkmark'}).appendTo(labelOn);
+
+        const labelOff = $('<label>', {class: 'checkbox-container', text: 'Выкл.', style: 'float: left; margin-right: 10px'}).appendTo(td);
+        const inputOff = $('<input>', {id: '',class: 'checkbox', type: 'checkbox',  value: 'off'}).appendTo(labelOff);
+        $('<span>', {class: 'checkmark'}).appendTo(labelOff);
+
+        const isHidden = (elem.hidden == 'true');
+
+        if (isHidden) {
+            inputOff.prop('checked', true);
+        }
+        else {
+            inputOn.prop('checked', true);
+        }
+
+        addEventOnOffToggle(inputOn, inputOff);
+
+        tr.appendTo(table);
+    }
+
+    table.appendTo(div);
+
+    div.appendTo('#popup_registry_settings .popup-content');
+
+    $('<div>', {class: 'form-submit-btn'}).append(
+        $('<button>', {id: 'registry_column_settings_btn', class: 'button-primary', text: 'Сохранить'})
+    ).appendTo('#popup_registry_settings .popup-content');
+}
+
+function addEventOnOffToggle(inputOn, inputOff) {
+    inputOn.on('click', function() {
+        if (inputOn.prop('checked')) {
+            inputOff.prop('checked', false);
+        }
+        else {
+            inputOn.prop('checked', true);
+        }
+    });
+
+    inputOff.on('click', function() {
+        if (inputOff.prop('checked')) {
+            inputOn.prop('checked', false);
+        }
+        else {
+            inputOff.prop('checked', true);
+        }
+    });
+}
+
 
 function getRegistryData(registryId) {
     $('#registry_print_icon').off('click');
     $('#registry_settings_content .block-content, #add_registry_entry_table').empty();
     createContentLoader('#registry_settings_content .block-content');
-    $.post(`/base_func?val_param=ree_recodrs&val_param1=${registryId}&val_param2=jlt_bank`, (data) => {
+    $.post(`/base_func?val_param=ree_recodrs&val_param1=${registryId}&val_param2=manual_input`, (data) => {
         registryData = JSON.parse(data);
         console.log(registryData);
         displayRegistry(registryData, registryId);
@@ -3410,6 +3500,8 @@ function displayRegistry(data, registryId) {
     const thead = data.thead;
     const tbody = data.tbody;
     const tfoot = data.tfooter;
+
+    initializeRegistrySettings(registryId, thead);
 
     let theadData = [];
 
@@ -3441,27 +3533,27 @@ function displayRegistry(data, registryId) {
             if (th.name == 'Примечание') {
                 $('<td>', {text: th.name, colspan: thead.length - 4, class: 'td-bold'}).appendTo(addEntryTable.find('tr:nth-child(1)'));
                 $('<td>', {colspan: thead.length - 4}).append(
-                    $('<input>', {type: 'text', class: 'table-td-input', name: th.name})
+                    $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
                 ).appendTo(addEntryTable.find('tr:nth-child(2)'));
             }
             else {
                 $('<td>', {text: th.name, class: 'td-bold'}).appendTo(addEntryTable.find('tr:nth-child(1)'));
                 $('<td>').append(
-                    $('<input>', {type: 'text', class: 'table-td-input', name: th.name})
+                    $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
                 ).appendTo(addEntryTable.find('tr:nth-child(2)'));
             }
         }
         else if (th.name == 'Итого') {
             $('<td>', {text: `Итого`, colspan: thead.length, class: 'td-bold'}).appendTo(addEntryTable.find('tr:nth-child(5)'));
             $('<td>', {colspan: thead.length}).append(
-                $('<input>', {id: 'add_entry_total_sum', type: 'text', class: 'table-td-input', name: th.name})
+                $('<input>', {id: 'add_entry_total_sum', type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
             ).appendTo(addEntryTable.find('tr:nth-child(6)'));
         }
         else {
             if (th.name !== 'Автор' && th.name !== 'адрес') {
                 $('<td>', {text: th.name, class: 'td-bold'}).appendTo(addEntryTable.find('tr:nth-child(3)'));
                 $('<td>').append(
-                    $('<input>', {type: 'text', class: 'table-td-input', name: th.name})
+                    $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
                 ).appendTo(addEntryTable.find('tr:nth-child(4)'));
             }
         }
@@ -3477,7 +3569,6 @@ function displayRegistry(data, registryId) {
 
             let editEntryData = theadData.slice();
             for (const index in entry.data) {
-                console.log(index, editEntryData[index])
                 $('<td>', { text: entry.data[index] }).appendTo(tr);
                 editEntryData[index].value = entry.data[index];
             }
@@ -3516,6 +3607,30 @@ function displayRegistry(data, registryId) {
     }
 
     addEntryTable.prependTo('#popup_add_edit_registry_entry .popup-content');
+
+    const headerManipulation = $('#registry_settings_content .header-manipulation');
+
+    if (!$('#registy_add_entry_btn').length) {
+        $('<button>', {id: 'registy_add_entry_btn', class: 'button-primary', style: 'float: right', title: 'Добавить запись в реестр', text: 'Добавить запись'}).appendTo(headerManipulation);
+        $('<i>', {id: 'registry_settings_icon', class: 'material-icons', title: 'Настройки', text: 'settings'}).on('click', () => {openPopupWindow('popup_registry_settings')}).appendTo(headerManipulation);
+        $('<i>', {id: 'registry_print_icon', class: 'material-icons', title: 'Печать', text: 'print'}).appendTo(headerManipulation);
+        $('<i>', {id: 'registry_lock_icon', class: 'material-icons', title: 'Блокировка', text: 'lock'}).appendTo(headerManipulation);
+    }
+
+
+    $('#add_registry_entry_table input').each(function() {
+        const input = $(this);
+        const valueType = $(this).attr('value_type')
+        if (valueType == 'numeric') {
+            input.inputmask('numeric', {
+                rightAlign: false
+            });
+        }
+        else if (valueType == 'date') {
+            input.inputmask('99.99.9999')
+        }
+    });
+
     $("#add_registry_entry_table input[name='ЛС']").keyup(function() {
         searchInputValue($(this), 'valueType');
     });
@@ -3749,7 +3864,7 @@ function editRegistryEntry(registryId,entryId) {
 
 function deleteRegistryEntry(registryId, entryId) {
     if (confirm(`Вы уверены, что хотите удалить запись из реестра?`)) {
-        const encodeURIstring = encodeURI(`/base_func?val_param=addchg_ree_recodrs&val_param1=${entryId}&val_param2=&val_param3=&val_param4=&val_param5=&val_param6=&val_param7=&val_param8=del&val_param9=`);
+        const encodeURIstring = encodeURI(`/base_func?val_param=addchg_ree_recodrs&val_param1=${entryId}&val_param2=&val_param3=&val_param4=&val_param5=&val_param6=&val_param7=&val_param8=&val_param9=del&val_param10=`);
     
         $.post(encodeURIstring, (data) => {
             console.log(data);
