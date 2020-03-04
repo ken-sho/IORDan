@@ -36,9 +36,10 @@ import logg_web
 #house_groups
 #house_groups_list
 #add_usr_hsgrlst
+#chgthead_reereestrs
 
 
-def fnk_lst (asid,orgid,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10):
+def fnk_lst (asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10):
     conn = db_conn.db_connect('web_receivables')
     cur = conn.cursor()
     res=''
@@ -166,7 +167,6 @@ def fnk_lst (asid,orgid,val_param,val_param1,val_param2,val_param3,val_param4,va
             res=(row[0])
     elif val_param=='ree_recodrs':
         q_sql = "select main.ree_recodrs('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -187,7 +187,6 @@ def fnk_lst (asid,orgid,val_param,val_param1,val_param2,val_param3,val_param4,va
         logg_web.add_log(asid,encoded,'Добавление группы домов')
     elif val_param=='house_group_list':
         q_sql = "select main.house_group_list('"+ asid +"','"+ orgid +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -201,6 +200,13 @@ def fnk_lst (asid,orgid,val_param,val_param1,val_param2,val_param3,val_param4,va
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
+    elif val_param=='chgthead_reereestrs':
+        q_sql = "select main.chgthead_reereestrs('"+ asid +"','"+ val_param1 +"','"+ adate +"')"
+        cur.execute(q_sql)
+        for row in cur:
+            res=(row[0])
+        encoded = base64.b64encode(q_sql.encode()).decode()
+        logg_web.add_log(asid,encoded,'Изменение заголовка реестра')
 
     conn.commit()
     cur.close()

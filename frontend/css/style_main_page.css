@@ -845,7 +845,6 @@ div {
     width: calc(100% - 36px);
     height: 38px;
     float: left;
-    height: 38px;
 }
 
 #main_search_input {
@@ -858,6 +857,7 @@ div {
     border: 0;
     color: white;
     font-size: 16px;
+    padding: 0;
     padding-left: 5px;
 }
 
@@ -1138,12 +1138,12 @@ div {
 
 #object_list_header {
     width: 100%;
-    height: 38px;
+    height: 40px;
 }
 
 #object_list_tree {
     width: 100%;
-    height: calc(100% - 73px);
+    height: calc(100% - 75px);
     overflow: auto;
 }
 
@@ -1178,11 +1178,11 @@ div {
 }
 
 #object_list_search_input {
-    height: 100%;
+    height: 37px;
     border: 1px solid #D9E0E3;
     border-radius: 5px;
     width: 100%;
-    font-size: 16;
+    font-size: 16px;
     color: #A8ADAF;
     padding-left: 10px;
 }
@@ -1839,13 +1839,14 @@ td.add-template-adress {
 
 #search_input {
     width: calc(100% - 124px);
-    height: 100%;
+    height: 40px;
     float: left;
 }
 
 #clear_search_input {
     height: 100%;
     float: left;
+    margin-left: 15px;
 }
 
 #print_mode_object_num {
@@ -1858,7 +1859,6 @@ td.add-template-adress {
 }
 
 #clear_object_btn {
-    margin-left: 4px;
     height: 100%;
 }
 
@@ -2892,7 +2892,7 @@ textarea {
 
 #registry_settings_calendar .ui-datepicker select.ui-datepicker-month,
 #registry_settings_calendar .ui-datepicker select.ui-datepicker-year {
-    height: 100%;
+    height: 26px;
     background: #FFFFFF;
     width: 75px;
     border-radius: 5px;
@@ -3031,6 +3031,12 @@ textarea {
     min-width: 200px;
 }
 
+#registry_column_settings_table {
+    border-collapse: collapse;
+}
+
 #registry_column_settings_table td {
     text-align: center;
+    border-top: 1px solid lightgray;
+    border-bottom: 1px solid lightgray
 }
