@@ -3040,3 +3040,8 @@ textarea {
     border-top: 1px solid lightgray;
     border-bottom: 1px solid lightgray
 }
+
+.delete-td {
+    text-decoration: line-through;
+    background: #D9E0E3
+}

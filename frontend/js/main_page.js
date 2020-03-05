@@ -390,7 +390,6 @@ function createObjectsTree(data) {
     const objectList = objectTree.object_list;
     OBJECT_TREE_TEMPLATES = objectTree.templates;
     const controlUl = $('<ul>', {id: 'create_object_group_ul'});
-    console.log(objectTree)
 
     for (const prop in objectList) {
         const objectData = prop.split('&');
@@ -1070,7 +1069,6 @@ function createDropdownMenuReportTree(index, reportsArr) {
         $('<ul>', {class: 'jq-dropdown-menu'})
     ).appendTo($('body'));
     for (const elem in reportsArr) {
-        console.log(elem)
         const report = reportsArr[elem];
         $('<li>', {class: 'dropdown-menu-item', rep_name:  report.rep_name, rep_num: report.rep_num, rep_type: report.rep_type}).append(
             $('<a>', {text: report.rep_name})
@@ -2556,7 +2554,6 @@ function uploadFiles() {
                         progressBarDiv.width(`${event.loaded / event.total * 100}%`);
                     };
                     xhr.upload.onload = function () {
-                        console.log('Done!')
                         progressBarDiv.width('0');
                     };
                     return xhr;
@@ -3183,7 +3180,6 @@ function showPopupNotification(message) {
 function getRegistryList() {
     const calendarValue = getCalendarValue('registry_settings_calendar');
     const registryUl = $('#registry_settings_select_menu ul');
-    $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon').remove();
     registryUl.empty();
     $.post(`/base_func?val_param=ree_reestrs&val_param1=regular&val_param2=${calendarValue}`, (data) => {
         if (data !== '') {
@@ -3203,7 +3199,7 @@ function getRegistryList() {
                         const tabsCollection = $('#registry_settings_select_menu ul li');
                         tabsCollection.removeClass('active');
                         $(this).addClass('active');
-                        getRegistryData(registry.id);
+                        getRegistryData(registry.id, registry.name);
                     })
                 }
     
@@ -3240,7 +3236,6 @@ function getObjectsGroupsList() {
     createContentLoader('#control_object_groups .block-content');
     $.post('/base_func?val_param=house_group_list', (data) => {
         const objectsGroupsData = JSON.parse(data);
-        console.log(objectsGroupsData)
 
         if(!isEmpty(objectsGroupsData.users_list)) {
             for (const user of objectsGroupsData.users_list) {
@@ -3341,7 +3336,6 @@ function getObjectsGroupUsersList(groupNumber) {
 
     $.post(`/base_func?val_param=house_group_usr&val_param1=${groupNumber}`, function (data) {
         const usersData = JSON.parse(data).users_list;
-        console.log(usersData);
 
         if (!isEmpty(usersData)) {
             for (const userData of usersData) {
@@ -3373,12 +3367,10 @@ function showObjectGroupUsers(groupNumber) {
 
 function addObjectsGroupUser(groupNumber) {
     event.preventDefault();
-    console.log(groupNumber);
     const userId = $('#add_objects_group_user_select option:selected').attr('user_id');
     if (userId) {
         const encodeURIstring = encodeURI(`/base_func?val_param=add_usr_hsgrlst&val_param1=add&val_param2=${groupNumber}&val_param3=${userId}`);
         $.post(encodeURIstring, function (data) {
-            console.log(data);
             if (data  == 'success') {
                 $('#add_objects_group_user_select option:first-child').prop('selected', true);
                 getObjectsGroupUsersList(groupNumber);
@@ -3472,21 +3464,24 @@ function addEventOnOffToggle(inputOn, inputOff) {
 }
 
 
-function getRegistryData(registryId) {
+function getRegistryData(registryId, registryName) {
     $('#registry_print_icon').off('click');
+    $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon, #registy_convert_to_excel_btn').remove();
     $('#registry_settings_content .block-content, #add_registry_entry_table').empty();
     createContentLoader('#registry_settings_content .block-content');
     $.post(`/base_func?val_param=ree_recodrs&val_param1=${registryId}&val_param2=manual_input`, (data) => {
         registryData = JSON.parse(data);
-        console.log(registryData);
-        displayRegistry(registryData, registryId);
+        displayRegistry(registryData, registryId, registryName);
     });
 }
 
-function displayRegistry(data, registryId) {
+function displayRegistry(data, registryId, registryName) {
     const thead = data.thead;
     const tbody = data.tbody;
     const tfoot = data.tfooter;
+    const registryBlocked  = data.blocked;
+
+    const registryIsBlocked = (registryBlocked == 'true');
 
     initializeRegistrySettings(registryId, thead);
 
@@ -3552,9 +3547,9 @@ function displayRegistry(data, registryId) {
         }
     }
 
-
-
-    $('<th>', {text: 'Действия'}).appendTo(table.find('thead tr'));
+    if (!registryIsBlocked) {
+        $('<th>', {text: 'Действия'}).appendTo(table.find('thead tr'));
+    }
 
     if (!isEmpty(tbody)) {
         for (const entry of tbody) {
@@ -3578,18 +3573,23 @@ function displayRegistry(data, registryId) {
             }
 
             const tdOperation = $('<td>');
-            tdOperation.appendTo(tr)
+            tdOperation.appendTo(tr);
 
             if (entry.status == 'delete') {
-                tr.find('td').css({'text-decoration': 'line-through', 'background': '#D9E0E3'});
+                tr.find('td').addClass('delete-td');
             }
             else {
-                const editEntryIcon = $('<i>', { class: 'material-icons', text: 'edit', title: 'Изменить' }).appendTo(tdOperation);
-                editEntryIcon.on('click', function() {
-                    openEditRegistryEntryPopup(registryId, entry.id, entryData);
-                });
-                $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить', onclick: `deleteRegistryEntry('${registryId}','${entry.id}')` }).appendTo(tdOperation);
+                if (!registryIsBlocked) {    
+                    const editEntryIcon = $('<i>', { class: 'material-icons', text: 'edit', title: 'Изменить' }).appendTo(tdOperation);
+                    editEntryIcon.on('click', function() {
+                        openEditRegistryEntryPopup(registryId, entry.id, entryData);
+                    });
+                    $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить', onclick: `deleteRegistryEntry('${registryId}','${entry.id}')` }).appendTo(tdOperation);
+    
+                }
             }
+
+
 
             tr.appendTo(table.find('tbody'));
         }
@@ -3617,11 +3617,22 @@ function displayRegistry(data, registryId) {
     const headerManipulation = $('#registry_settings_content .header-manipulation');
 
     if (!$('#registy_add_entry_btn').length) {
-        $('<button>', {id: 'registy_add_entry_btn', class: 'button-primary', style: 'float: right', title: 'Добавить запись в реестр', text: 'Добавить запись'}).appendTo(headerManipulation);
+        if (!registryIsBlocked) {
+            $('<button>', {id: 'registy_add_entry_btn', class: 'button-primary', style: 'float: right', title: 'Добавить запись в реестр', text: 'Добавить запись'}).appendTo(headerManipulation);
+        }
         $('<button>', {id: 'registy_convert_to_excel_btn', class: 'button-primary', style: 'float: right; background: #1D6F42', title: 'Конвертировать в Excel', text: 'Excel'}).appendTo(headerManipulation);
         $('<i>', {id: 'registry_settings_icon', class: 'material-icons', title: 'Настройки', text: 'settings'}).on('click', () => {openPopupWindow('popup_registry_settings')}).appendTo(headerManipulation);
         $('<i>', {id: 'registry_print_icon', class: 'material-icons', title: 'Печать', text: 'print'}).appendTo(headerManipulation);
-        $('<i>', {id: 'registry_lock_icon', class: 'material-icons', title: 'Блокировка', text: 'lock'}).appendTo(headerManipulation);
+
+        if (registryIsBlocked) {
+            $('<i>', {id: 'registry_lock_icon', class: 'material-icons', title: 'Реестр закрыт', text: 'lock'}).appendTo(headerManipulation);
+        }
+        else {
+            const lockIcon = $('<i>', {id: 'registry_lock_icon', class: 'material-icons', title: 'Реестр открыт. Нажмите, чтобы закрыть реестр', text: 'lock_open'}).appendTo(headerManipulation);
+            lockIcon.on('click', function() { 
+                blockRegistry(registryId, registryName);
+            });
+        }
     }
 
 
@@ -3658,8 +3669,24 @@ function displayRegistry(data, registryId) {
 
     $('#registy_convert_to_excel_btn').off('click');
     $('#registy_convert_to_excel_btn').on('click', () => {
-        const content = $('#registry_settings_content .block-content').html();
-        convertContentToExcel(content);
+        const table = $('#registry_settings_content .block-content');
+        let convertibleContent = table.clone();
+        const hiddenTdCollection = convertibleContent.find('td, th');
+        hiddenTdCollection.each(function() {
+            if ($(this).css('display') == 'none' || $(this).hasClass('delete-td')) {
+                $(this).remove()
+            }
+        });
+
+        if (!registryIsBlocked) {
+            convertibleContent.find('th:last-child').remove();
+            convertibleContent.find('td:last-child').remove();
+        }
+
+        const fileName = `реестр_${registryName}_${sessionStorage['currentCompany']}`.replace(/ /g, '_');
+        console.log(fileName)
+
+        convertContentToExcel(convertibleContent.html(), fileName);
     });
 
 
@@ -3922,7 +3949,6 @@ function deleteRegistryEntry(registryId, entryId) {
         const encodeURIstring = encodeURI(`/base_func?val_param=addchg_ree_recodrs&val_param1=${entryId}&val_param2=&val_param3=&val_param4=&val_param5=&val_param6=&val_param7=&val_param8=&val_param9=del&val_param10=`);
     
         $.post(encodeURIstring, (data) => {
-            console.log(data);
             if (data == 'success') {
                 getRegistryData(registryId);
                 showPopupNotification('Запись из реестра успешно удалена!');
@@ -3933,6 +3959,24 @@ function deleteRegistryEntry(registryId, entryId) {
             else if (data == 'already_deleted') {
                 getRegistryData(registryId);
                 showPopupNotification('Данная запись уже удалена из реестра!'); 
+            }
+        });
+    }
+}
+
+function blockRegistry(registryId, registryName) {
+    if (confirm(`Вы уверены, что хотите закрыть реестр "${registryName}"?`)) {
+        encodeURIstring = encodeURI(`/base_func?val_param=ree_reestrs_close&val_param1=${registryId}`);
+        $.post(encodeURIstring, function (data) { 
+            if (data == 'success') {
+                showPopupNotification(`Реестр "${registryName}" успешно закрыт!`);
+                getRegistryData(registryId);
+            }
+            else if (data == 'already_close') {
+                showPopupNotification(`Реестр "${registryName}" уже закрыт!`);
+            }
+            else if (data == 'no_rule') {
+                showPopupNotification(`У Вас нет прав на закрытие реестра "${registryName}"!`);
             }
         });
     }
@@ -3988,14 +4032,14 @@ function changeRegistryLock(registryId) {
     });
 }
 
-function convertContentToExcel(content) {
+function convertContentToExcel(content, fileName) {
     $.ajax({
-        url: `/conver?type=xls`,
+        url: encodeURI(`/conver?type=xls&file_name=${fileName}`),
         type: 'POST',
         data: content,
         contentType: 'application/json',
         success: function(data) {
-            console.log(data);
+            showPopupNotification('Загрузка файла начнется автоматически!');
             window.location = data;
         }
     });

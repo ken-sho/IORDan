@@ -207,6 +207,14 @@ def fnk_lst (asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_par
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Изменение заголовка реестра')
+    elif val_param=='ree_reestrs_close':
+        q_sql = "select main.ree_reestrs_close('"+ asid +"','"+ val_param1 +"')"
+        print(q_sql)
+        cur.execute(q_sql)
+        for row in cur:
+            res=(row[0])
+        encoded = base64.b64encode(q_sql.encode()).decode()
+        logg_web.add_log(asid,encoded,'Закрытие реестра')
 
     conn.commit()
     cur.close()
