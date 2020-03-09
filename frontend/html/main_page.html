@@ -728,6 +728,20 @@
             </div>
         </div>
 
+        <div id="popup_company_document" class="popup-fullscreen">
+            <div class="popup-background">
+                <div class="popup-header-fullscreen">
+                    <div class="popup-name"></div>
+                    <div class="popup-report-operation">
+                        <i class="material-icons" title="Закрыть" onclick="closePopupWindow('popup_objects_group')">close</i>
+                        <button id="document_convert_to_excel_btn" class="excel-button" onclick="">Excel</button>
+                        <button class="button-primary">Печать</button>
+                    </div>
+                </div>
+                <div class="popup-content"></div>
+            </div>
+        </div>
+
         <div id="popup_processed_file_template" class="popup-fullscreen">
             <div class="popup-background">
                 <div class="popup-header-fullscreen">
@@ -765,6 +779,14 @@
             <div class="popup-header">
                 <div class="popup-name"></div>
                 <div class="popup-close" onclick="closePopupWindow('popup_not_fullscreen')"><i class="material-icons" title="Закрыть">close</i></div>
+            </div>
+            <div class="popup-content"></div>
+        </div>
+
+        <div id="popup_company_document_settings" class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name"></div>
+                <div class="popup-close" onclick="closePopupWindow('popup_company_document_settings')"><i class="material-icons" title="Закрыть">close</i></div>
             </div>
             <div class="popup-content"></div>
         </div>
@@ -1098,8 +1120,17 @@
                         </div>
                         <div id="control_registry" class="tab-content">
                             <div id="registry_settings_select_menu" class="main-list">
+                                <div id="registry_type_div">
+                                    <p>Тип реестров:
+                                        <select id="registry_type_select">
+                                            <option value="regular">Ежемесячные</option>
+                                            <option value="constant">Постоянные</option>
+                                        </select>
+                                    </p>
+                                </div>
                                 <div id="registry_settings_calendar"></div>
-                                <ul></ul>
+                                <ul id="regular_registries_ul"></ul>
+                                <ul id="constant_registries_ul"></ul>
                             </div>
                             <div id="registry_settings_content" class="main-content">
                                 <div class="block">
@@ -1107,9 +1138,6 @@
                                         <div class="header"></div>
                                         <div class="header-manipulation">
                                             <i class="material-icons" data-jq-dropdown="" title="Справка" onclick="">help_outline</i>
-                                            <!-- <button id="registy_add_entry_btn" class="button-primary" style="float: right" title="Добавить запись в реестр">Добавить запись</button> -->
-                                            <!-- <i id="registry_print_icon" class="material-icons" title="Печать" onclick="">print</i>
-                                            <i id="registry_lock_icon" class="material-icons" title="Блокировка" onclick="">lock</i> -->
                                         </div>
                                     </div>
                                     <div class="block-content no-padding"></div>
@@ -1122,16 +1150,7 @@
                                     <div class="header">Список отчетов</div>
                                     <div class="header-manipulation"></div>
                                 </div>
-                                <div class="block-content full-area">
-                                    <table id="control_documents_list_table" class="block-table">
-                                        <tr>
-                                            <td>Отчёт по активностям пользователей</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Отчёт по поступившим средствам за период</td>
-                                        </tr>
-                                    </table>
-                                </div>
+                                <div class="block-content full-area"></div>
                             </div>
                         </div>
                         <div id="control_object_groups" class="tab-content">

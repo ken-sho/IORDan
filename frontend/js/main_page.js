@@ -135,17 +135,6 @@ $(document).ready(function() {
             $('#object_communication_textarea_tr').hide();
         }
     });
-
-    $('#control_documents_list_table tr').each(function() {
-        $(this).on('click', function() {
-            const name = $(this).text()
-            let content = '<table id="rep_range_table"><tr><td>Дата начала</td><td><input type="text" id="start_date" class="input-main"></td></tr>' +
-                '<tr><td>Дата конца</td><td><input type="text" id="final_date" class="input-main"></td></tr></table>' +
-                '<div class="content-center"><div class="notification">По умолчанию будет выбран период с 01.01.2005 по 01.12.2015</div><button id="pep_range_btn" class="button-primary">Выполнить</button></div>';
-            formPopupNotFullscreen(name, content);
-            openPopupWindow('popup_not_fullscreen');
-        });
-    });
 });
 
 // получение данных о пользователе
@@ -202,6 +191,7 @@ function getUserRightsData() {
 function initializeUserRight() {
     const userRights = USER_DATA.u_right;
 
+
     if(!isEmpty(userRights)) {
         if (userRights.includes(1)) {
             getControlFilesList();
@@ -210,7 +200,8 @@ function initializeUserRight() {
             $('#control_files_tab').removeClass('default-hidden');
         }
         if (userRights.includes(2)) {
-            getRegistryList();
+            getRegistryList('regular');
+            selectRegistriesTypeHandler();
             $('#control_registry_tab').removeClass('default-hidden');
         }    
     }
@@ -218,8 +209,10 @@ function initializeUserRight() {
         getControlFilesList();
         getControlProcessedFilesList();
         getControlPerformedFilesList();
-        getRegistryList();
+        getRegistryList('regular');
+        selectRegistriesTypeHandler();
         $('.default-hidden').removeClass('default-hidden');
+        getCompanyDocumentsList();
     }
 }
 
@@ -1826,7 +1819,7 @@ function createRegistryCalendar() {
 function registryCalendarChangeDate() {
 
     const handler = function() {
-        getRegistryList();
+        getRegistryList('regular');
         registryCalendarChangeDate();
     }
 
@@ -3177,61 +3170,24 @@ function showPopupNotification(message) {
     }
 }
 
-function getRegistryList() {
-    const calendarValue = getCalendarValue('registry_settings_calendar');
-    const registryUl = $('#registry_settings_select_menu ul');
-    registryUl.empty();
-    $.post(`/base_func?val_param=ree_reestrs&val_param1=regular&val_param2=${calendarValue}`, (data) => {
-        if (data !== '') {
-            const registryList = JSON.parse(data);
-
-            if (!isEmpty(registryList)) {
-                createRegistrySettingsPopup();
-
-                for (const registry of registryList) {
-                    const li = $('<li>', {registry_id: registry.id}).append(
-                        $('<a>').append(
-                            $('<span>', {text: registry.name})
-                        )
-                    ).appendTo(registryUl);
-    
-                    li.on('click', function () {
-                        const tabsCollection = $('#registry_settings_select_menu ul li');
-                        tabsCollection.removeClass('active');
-                        $(this).addClass('active');
-                        getRegistryData(registry.id, registry.name);
-                    })
-                }
-    
-                const firstClildLi = $('#registry_settings_select_menu ul li:first-child');
-                firstClildLi.addClass('active');
-                firstClildLi.trigger('click');
-            }
-        }
-        else {
-            // showTextCenter('control_registry', 'Реестры отсутствуют');
-            $('#registry_settings_content .block-content').empty();
-        }
-    });
-}
 
 function createRegistrySettingsPopup() {
     if ($('#popup_registry_settings').length) {
         $('#popup_registry_settings').remove();
     }
-
+    
     $('<div>', {id: 'popup_registry_settings', class: 'popup-window'}).append(
         $('<div>', {class: 'popup-header'}).append(
             $('<div>', {class: 'popup-name', text: 'Отображение столбцов в реестре'}),
             $('<div>', {class: 'popup-close'}).append(
                 $('<i>',  {class: 'material-icons', text: 'close'}).on('click', () => {closePopupWindow('popup_registry_settings')})
-            )
+                )
         ),
         $('<div>',  {class: 'popup-content'})
-    ).appendTo('#popup_background')
-} 
+        ).appendTo('#popup_background')
+    } 
 
-function getObjectsGroupsList() {
+    function getObjectsGroupsList() {
     $('#control_object_groups .block-content, #add_objects_group_user_select').empty();
     createContentLoader('#control_object_groups .block-content');
     $.post('/base_func?val_param=house_group_list', (data) => {
@@ -3243,7 +3199,7 @@ function getObjectsGroupsList() {
                 $('<option>', {text: userData[0], user_id: userData[1]}).appendTo('#add_objects_group_user_select');
             }
         }
-
+        
         if (!isEmpty(objectsGroupsData.house_groups)) {
             const table = $('<table>', {class: 'block-table'}).append(
                 $('<tr>').append(
@@ -3252,18 +3208,18 @@ function getObjectsGroupsList() {
                     $('<th>', {text: 'Дата создания'}),
                     $('<th>', {text: 'Действия'})
                 )
-            );
+                );
     
-            for (const group in objectsGroupsData.house_groups) {
+                for (const group in objectsGroupsData.house_groups) {
                 const groupData = objectsGroupsData.house_groups[group];
                 const tr = $('<tr>').append(
                     $('<td>', {text: group}),
                     $('<td>', {text: groupData.author}),
                     $('<td>', {text: groupData.creation_date})
                 );
-
+                
                 const manipulationTd = $('<td>')
-
+                
                 $('<i>', {class: 'material-icons', text: 'supervisor_account', title: 'Управление пользователями', onclick: `showObjectGroupUsers(${groupData.number})`}).appendTo(manipulationTd);
 
                 if (groupData.author == USER_DATA.user_login) {
@@ -3271,24 +3227,24 @@ function getObjectsGroupsList() {
                 }
 
                 manipulationTd.appendTo(tr);
-
+                
                 tr.on('click', function(e) {
                     if (e.target.nodeName !== 'TD') {
                         return;
                     }
                     showObjectsGroup(group, groupData.objects_list);
                 });
-
+                
                 tr.appendTo(table);
             }
-    
+            
             $('#control_object_groups .block-content').html(table);
         }
         else {
             showTextCenter('control_object_groups .block-content', 'Группы объектов отсутствуют');
         }
     });
-
+    
     function showObjectsGroup(name, objectsList) {
         const popupContent = $('#popup_objects_group .popup-content');
         popupContent.empty();
@@ -3317,26 +3273,26 @@ function getObjectsGroupsList() {
                 $('<td>', {text: objectData[1]}),
                 $('<td>', {text: objectData[2]})
             ).appendTo(table);
-
+            
             apartamentsAmount = apartamentsAmount + Number(objectData[2]);
         }
-
+        
         $('<tr>').append(
             $('<td>', {text: `Итого: домов - ${objectsList.length}, квартир - ${apartamentsAmount}`, style: 'font-weight: bold', colspan:  '3'})
         ).appendTo(table);
         
         table.appendTo(content);
-
+        
         popupContent.html(content);
     }
 }
 
 function getObjectsGroupUsersList(groupNumber) {
     $('#objects_group_users_list').empty();
-
+    
     $.post(`/base_func?val_param=house_group_usr&val_param1=${groupNumber}`, function (data) {
         const usersData = JSON.parse(data).users_list;
-
+        
         if (!isEmpty(usersData)) {
             for (const userData of usersData) {
                 const user = userData.split('&');
@@ -3344,15 +3300,14 @@ function getObjectsGroupUsersList(groupNumber) {
                     $('<div>', {class: 'objects-group-user-name', text: user[0]}),
                     $('<div>', {class: 'objects-group-user-delete'}).append(
                         $('<i>', {class: 'material-icons', text: 'delete', title: 'Удалить', onclick: `deleteObjectsGroupUser(${groupNumber}, '${user[0]}', ${user[1]})`})
-                    )
+                        )
                 ).appendTo('#objects_group_users_list');
             }
         }
         else {
             $('<div>', {class: 'notification', text: 'Пользователи отсутствуют'}).appendTo('#objects_group_users_list');
-        }
-
-    })
+        }    
+    });
 }
 
 function showObjectGroupUsers(groupNumber) {
@@ -3374,8 +3329,7 @@ function addObjectsGroupUser(groupNumber) {
             if (data  == 'success') {
                 $('#add_objects_group_user_select option:first-child').prop('selected', true);
                 getObjectsGroupUsersList(groupNumber);
-                showPopupNotification('Пользователь успешно привязан к группе объектов!');
-
+                showPopupNotification('Пользователь успешно привязан к группе объектов!'); 
             }
             else if (data == 'already_exist') {
                 showPopupNotification('Данный пользователь уже привязан к этой группе объектов!');
@@ -3395,6 +3349,63 @@ function deleteObjectsGroupUser(groupNumber, userName, userId) {
             showPopupNotification(`Пользователь ${userName} успешно удален!`);
         });
     }
+}
+
+function getRegistryList(type) {
+    $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon, #registy_convert_to_excel_btn, #no_registries_div').remove();
+    let calendarValue = getCalendarValue('registry_settings_calendar');
+    let registryUl;
+
+    if (type == 'regular') {
+        $('#registry_settings_calendar, #regular_registries_ul').show();
+        $('#constant_registries_ul').hide();
+        registryUl = $('#regular_registries_ul');
+        calendarValue = getCalendarValue('registry_settings_calendar');
+    }
+    else if (type == 'constant') {
+        $('#registry_settings_calendar, #regular_registries_ul').hide();
+        $('#constant_registries_ul').show();
+        registryUl = $('#constant_registries_ul');
+        calendarValue = '';
+    }
+    registryUl.empty();
+    $.post(`/base_func?val_param=ree_reestrs&val_param1=${type}&val_param2=${calendarValue}`, (data) => {
+        const registryList = JSON.parse(data);
+        console.log(registryList)
+
+        if (!isEmpty(registryList)) {
+            createRegistrySettingsPopup();
+
+            for (const registry of registryList) {
+                const li = $('<li>', {registry_id: registry.id}).append(
+                    $('<a>').append(
+                        $('<span>', {text: registry.name})
+                    )
+                ).appendTo(registryUl);
+
+                li.on('click', function () {
+                    const tabsCollection = registryUl.find('li');
+                    tabsCollection.removeClass('active');
+                    $(this).addClass('active');
+                    getRegistryData(registry.id, registry.name, type, registry.doc_type);
+                })
+            }
+
+            const firstClildLi = registryUl.find('li:first-child');;
+            firstClildLi.addClass('active');
+            firstClildLi.trigger('click');
+        }
+        else {
+            $('#registry_settings_content .block-content').empty();
+
+            $('<div>', {id: 'no_registries_div', style: 'text-align: center'}).append(
+                $('<p>', {text: 'Реестры отсутствуют', style: 'font-size: 16px'}),
+                $('<p>').append(
+                    $('<button>', {class: 'button-secondary', text: 'Создать'})
+                )
+            ).appendTo('#registry_settings_select_menu');
+        }
+    });
 }
 
 function initializeRegistrySettings(registryId, registryData) {
@@ -3464,18 +3475,18 @@ function addEventOnOffToggle(inputOn, inputOff) {
 }
 
 
-function getRegistryData(registryId, registryName) {
+function getRegistryData(registryId, registryName, registryType, documentType) {
     $('#registry_print_icon').off('click');
-    $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon, #registy_convert_to_excel_btn').remove();
+    $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon, #registy_convert_to_excel_btn, #no_registries_div').remove();
     $('#registry_settings_content .block-content, #add_registry_entry_table').empty();
     createContentLoader('#registry_settings_content .block-content');
-    $.post(`/base_func?val_param=ree_recodrs&val_param1=${registryId}&val_param2=manual_input`, (data) => {
+    $.post(`/base_func?val_param=ree_recodrs&val_param1=${registryId}&val_param2=${documentType}`, (data) => {
         registryData = JSON.parse(data);
-        displayRegistry(registryData, registryId, registryName);
+        displayRegistry(registryData, registryId, registryName, registryType);
     });
 }
 
-function displayRegistry(data, registryId, registryName) {
+function displayRegistry(data, registryId, registryName, registryType) {
     const thead = data.thead;
     const tbody = data.tbody;
     const tfoot = data.tfooter;
@@ -3620,19 +3631,22 @@ function displayRegistry(data, registryId, registryName) {
         if (!registryIsBlocked) {
             $('<button>', {id: 'registy_add_entry_btn', class: 'button-primary', style: 'float: right', title: 'Добавить запись в реестр', text: 'Добавить запись'}).appendTo(headerManipulation);
         }
-        $('<button>', {id: 'registy_convert_to_excel_btn', class: 'button-primary', style: 'float: right; background: #1D6F42', title: 'Конвертировать в Excel', text: 'Excel'}).appendTo(headerManipulation);
+        $('<button>', {id: 'registy_convert_to_excel_btn', class: 'excel-button', title: 'Конвертировать в Excel', text: 'Excel'}).appendTo(headerManipulation);
         $('<i>', {id: 'registry_settings_icon', class: 'material-icons', title: 'Настройки', text: 'settings'}).on('click', () => {openPopupWindow('popup_registry_settings')}).appendTo(headerManipulation);
         $('<i>', {id: 'registry_print_icon', class: 'material-icons', title: 'Печать', text: 'print'}).appendTo(headerManipulation);
 
-        if (registryIsBlocked) {
-            $('<i>', {id: 'registry_lock_icon', class: 'material-icons', title: 'Реестр закрыт', text: 'lock'}).appendTo(headerManipulation);
+        if (registryType == 'regular') {
+            if (registryIsBlocked) {
+                $('<i>', {id: 'registry_lock_icon', class: 'material-icons', title: 'Реестр закрыт', text: 'lock'}).appendTo(headerManipulation);
+            }
+            else {
+                const lockIcon = $('<i>', {id: 'registry_lock_icon', class: 'material-icons', title: 'Реестр открыт. Нажмите, чтобы закрыть реестр', text: 'lock_open'}).appendTo(headerManipulation);
+                lockIcon.on('click', function() { 
+                    blockRegistry(registryId, registryName);
+                });
+            }
         }
-        else {
-            const lockIcon = $('<i>', {id: 'registry_lock_icon', class: 'material-icons', title: 'Реестр открыт. Нажмите, чтобы закрыть реестр', text: 'lock_open'}).appendTo(headerManipulation);
-            lockIcon.on('click', function() { 
-                blockRegistry(registryId, registryName);
-            });
-        }
+
     }
 
 
@@ -4016,7 +4030,7 @@ function createObjectGroup() {
 
 function deleteObjectsGroup(groupName) {
     if (confirm(`Вы уверены, что хотите удалить группу объектов "${groupName}"?`)) {
-        encodeURIstring = encodeURI(`/base_func?val_param=house_groups&val_param1=del&val_param2=${groupName}&val_param3=`);
+        const encodeURIstring = encodeURI(`/base_func?val_param=house_groups&val_param1=del&val_param2=${groupName}&val_param3=`);
         $.post(encodeURIstring, function (data) {
             getObjectsGroupsList();
             showPopupNotification(`Группа объектов "${groupName}" успешно удалена!`);
@@ -4033,14 +4047,122 @@ function changeRegistryLock(registryId) {
 }
 
 function convertContentToExcel(content, fileName) {
+    showPopupNotification('Загрузка файла начнется автоматически!');
     $.ajax({
         url: encodeURI(`/conver?type=xls&file_name=${fileName}`),
         type: 'POST',
         data: content,
         contentType: 'application/json',
         success: function(data) {
-            showPopupNotification('Загрузка файла начнется автоматически!');
             window.location = data;
         }
     });
+}
+
+function selectRegistriesTypeHandler() {
+    $('#registry_type_select').on('change', function() {
+        if ($(this).val() == 'regular') {
+            getRegistryList('regular');
+        }
+        else if ($(this).val() == 'constant') {
+            getRegistryList('constant');
+        }
+    });
+}
+
+function getCompanyDocumentsList() {
+    $.post('/report_srv?attr=list', function(data) {
+        const documentsList = JSON.parse(data);
+        console.log(documentsList)
+        if (!isEmpty(documentsList)) {
+            showCompanyDocumentsList(documentsList);
+        }
+        else {
+            showTextCenter('control_documents .block-content', 'Отчеты отсутствуют');
+        }
+    });
+}
+
+function showCompanyDocumentsList(data) {
+    $('#control_documents .block-content').empty();
+    const table = $('<table>', {id: 'control_documents_list_table', class: 'block-table'});
+    for (const document in data) {
+        const tr = $('<tr>').append(
+            $('<td>', {text: document})
+        ).appendTo(table);
+
+        tr.on('click',  function() {
+            initializeCompanyDocumentPopupWindow(document, data[document].interface, data[document].fnk_name);
+        });
+    }
+    table.appendTo('#control_documents .block-content');
+}
+
+function initializeCompanyDocumentPopupWindow(documentName, interfaceData, funcName) {
+    $('#popup_company_document_settings .block-content').empty();
+    $('#popup_company_document_settings .popup-name').html(documentName);
+
+    const parentDiv = $('<div>', {class: 'content-center'});
+
+    for (const line in interfaceData) {
+        const div = $('<div>', {class: 'company-document-div'});
+        for (const elem of interfaceData[line]) {
+            console.log(elem)
+            if (elem.type == 'input') {
+                const input = $('<input>', {type: elem.input_type, parameter_name: elem.parameter_name}).appendTo(div);
+                input.before($('<span>', {text: elem.interface_name}));
+            }
+        }
+
+        div.appendTo(parentDiv);
+    }
+
+    $('<div>', {class: 'form-submit-btn'}).append(
+        $('<button>', {class: 'button-primary', text: 'Выполнить'}).on('click', function() {
+            getCompanyDocument(funcName, documentName);
+        })
+    ).appendTo(parentDiv);
+
+    $('#popup_company_document_settings .popup-content').html(parentDiv);
+
+    openPopupWindow('popup_company_document_settings');
+
+}
+
+function getCompanyDocument(funcName, documentName) {
+
+    let parametersData =  {};
+    const validateinputsArray = [];
+
+    $('#popup_company_document_settings input').each(function() {
+        const input = $(this);
+        validateinputsArray.push(input);
+
+
+        if (input.val() !== '') {
+            parametersData[input.attr('parameter_name')] = RemakeDateFormatFromInput(input.val());
+        }
+    })
+
+    console.log(parametersData);
+
+    if (validateFormInputs(validateinputsArray)) {
+        $('#popup_company_document .popup-content').empty();
+        $('#popup_company_document .popup-name').html(documentName);
+        openPopupWindow('popup_company_document');
+        createContentLoader('#popup_company_document .popup-content');
+        $.ajax({
+            type: 'POST',
+            url: encodeURI(`/report_srv?attr=${funcName}`),
+            data: JSON.stringify(parametersData),
+            success: function(data) {
+                $('#popup_company_document .popup-content').html(data);
+
+                $('#document_convert_to_excel_btn').off('click');
+                $('#document_convert_to_excel_btn').on('click', function() {
+                    convertContentToExcel(data, documentName);
+                });
+            }
+        });
+    }
 }

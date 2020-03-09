@@ -405,7 +405,32 @@ class RedmineHandler(tornado.web.RequestHandler):
         response = requests.post(url, headers={"Content-Type": "application/json"}, data=args)
         self.write(response.text)
 
-class ConverHandler(tornado.web.RequestHandler):
+class ReportsrvHandler(BaseHandler):
+    def post(self):
+        asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
+        autor = tornado.escape.native_str(self.get_secure_cookie('user'))
+        orgid = str(self.get_cookie('companyId'))
+        attr = self.get_argument('attr')
+        if attr=='list':
+            conn = db_conn.db_connect('web_receivables')
+            cur = conn.cursor()
+            q_sql = "select report.report_list('"+ asid +"','"+ orgid +"')"
+            cur.execute(q_sql)
+            for row in cur:
+                res=(row[0])
+            self.write(res)
+        else:
+            param = ((self.request.body).decode('UTF8'))
+            conn = db_conn.db_connect('web_receivables')
+            cur = conn.cursor()
+            q_sql = "select report."+attr+"('"+ asid +"','"+ orgid +"','"+param+"')"
+            print(q_sql)
+            cur.execute(q_sql)
+            for row in cur:
+                res=(row[0])
+            self.write(res)
+
+class ConverHandler(BaseHandler):
     def post(self):
         html_body = ((self.request.body).decode('UTF8'))
         ftype = self.get_argument('type')
@@ -432,6 +457,7 @@ application = tornado.web.Application([
     (r"/filelist", FilelistHandler),
     (r"/admin", AnminHandler),
     (r"/redmine", RedmineHandler),
+    (r"/report_srv", ReportsrvHandler),
     (r"/conver", ConverHandler),
     (r"/css/(.*)", tornado.web.StaticFileHandler, {'path': 'frontend/css'}),
     (r"/js/(.*)", tornado.web.StaticFileHandler, {'path': 'frontend/js'}),

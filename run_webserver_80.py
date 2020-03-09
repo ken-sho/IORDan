@@ -407,7 +407,7 @@ class RedmineHandler(tornado.web.RequestHandler):
 
 class ConverHandler(tornado.web.RequestHandler):
     def post(self):
-         html_body = ((self.request.body).decode('UTF8'))
+        html_body = ((self.request.body).decode('UTF8'))
         ftype = self.get_argument('type')
         file_name = self.get_argument('file_name')
         if ftype=='xls':

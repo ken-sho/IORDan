@@ -162,11 +162,13 @@ def fnk_lst (asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_par
         logg_web.add_log(asid,encoded,'Смена настроек пользователя')
     elif val_param=='ree_reestrs':
         q_sql = "select main.ree_reestrs('"+ asid +"','"+ val_param1 +"','"+ orgid +"','"+ val_param2 +"')"
+        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
     elif val_param=='ree_recodrs':
         q_sql = "select main.ree_recodrs('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"')"
+        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
