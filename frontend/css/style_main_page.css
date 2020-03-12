@@ -10,6 +10,21 @@
          url(/icon/iconfont/MaterialIcons-Regular.ttf) format('truetype');
 }
 
+@keyframes spin_notification {
+    25% {transform:rotate(40deg);} 
+    75% {transform:rotate(-40deg);}
+}
+
+@-webkit-keyframes spin_notification {
+    25% {transform:rotate(40deg);} 
+    75% {transform:rotate(-40deg);}
+}
+
+@keyframes spin_notification {
+    25% {transform:rotate(40deg);} 
+    75% {transform:rotate(-40deg);}
+}
+
 html, body {
     width: 100%;
     height: 100%;
@@ -2807,10 +2822,10 @@ textarea {
 }
 
 .popup-notification {
-    width: 300px;
-    height: 46px;
+    width: 350px;
+    height: 55px;
     position: fixed;
-    right: -312px;
+    right: -365px;
     bottom: 0;
     margin: 12px;
     border-radius: 5px;
@@ -2833,23 +2848,38 @@ textarea {
     align-items: center;
 }
 
-.popup-notification i {
+.popup-notification > .icon i {
     font-size: 24px !important;
     text-align: center;
     color: white;
     cursor: default;
+
+    -webkit-animation:spin_notification 2s linear infinite;
+    -moz-animation:spin_notification 2s linear infinite;
+    animation:spin_notification 2s linear infinite;
+    animation-delay: 5s;
 }
 
 .popup-notification > .content {
-    width: 258px;
+    width: 273px;
     height: 100%;
     float: left;
     display: flex;
     align-items: center;
     padding: 5px;
     box-sizing: border-box;
-    font-size: 12px;
+    font-size: 14px;
     color: #263238;
+}
+
+.popup-notification > .notification-close {
+    height: 100%;
+    width: 35px;
+    float: left;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    box-sizing: border-box;
 }
 
 #main_menu_company_name {

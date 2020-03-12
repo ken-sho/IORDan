@@ -523,7 +523,7 @@ function createObjectsTree(data) {
                     $('#obj_content').show();
                 }
 
-                if ($('#obj_info .header-manipulation').is(':hidden')) {
+                if (!isEmpty(CURRENT_OBJECT_DATA)) {
                     $('#obj_info .header-manipulation').show();
                     $('#obj_agreements_btn, #obj_owners_btn').prop('disabled', false);
                 }
@@ -2770,6 +2770,8 @@ function mainSearchKeyup(inputId, menuId) {
                         input.val('');
                         openHomePage();
 
+                        $('#obj_agreements_btn, #obj_owners_btn').prop('disabled', false);
+
                         CURRENT_OBJECT_DATA.accid = accid;
                         getObjectData();
                         $('#obj_adress').text(adress);
@@ -3133,9 +3135,27 @@ function createPopupNotification(message) {
         $('<span>', {class: 'icon'}).append(
             $('<i>', {class: 'material-icons', text: 'notifications'})
         ),
-        $('<span>', {class: 'content', text: message})
+        $('<span>', {class: 'content', text: message}),
+        $('<span>', {class: 'notification-close'}).append(
+            $('<i>', {class: 'material-icons', text: 'close', title: 'Закрыть уведомление'}).on('click', function() {
+                removePopupNotification(notification);
+            })
+        )
     );
     return notification;
+}
+
+function removePopupNotification(notification) {
+    notification.animate({
+        right: -365
+    }, 500, () => {
+        if (notification.prev('.popup-notification').length) {
+            notification.prevAll('.popup-notification').animate({
+                bottom: '-=60'
+            }, 400);
+        }
+        notification.remove();
+    });
 }
 
 function showPopupNotification(message) {
@@ -3143,8 +3163,8 @@ function showPopupNotification(message) {
 
     if ($('.popup-notification').length) {
         $('.popup-notification').animate({
-            bottom: '+=58'
-        }, 500, function () {
+            bottom: '+=60'
+        }, 400, function () {
             addPopupNotification();
         });
     }
@@ -3156,16 +3176,8 @@ function showPopupNotification(message) {
         notification.appendTo('body');
         notification.animate({
             right: 0
-        }, 500, () => {
-            setTimeout(removePopupNotification, 4000);
-        });
-    }
-
-    function removePopupNotification() {
-        notification.animate({
-            opacity: 0
-        }, 500, () => {
-            notification.remove();
+        }, 400, () => {
+            // setTimeout(removePopupNotification(notification), 4000);
         });
     }
 }
@@ -3342,7 +3354,7 @@ function addObjectsGroupUser(groupNumber) {
 }
 
 function deleteObjectsGroupUser(groupNumber, userName, userId) {
-    if (confirm(`Вы уверены, что хотите удалить пользователя ${userName} из этой группы объектов?`)) {
+    if (confirm(`Вы уверены, что хотите удалить Пользователя ${userName} из этой группы объектов?`)) {
         const encodeURIstring = encodeURI(`/base_func?val_param=add_usr_hsgrlst&val_param1=del&val_param2=${groupNumber}&val_param3=${userId}`);
         $.post(encodeURIstring, function (data) {
             getObjectsGroupUsersList(groupNumber);
@@ -3481,12 +3493,12 @@ function getRegistryData(registryId, registryName, registryType, documentType) {
     $('#registry_settings_content .block-content, #add_registry_entry_table').empty();
     createContentLoader('#registry_settings_content .block-content');
     $.post(`/base_func?val_param=ree_recodrs&val_param1=${registryId}&val_param2=${documentType}`, (data) => {
-        registryData = JSON.parse(data);
-        displayRegistry(registryData, registryId, registryName, registryType);
+        const registryData = JSON.parse(data);
+        displayRegistry(registryData, registryId, registryName, registryType, documentType);
     });
 }
 
-function displayRegistry(data, registryId, registryName, registryType) {
+function displayRegistry(data, registryId, registryName, registryType, documentType) {
     const thead = data.thead;
     const tbody = data.tbody;
     const tfoot = data.tfooter;
@@ -3595,7 +3607,9 @@ function displayRegistry(data, registryId, registryName, registryType) {
                     editEntryIcon.on('click', function() {
                         openEditRegistryEntryPopup(registryId, entry.id, entryData);
                     });
-                    $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить', onclick: `deleteRegistryEntry('${registryId}','${entry.id}')` }).appendTo(tdOperation);
+                    $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить'}).on('click', function() {
+                        deleteRegistryEntry(registryId, entry.id, registryName, registryType, documentType)
+                    }).appendTo(tdOperation);
     
                 }
             }
@@ -3642,7 +3656,7 @@ function displayRegistry(data, registryId, registryName, registryType) {
             else {
                 const lockIcon = $('<i>', {id: 'registry_lock_icon', class: 'material-icons', title: 'Реестр открыт. Нажмите, чтобы закрыть реестр', text: 'lock_open'}).appendTo(headerManipulation);
                 lockIcon.on('click', function() { 
-                    blockRegistry(registryId, registryName);
+                    blockRegistry(registryId, registryName, registryType, documentType);
                 });
             }
         }
@@ -3673,12 +3687,12 @@ function displayRegistry(data, registryId, registryName, registryType) {
 
     $('#registy_add_entry_btn').off('click');
     $('#registy_add_entry_btn').on('click', () => {
-        openAddRegistryEntryPopup(registryId);
+        openAddRegistryEntryPopup(registryId, registryName, registryType, documentType);
     });
 
     $('#registry_column_settings_btn').off('click');
     $('#registry_column_settings_btn').on('click', () => {
-        saveRegisrtrySettings(registryId);
+        saveRegisrtrySettings(registryId, registryName, registryType, documentType);
     });
 
     $('#registy_convert_to_excel_btn').off('click');
@@ -3738,14 +3752,14 @@ function displayRegistry(data, registryId, registryName, registryType) {
     });
 }
 
-function openAddRegistryEntryPopup(registryId) {
+function openAddRegistryEntryPopup(registryId, registryName, registryType, documentType) {
     $('#popup_add_edit_registry_entry .popup-name').text('Добавить запись в реестр');
     $('#add_registry_entry_btn').text('Добавить');
     $('#add_registry_entry_table input').val('');
 
     $('#add_registry_entry_btn').off('click');
     $('#add_registry_entry_btn').on('click', () => {
-        addRegistryEntry(registryId);
+        addRegistryEntry(registryId, registryName, registryType, documentType);
     });
 
     openPopupWindow('popup_add_edit_registry_entry');
@@ -3757,7 +3771,7 @@ function openEditRegistryEntryPopup(registryId, entryId, entryData) {
 
     $('#add_registry_entry_btn').off('click');
     $('#add_registry_entry_btn').on('click', () => {
-        editRegistryEntry(registryId, entryId);
+        editRegistryEntry(registryId, entryId, registryName, registryType, documentType);
     });
 
     $('#add_registry_entry_table input').each(function() {
@@ -3786,7 +3800,7 @@ function sumUpInputValues(inputCollection) {
     return totalSum;
 }
 
-function saveRegisrtrySettings(registryId) {
+function saveRegisrtrySettings(registryId, registryName, registryType, documentType) {
     let dataObj = {};
     
     $('#registry_column_settings_table input').each(function() {
@@ -3816,12 +3830,12 @@ function saveRegisrtrySettings(registryId) {
         success: function() {
             closePopupWindow('popup_registry_settings');
             showPopupNotification('Отображение столбцов в реестре успешно сохранено!');
-            getRegistryData(registryId);
+            getRegistryData(registryId, registryName, registryType, documentType);
         }
     });
 } 
 
-function addRegistryEntry(registryId) {
+function addRegistryEntry(registryId, registryName, registryType, documentType) {
     event.preventDefault();
     const validateinputsArray = [];
 
@@ -3876,7 +3890,7 @@ function addRegistryEntry(registryId) {
             }
             else if (data == 'success') {
                 closePopupWindow('popup_add_edit_registry_entry');
-                getRegistryData(registryId);
+                getRegistryData(registryId, registryName, registryType, documentType);
                 showPopupNotification('Запись в реестр успешно добавлена!');
             }
         });
@@ -3886,7 +3900,7 @@ function addRegistryEntry(registryId) {
     }
 }
 
-function editRegistryEntry(registryId,entryId) {
+function editRegistryEntry(registryId, entryId, registryName, registryType, documentType) {
     event.preventDefault();
     const validateinputsArray = [];
 
@@ -3941,14 +3955,14 @@ function editRegistryEntry(registryId,entryId) {
             }
             else if (data == 'success') {
                 closePopupWindow('popup_add_edit_registry_entry');
-                getRegistryData(registryId);
+                getRegistryData(registryId, registryName, registryType, documentType);
                 showPopupNotification('Запись в реестре успешно изменена!');
             }
             else if (data == 'wrong_user') {
                 showPopupNotification('У Вас нет прав на изменение этой записи!')
             }
             else if (data == 'already_deleted') {
-                getRegistryData(registryId);
+                getRegistryData(registryId, registryName, registryType, documentType);
                 showPopupNotification('Данная запись уже удалена из реестра!'); 
             }
         });
@@ -3958,33 +3972,33 @@ function editRegistryEntry(registryId,entryId) {
     }
 }
 
-function deleteRegistryEntry(registryId, entryId) {
+function deleteRegistryEntry(registryId, entryId, registryName, registryType, documentType) {
     if (confirm(`Вы уверены, что хотите удалить запись из реестра?`)) {
         const encodeURIstring = encodeURI(`/base_func?val_param=addchg_ree_recodrs&val_param1=${entryId}&val_param2=&val_param3=&val_param4=&val_param5=&val_param6=&val_param7=&val_param8=&val_param9=del&val_param10=`);
     
         $.post(encodeURIstring, (data) => {
             if (data == 'success') {
-                getRegistryData(registryId);
+                getRegistryData(registryId, registryName, registryType, documentType);
                 showPopupNotification('Запись из реестра успешно удалена!');
             }
             else if (data == 'wrong_user') {
                 showPopupNotification('У Вас нет прав на удаление этой записи!')
             }
             else if (data == 'already_deleted') {
-                getRegistryData(registryId);
+                getRegistryData(registryId, registryName, registryType, documentType);
                 showPopupNotification('Данная запись уже удалена из реестра!'); 
             }
         });
     }
 }
 
-function blockRegistry(registryId, registryName) {
+function blockRegistry(registryId, registryName, registryName, registryType, documentType) {
     if (confirm(`Вы уверены, что хотите закрыть реестр "${registryName}"?`)) {
         encodeURIstring = encodeURI(`/base_func?val_param=ree_reestrs_close&val_param1=${registryId}`);
         $.post(encodeURIstring, function (data) { 
             if (data == 'success') {
                 showPopupNotification(`Реестр "${registryName}" успешно закрыт!`);
-                getRegistryData(registryId);
+                getRegistryData(registryId, registryName, registryType, documentType);
             }
             else if (data == 'already_close') {
                 showPopupNotification(`Реестр "${registryName}" уже закрыт!`);

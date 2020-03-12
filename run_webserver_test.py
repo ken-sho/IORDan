@@ -474,5 +474,5 @@ if __name__ == "__main__":
     #http_server = tornado.httpserver.HTTPServer(application, ssl_options={'certfile': 'ssl/tornado.crt', 'keyfile': 'ssl/tornado.key'})
     #http_server.listen(443)
     http_server = tornado.httpserver.HTTPServer(application)
-    http_server.listen(80)
+    http_server.listen(8082)
     tornado.ioloop.IOLoop.instance().start()
