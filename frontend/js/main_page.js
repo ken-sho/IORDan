@@ -3716,13 +3716,23 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
 
         convertContentToExcel(convertibleContent.html(), fileName);
     });
+}
 
+function openAddRegistryEntryPopup(registryId, registryName, registryType, documentType) {
+    $('#popup_add_edit_registry_entry .popup-name').text('Добавить запись в реестр');
+    $('#add_registry_entry_btn').text('Добавить');
+    $('#add_registry_entry_table input').val('');
+    $('#add_entry_total_sum').attr('disabled', false);
 
+    $('#add_registry_entry_btn').off('click');
+    $('#add_registry_entry_btn').on('click', () => {
+        addRegistryEntry(registryId, registryName, registryType, documentType);
+    });
 
-
-    const inputCollection = $(addEntryTable.find('tr:nth-child(4) input'));
+    const inputCollection = $('#add_registry_entry_table').find('tr:nth-child(4) input');
     inputCollection.each(function() {
-        $(this).keyup(function() {
+        $(this).off('keyup');
+        $(this).on('keyup', function() {
             $('#add_entry_total_sum').val(sumUpInputValues(inputCollection));
             inputCollection.each(function() {
                 if ($(this).val() !== '') {
@@ -3737,7 +3747,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
         });
     });
 
-    $('#add_entry_total_sum').keyup(function() {
+    $('#add_entry_total_sum').on('keyup', function() {
         if ($(this).val() !== '') {
             inputCollection.each(function() {
                 $(this).val('');
@@ -3750,17 +3760,6 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
             });
         }
     });
-}
-
-function openAddRegistryEntryPopup(registryId, registryName, registryType, documentType) {
-    $('#popup_add_edit_registry_entry .popup-name').text('Добавить запись в реестр');
-    $('#add_registry_entry_btn').text('Добавить');
-    $('#add_registry_entry_table input').val('');
-
-    $('#add_registry_entry_btn').off('click');
-    $('#add_registry_entry_btn').on('click', () => {
-        addRegistryEntry(registryId, registryName, registryType, documentType);
-    });
 
     openPopupWindow('popup_add_edit_registry_entry');
 }
@@ -3768,6 +3767,7 @@ function openAddRegistryEntryPopup(registryId, registryName, registryType, docum
 function openEditRegistryEntryPopup(registryId, entryId, entryData) {
     $('#popup_add_edit_registry_entry .popup-name').text('Изменить запись в реестре');
     $('#add_registry_entry_btn').text('Сохранить');
+    $('#add_entry_total_sum').attr('disabled', true);
 
     $('#add_registry_entry_btn').off('click');
     $('#add_registry_entry_btn').on('click', () => {
@@ -3777,6 +3777,14 @@ function openEditRegistryEntryPopup(registryId, entryId, entryData) {
     $('#add_registry_entry_table input').each(function() {
         const inputName = $(this).attr('name');
         $(this).val(entryData[inputName]);
+    });
+
+    const inputCollection = $('#add_registry_entry_table').find('tr:nth-child(4) input');
+    inputCollection.each(function() {
+        $(this).off('keyup');
+        $(this).on('keyup', function() {
+            $('#add_entry_total_sum').val(sumUpInputValues(inputCollection));
+        });
     });
 
     openPopupWindow('popup_add_edit_registry_entry')
