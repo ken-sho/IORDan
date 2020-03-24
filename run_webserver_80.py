@@ -37,7 +37,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
 class LoginHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render("frontend/html/login_page.html")
+        self.render("opt/IORDan/frontend/html/login_page.html")
 
     def post(self):
         passwd =  self.get_argument('password')
@@ -63,7 +63,7 @@ class MainHandler(BaseHandler):
         if not self.current_user:
             self.redirect("/")
             return
-        self.render("frontend/html/main_page.html")
+        self.render("opt/IORDan/frontend/html/main_page.html")
         #self.write('Нет прав доступа')
 
 class AnminHandler(BaseHandler):
@@ -83,7 +83,7 @@ class AnminHandler(BaseHandler):
         except:
             utupe = ''
         if utupe=='admin':
-            self.render("frontend/html/admin_page.html")
+            self.render("opt/IORDan/frontend/html/admin_page.html")
         else:
             self.write('Нет прав доступа')
 
