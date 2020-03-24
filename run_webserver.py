@@ -44,7 +44,7 @@ class LoginHandler(tornado.web.RequestHandler):
         lname = self.get_argument('email')
         loginname = lname.lower()
         ip_adr = self.request.remote_ip
-        asid = login_db.login(loginname, passwd, ip_adr)
+        asid = login_db.opt/IORDan/(loginname, passwd, ip_adr)
         #print (asid)
         if asid !='no_usr_or_pwd':
             self.set_secure_cookie("user", loginname)
@@ -459,11 +459,11 @@ application = tornado.web.Application([
     (r"/redmine", RedmineHandler),
     (r"/report_srv", ReportsrvHandler),
     (r"/conver", ConverHandler),
-    (r"/css/(.*)", tornado.web.StaticFileHandler, {'path': 'opt/IORDan/frontend/css'}),
-    (r"/js/(.*)", tornado.web.StaticFileHandler, {'path': 'opt/IORDan/frontend/js'}),
+    (r"/css/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/frontend/css'}),
+    (r"/js/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/frontend/js'}),
     (r"/icon/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/material-design-icons'}),
-    (r"/images/(.*)", tornado.web.StaticFileHandler, {'path': 'opt/IORDan/frontend/images'}),
-    (r"/download/(.*)", tornado.web.StaticFileHandler, {'path': 'opt/IORDan/download'}),
+    (r"/images/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/frontend/images'}),
+    (r"/download/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/download'}),
 #], **settings)
 ], **settings, debug=True)
 
@@ -471,7 +471,7 @@ if __name__ == "__main__":
     print ("WEB server Running...")
     print ("Press ctrl + C to close")
     #http_server = tornado.httpserver.HTTPServer(application,xheaders=True, ssl_options={'certfile': 'ssl/tornado.crt', 'keyfile': 'ssl/tornado.key'})
-    http_server = tornado.httpserver.HTTPServer(application, ssl_options={'certfile': 'opt/IORDan/ssl/tornado.crt', 'keyfile': 'opt/IORDan/ssl/tornado.key'})
+    http_server = tornado.httpserver.HTTPServer(application, ssl_options={'certfile': '/opt/IORDan/ssl/tornado.crt', 'keyfile': '/opt/IORDan/ssl/tornado.key'})
     http_server.listen(443)
     #http_server = tornado.httpserver.HTTPServer(application)
     #http_server.listen(8082)

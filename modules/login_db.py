@@ -17,11 +17,11 @@ def login (uname, pwd ,ip_adr):
            conn.commit()
            cur.close()
            conn.close ()
-           dexist = os.path.exists("personal/" + uname)
+           dexist = os.path.exists("/opt/IORDan/personal/" + uname)
            if dexist==True:
               return res
            else:
-              os.mkdir("personal/" + uname)
+              os.mkdir("/opt/IORDan/personal/" + uname)
               return res
         else:
            cur.close()
