@@ -44,7 +44,7 @@ class LoginHandler(tornado.web.RequestHandler):
         lname = self.get_argument('email')
         loginname = lname.lower()
         ip_adr = self.request.remote_ip
-        asid = login_db.opt/IORDan/(loginname, passwd, ip_adr)
+        asid = login_db.(loginname, passwd, ip_adr)
         #print (asid)
         if asid !='no_usr_or_pwd':
             self.set_secure_cookie("user", loginname)
