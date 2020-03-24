@@ -300,12 +300,12 @@ class UploadHandler(tornado.web.RequestHandler):
         file1 = self.request.files['file'][0]
         original_fname = file1['filename']
         #fexist = os.path.exists("www/upload/" + autor + "/" + original_fname)
-        fexist = os.path.exists("upload/" + original_fname)
+        fexist = os.path.exists("/opt/IORDan/upload/" + original_fname)
         if fexist==True:
            for cnt in range (1,1000):
                final_filename = "Копия_"+str(cnt)+"-"+original_fname
                #fexist = os.path.exists("upload/" + autor + "/" + final_filename)
-               fexist = os.path.exists("upload/" + final_filename)
+               fexist = os.path.exists("/opt/IORDan/upload/" + final_filename)
                if fexist==True:
                   cnt =+1
                else:
@@ -313,7 +313,7 @@ class UploadHandler(tornado.web.RequestHandler):
         else:
            final_filename = original_fname
         #output_file = open("upload/" + autor + "/" + final_filename, 'wb')
-        output_file = open("upload/" + final_filename, 'wb')
+        output_file = open("/opt/IORDan/upload/" + final_filename, 'wb')
         output_file.write(file1['body'])
         output_file.close()
         self.write('success')
@@ -331,7 +331,7 @@ class OpFileHandler(tornado.web.RequestHandler):
         elif attr=='runformat':
             org_id = self.get_argument('org_id')
             fname_short = fname
-            fname = "upload/" + fname
+            fname = "/opt/IORDan/upload/" + fname
             conn = db_conn.db_connect('web_receivables')
             loadxls.LoadFile(fname,conn,asid,fname_short)
             cur = conn.cursor()
@@ -339,7 +339,7 @@ class OpFileHandler(tornado.web.RequestHandler):
             cur.execute(q_sql)
             conn.commit()
             zipname=str(time.time())
-            z = zipfile.ZipFile("archive/" + zipname+'.zip', 'w', zipfile.ZIP_DEFLATED)
+            z = zipfile.ZipFile("/opt/IORDan/archive/" + zipname+'.zip', 'w', zipfile.ZIP_DEFLATED)
             z.write(fname)
             z.close()
             os.remove(fname)
