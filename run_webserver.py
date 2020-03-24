@@ -285,7 +285,7 @@ class FilelistHandler(BaseHandler):
         asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
         name = tornado.escape.xhtml_escape(self.current_user)
         self.write ('[')
-        for root, dirs, files in os.walk('upload/'): 
+        for root, dirs, files in os.walk('/opt/IORDan/upload/'): 
                 string=''
                 for f in files:
                     string+='{"name":"'+f+'","creationTime":"'+time.ctime(os.path.getctime(root+"/"+f))+'"},'
