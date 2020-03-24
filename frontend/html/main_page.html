@@ -185,8 +185,8 @@
                                     <div class="header-manipulation">
                                         <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-info" title="Справка"
                                             onclick="">help_outline</i>
-                                        <i class="material-icons" title="Настройки панели дополнительной информации"
-                                            onclick="alert('Недостаточно прав')">settings</i>
+                                        <i class="material-icons" title="Настройки таблицы истории"
+                                            onclick="openPopupWindow('popup_object_history_settings')">settings</i>
                                         <div class="icon-with-count" id="obj_notations_icon">
                                             <i class="material-icons" title="Примечания" onclick="openPopupWindow('popup_object_notations')">comment</i>
                                         </div>
@@ -250,8 +250,8 @@
             </div>
             <div class="popup-content">
                 <div class="popup-tabs" id="object_list_settings_tabs">
-                    <button class="tab-button active" onclick="openTabs('object_list_settings_tabs', this,'object_list_settings')">Настройки</button>
-                    <button class="tab-button" onclick="openTabs('object_list_settings_tabs', this,'object_list_template')">Шаблоны</button>
+                    <button class="tab-button active" onclick="openTab('object_list_settings_tabs', this,'object_list_settings')">Настройки</button>
+                    <button class="tab-button" onclick="openTab('object_list_settings_tabs', this,'object_list_template')">Шаблоны</button>
                 </div>
                 <div id="object_list_settings_tabs_content" class="popup-tabs-content">
                     <div id="object_list_settings" class="tab-content active"></div>
@@ -335,6 +335,23 @@
                         <button id="add_task_btn" class="button-primary" onclick="addIssue()">Добавить</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <div id="popup_object_history_settings" class="popup-fullscreen">
+            <div class="popup-background">
+                <div class="popup-header-fullscreen">
+                    <div class="popup-name">Настройки таблицы истории</div>
+                    <div class="popup-report-operation">
+                        <i class="material-icons" onclick="closePopupWindow('popup_object_history_settings')">close</i>
+                    </div>
+                </div>
+                <div class="popup-content">
+                    <div id="history_settings_content"></div>
+                    <div class="content-center">
+                        <button id="save_history_settings_btn" class="button-primary">Сохранить</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -494,9 +511,9 @@
             </div>
             <div class="popup-content">
                 <div class="popup-tabs" id="contacts_tabs">
-                    <button class="tab-button active" onclick="openTabs('contacts_tabs', this,'contacts_list')">Список контактов</button>
-                    <button class="tab-button" onclick="openTabs('contacts_tabs', this,'contacts_add')">Добавить</button>
-                    <button class="tab-button" onclick="openTabs('contacts_tabs', this,'contacts_edit')">Редактировать</button>
+                    <button class="tab-button active" onclick="openTab('contacts_tabs', this,'contacts_list')">Список контактов</button>
+                    <button class="tab-button" onclick="openTab('contacts_tabs', this,'contacts_add')">Добавить</button>
+                    <button class="tab-button" onclick="openTab('contacts_tabs', this,'contacts_edit')">Редактировать</button>
                 </div>
                 <div id="contacts_tabs_content" class="popup-tabs-content">
                     <div id="contacts_list" class="tab-content active"></div>
@@ -841,13 +858,13 @@
         </div>
         <div class="popup-content">
             <div class="tabs" id="profile_tabs">
-                <button class="tab-button active"
-                    onclick="openTabs('profile_tabs', this,'profile_settings')">Настройки</button>
+                <button class="tab-button active" onclick="openTab('profile_tabs', this, 'profile_basic_data')">Основные данные</button>
+                <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_settings')">Настройки</button>
             </div>
             <div id="profile_tabs_area">
                 <div class="popup-background-with-tabs">
                     <div id="profile_tabs_content" class="tabs-content">
-                        <div id="profile_settings" class="tab-content active">
+                        <div id="profile_basic_data" class="tab-content grid active">
                             <div>
                                 <h3>Основные данные</h3>
                             </div>
@@ -881,7 +898,8 @@
                                     </table>
                                 </form>
                             </div>
-                            <div></div>
+                        </div>
+                        <div id="profile_settings" class="tab-content grid">
                             <div>
                                 <h3>Цветовая схема</h3>
                                 <div id="color_theme_setting">
@@ -934,12 +952,12 @@
             </div>
             <div class="popup-content">
                 <div class="tabs" id="control_tabs">
-                    <button class="tab-button active" onclick="openTabs('control_tabs', this,'control_reports')">Справки</button>
-                    <button class="tab-button" onclick="openTabs('control_tabs', this,'control_report_settings')">Настройка справок</button>
-                    <button id="control_files_tab" class="tab-button default-hidden" onclick="openTabs('control_tabs', this,'control_files')">Работа с файлами</button>
-                    <button id="control_registry_tab" class="tab-button default-hidden" onclick="openTabs('control_tabs', this,'control_registry')">Реестры</button id="control_registry_tab">
-                    <button class="tab-button" onclick="openTabs('control_tabs', this,'control_documents')">Отчеты</button>
-                    <button class="tab-button" onclick="openTabs('control_tabs', this,'control_object_groups')">Группы объектов</button>
+                    <button class="tab-button active" onclick="openTab('control_tabs', this,'control_reports')">Справки</button>
+                    <button class="tab-button" onclick="openTab('control_tabs', this,'control_report_settings')">Настройка справок</button>
+                    <button id="control_files_tab" class="tab-button default-hidden" onclick="openTab('control_tabs', this,'control_files')">Работа с файлами</button>
+                    <button id="control_registry_tab" class="tab-button default-hidden" onclick="openTab('control_tabs', this,'control_registry')">Реестры</button id="control_registry_tab">
+                    <button class="tab-button" onclick="openTab('control_tabs', this,'control_documents')">Отчеты</button>
+                    <button class="tab-button" onclick="openTab('control_tabs', this,'control_object_groups')">Группы объектов</button>
 
                 </div>
                 <div class="popup-background-with-tabs">

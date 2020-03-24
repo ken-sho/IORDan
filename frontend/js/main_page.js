@@ -44,6 +44,7 @@ $(document).ready(function() {
     }
 
     getUserData([getUserRightsData, createCompanyDropdownMenu, getUpdateList]);
+    initializeUserSettings();
 
     $('#add_contact_phone_number').inputmask("(999)999-99-99");
 
@@ -136,6 +137,80 @@ $(document).ready(function() {
         }
     });
 });
+
+function initializeUserSettings() {
+    const ObjectListSettingTable = $('<table>', {class: 'table-form table-settings'});
+
+    let currentValue = 'on';
+
+    if (localStorage.hasOwnProperty('user_settings_display_city') && localStorage.getItem('user_settings_display_city') == 'off') {
+        currentValue = 'off';
+    }
+
+    createTrWithToggle('Отображение города', displayCityHandler, currentValue).appendTo(ObjectListSettingTable);
+
+    $('#profile_settings').append(createUserSettingDiv('Дерево объектов', ObjectListSettingTable));
+
+    function displayCityHandler(elem) {
+        console.log(elem);
+        addPropertyToStorage('local', 'user_settings_display_city', elem.attr('value'));
+        getObjectsTreeData();
+    }
+}
+
+function createUserSettingDiv(settingName, settingContent) {
+    const div = $('<div>');
+    $('<h3>', {text: settingName}).appendTo(div);
+    settingContent.appendTo(div);
+
+    return div;
+}
+
+function createTrWithToggle(toggleName, toggleHandler, currentValue) {
+    const tr = $('<tr>');
+    $('<td>', {text: toggleName}).appendTo(tr);
+    const td = $('<td>').appendTo(tr);
+    const div = $('<div>', {style: 'width: max-content; margin: auto'}).appendTo(td);
+    const labelOn = $('<label>', {class: 'checkbox-container', text: 'Вкл.', style: 'float: left; margin-right: 10px; display: block; text-align: center'}).appendTo(div);
+    const inputOn = $('<input>', {class: 'checkbox', type: 'checkbox', value: 'on'}).appendTo(labelOn);
+    $('<span>', {class: 'checkmark'}).appendTo(labelOn);
+
+    inputOn.on('click', function() {
+        if ($(this).prop('checked')) {
+            toggleHandler($(this));
+        }
+    })
+
+    const labelOff = $('<label>', {class: 'checkbox-container', text: 'Выкл.', style: 'float: left; margin-right: 10px; display: block; text-align: center'}).appendTo(div);
+    const inputOff = $('<input>', {class: 'checkbox', type: 'checkbox',  value: 'off'}).appendTo(labelOff);
+    $('<span>', {class: 'checkmark'}).appendTo(labelOff);
+
+    inputOff.on('click', function() {
+        if ($(this).prop('checked')) {
+            toggleHandler($(this));
+        }
+    })
+
+    if (currentValue == 'on') {
+        inputOn.prop('checked', true);
+    }
+    else if (currentValue == 'off') {
+        inputOff.prop('checked', true);
+    }
+
+    addEventOnOffToggle(inputOn, inputOff);
+
+    return tr;
+}
+
+function addPropertyToStorage(storageType, key, value) {
+    if (storageType == 'local') {
+        localStorage.setItem(key, value);
+    }
+    else if (storageType == 'session') {
+        sessionStorage.setItem(key, value);
+    }
+}
 
 // получение данных о пользователе
 function getUserData(callback) {
@@ -380,21 +455,29 @@ function createObjectsTree(data) {
     const templateSelect = $('#choose_template_select');
 
     var objectTree = JSON.parse(data).object_tree;
+
+    console.log(objectTree);
+
     const objectList = objectTree.object_list;
     OBJECT_TREE_TEMPLATES = objectTree.templates;
     const controlUl = $('<ul>', {id: 'create_object_group_ul'});
 
-    for (const prop in objectList) {
-        const objectData = prop.split('&');
-        const li = $('<li>', { text: objectData[0], class: 'parent-li' }).appendTo('.object-list-tree');
+    for (const object of objectList) {
+        let objectAdress = `${object.city} ${object.street} ${object.house}`;
+    
+        if (localStorage.hasOwnProperty('user_settings_display_city') && localStorage.getItem('user_settings_display_city') == 'off') {
+            objectAdress = `${object.street} ${object.house}`;
+        }
+
+        const li = $('<li>', { text: objectAdress, class: 'parent-li' }).appendTo('.object-list-tree');
         $('<input>', {type: 'checkbox', class: 'object-tree-parent-li-input'}).prependTo(li);
         const parentUl = $('<ul>', { class: 'object-tree-ul hide' }).insertAfter(li);
 
-        const controlLi = $('<li>', {class: 'parent-li', text: objectData[0]}).appendTo(controlUl);
-        $('<input>', {type: 'checkbox', id: `object_${objectData[1]}`,object_id: objectData[1]}).prependTo(controlLi);
+        const controlLi = $('<li>', {class: 'parent-li', text: `${object.city} ${object.street} ${object.house}`}).appendTo(controlUl);
+        $('<input>', {type: 'checkbox', id: `object_${object.id}`, object_id: object.id}).prependTo(controlLi);
 
-        for (i = 0; i < objectList[prop].length; i++) {
-            const apartData = objectList[prop][i].split('&');
+        for (const apartment of object.apartments) {
+            const apartData = apartment.split('&');
             const li = $('<li>', { class: 'object-tree-li', text: apartData[0], accid: apartData[1] }).appendTo(parentUl);
             $('<input>', {type: 'checkbox', class: 'object-tree-apartament-input'}).prependTo(li);
             if (apartData[2] !== 'white') {
@@ -1129,18 +1212,6 @@ function logout() {
     }
 }
 
-// function openCloseInfo() {
-//     let info = $('#update_info_content');
-//     if (info.is(":hidden")) {
-//         $('#update_info_content').show();
-//         $('#obj_content').hide();
-//     }
-//     else {
-//         $('#update_info_content').hide();
-//         $('#obj_content').show();
-//     }
-// }
-
 function openHomePage() {
     $('#update_info_content, .popup-with-menu').hide();
     $('#obj_content').show();
@@ -1151,11 +1222,11 @@ function openInfoPage() {
     $('#obj_content, .popup-with-menu').hide();
 }
 
-function openTabs(tabsId, elem, tabId) {
+function openTab(tabsId, elem, tabId) {
     $(`#${tabsId} .tab-button`).removeClass('active');
     $(elem).addClass('active');
-    $(`#${tabsId}_content .tab-content`).hide();
-    $(`#${tabId}`).show();
+    $(`#${tabsId}_content .tab-content`).removeClass('active');
+    $(`#${tabId}`).addClass('active');
 }
 
 function setCookie(name, value, options) {
@@ -1799,9 +1870,64 @@ function getMainTable() {
     let accid = CURRENT_OBJECT_DATA.accid;
 
     $.post(`/base_func?val_param=account_history&val_param1=${accid}&val_param2=${date}`, function (data) {
-        $('#obj_main_table').html(data);
+        const tableData = JSON.parse(data);
+        console.log(tableData)
+
+
+        const table = $('<table>', { id: 'history_table', class: 'main-table' }).append(
+            $('<thead>').append(
+                $('<tr>')
+            ),
+            $('<tbody>')
+        );
+
+        for (const th of tableData.header) {
+            const isHidden = (th.hidden == 'true');
+            
+            const thElem = $('<th>', {text: th.name}).appendTo(table.find('thead tr'));
+
+            if(isHidden) {
+                thElem.css({'display': 'none'});
+            }
+        }
+
+        for (const row of tableData.body) {
+            const tr = $('<tr>');
+            $('<td>', {text: row.name}).appendTo(tr);
+            for (const elem of row.data) {
+                $('<td>', {text: elem}).appendTo(tr);
+            }
+
+            tr.appendTo(table);
+        }
+
+        const footerTr = $('<tr>', {class: 'tr-bold'});
+        $('<td>', {text: tableData.footer.name}).appendTo(footerTr);
+
+        for (const elem of tableData.footer.data) {
+            $('<td>', {text: elem}).appendTo(footerTr);
+        }
+
+        footerTr.appendTo(table);
+
+        $('#obj_main_table').html(table);
         if ($('#main_calendar').is(':hidden')) $('#main_calendar').show();
+
+        initializeAccountHistorySettings(tableData);
     });
+}
+
+function sendAccountHistorySettings(data) {
+    if (!isEmpty(data)) {
+        $.ajax({
+            type: 'POST',
+            url: `/base_func?val_param=chg_history_setting`,
+            data: JSON.stringify(data),
+            success: function (data) {
+                console.log(data);
+            }
+        });
+    }
 }
 
 function createRegistryCalendar() {
@@ -3423,7 +3549,7 @@ function getRegistryList(type) {
 function initializeRegistrySettings(registryId, registryData) {
     $('#popup_registry_settings .popup-content').empty();
     const div = $('<div>', {style: 'height: 500px; overflow: auto'});
-    const table = $('<table>', {id: 'registry_column_settings_table', class: 'table-form'});
+    const table = $('<table>', {id: 'registry_column_settings_table', class: 'table-form table-settings'});
 
     $('<tr>').append(
         $('<th>', {text: 'Столбец'}),
@@ -3466,8 +3592,110 @@ function initializeRegistrySettings(registryId, registryData) {
     ).appendTo('#popup_registry_settings .popup-content');
 }
 
+function initializeAccountHistorySettings(tableData) {
+    let changedSettingsObj = {};
+
+    $('#history_settings_content').empty();
+    const divColumn = $('<div>');
+    const tableColumn = $('<table>', {id: 'history_column_settings_table', class: 'table-form table-settings'});
+
+    $('<tr>').append(
+        $('<th>', {text: 'Столбец'}),
+        $('<th>', {text: 'Отображение'})
+    ).appendTo(tableColumn);
+
+    for (const elem of tableData.header) {
+        const isHidden = (elem.hidden == 'true');
+        const tr = $('<tr>');
+        $('<td>', {text: elem.name}).appendTo(tr);
+        const td = $('<td>').appendTo(tr);
+        const div = $('<div>', {style: 'width: max-content; margin: auto'}).appendTo(td);
+        const labelOn = $('<label>', {class: 'checkbox-container', text: 'Вкл.', style: 'float: left; margin-right: 10px; display: block; text-align: center'}).appendTo(div);
+        const inputOn = $('<input>', {class: 'checkbox', type: 'checkbox', value: 'on', setting_type: 'column', setting_name: elem.name}).appendTo(labelOn);
+        $('<span>', {class: 'checkmark'}).appendTo(labelOn);
+
+        addSettingChangeToObj(changedSettingsObj, inputOn, `column_${elem.name}`, isHidden);
+
+        const labelOff = $('<label>', {class: 'checkbox-container', text: 'Выкл.', style: 'float: left; margin-right: 10px; display: block; text-align: center'}).appendTo(div);
+        const inputOff = $('<input>', {class: 'checkbox', type: 'checkbox',  value: 'off', setting_type: 'column', setting_name: elem.name}).appendTo(labelOff);
+        $('<span>', {class: 'checkmark'}).appendTo(labelOff);
+
+        addSettingChangeToObj(changedSettingsObj, inputOff, `column_${elem.name}`, isHidden);
+
+
+        if (isHidden) {
+            inputOff.prop('checked', true);
+        }
+        else {
+            inputOn.prop('checked', true);
+        }
+
+        addEventOnOffToggle(inputOn, inputOff);
+
+        tr.appendTo(tableColumn);
+    }
+
+    tableColumn.appendTo(divColumn);
+
+    divColumn.appendTo('#history_settings_content');
+
+    const divService = $('<div>');
+    const tableService = $('<table>', {id: 'history_service_settings_table', class: 'table-form table-settings'});
+
+    $('<tr>').append(
+        $('<th>', {text: 'Услуга'}),
+        $('<th>', {text: 'Отображение'})
+    ).appendTo(tableService);
+
+    for (const elem of tableData.body) {
+        const isHidden = (elem.hidden == 'true');
+        const tr = $('<tr>');
+        $('<td>', {text: elem.name}).appendTo(tr);
+        const td = $('<td>').appendTo(tr);
+        const div = $('<div>', {style: 'width: max-content; margin: auto'}).appendTo(td);
+        const labelOn = $('<label>', {class: 'checkbox-container', text: 'Вкл.', style: 'float: left; margin-right: 10px; display: block; text-align: center'}).appendTo(div);
+        const inputOn = $('<input>', {class: 'checkbox', type: 'checkbox', value: 'on', setting_type: 'service', setting_name: elem.name}).appendTo(labelOn);
+        $('<span>', {class: 'checkmark'}).appendTo(labelOn);
+
+        addSettingChangeToObj(changedSettingsObj, inputOn, `service_${elem.name}`, elem.hidden);
+
+
+        const labelOff = $('<label>', {class: 'checkbox-container', text: 'Выкл.', style: 'float: left; margin-right: 10px; display: block; text-align: center'}).appendTo(div);
+        const inputOff = $('<input>', {class: 'checkbox', type: 'checkbox',  value: 'off', setting_type: 'service', setting_name: elem.name}).appendTo(labelOff);
+        $('<span>', {class: 'checkmark'}).appendTo(labelOff);
+
+        addSettingChangeToObj(changedSettingsObj, inputOff, `service_${elem.name}`, isHidden);
+
+        if (isHidden) {
+            inputOff.prop('checked', true);
+        }
+        else {
+            inputOn.prop('checked', true);
+        }
+
+        addEventOnOffToggle(inputOn, inputOff);
+
+        tr.appendTo(tableService);
+    }
+
+    tableService.appendTo(divService);
+
+    divService.appendTo('#history_settings_content');
+
+    $('#save_history_settings_btn').off('click');
+    $('#save_history_settings_btn').on('click', function() {
+        let changedSettingsArr = [];
+
+        for (const setting in changedSettingsObj) {
+            changedSettingsArr.push(changedSettingsObj[setting]);
+        }
+
+        sendAccountHistorySettings(changedSettingsArr);
+    });
+}
+
 function addEventOnOffToggle(inputOn, inputOff) {
-    inputOn.on('click', function() {
+    inputOn.on('change', function() {
         if (inputOn.prop('checked')) {
             inputOff.prop('checked', false);
         }
@@ -3476,7 +3704,7 @@ function addEventOnOffToggle(inputOn, inputOff) {
         }
     });
 
-    inputOff.on('click', function() {
+    inputOff.on('change', function() {
         if (inputOff.prop('checked')) {
             inputOn.prop('checked', false);
         }
@@ -3486,6 +3714,20 @@ function addEventOnOffToggle(inputOn, inputOff) {
     });
 }
 
+function addSettingChangeToObj(obj, elem, objKey, hiddenCurrentState) {
+    elem.on('change', function () {
+        const isHidden = elem.attr('value') == 'off';
+
+        if (!obj.hasOwnProperty(objKey)) {
+            const value = { type: elem.attr('setting_type'), name: elem.attr('setting_name'), hidden: isHidden.toString() };
+            obj[objKey] = value;
+        }
+        else if (hiddenCurrentState == isHidden) {
+            delete obj[objKey];
+        }
+        console.log(obj);
+    });
+}
 
 function getRegistryData(registryId, registryName, registryType, documentType) {
     $('#registry_print_icon').off('click');
@@ -3494,6 +3736,7 @@ function getRegistryData(registryId, registryName, registryType, documentType) {
     createContentLoader('#registry_settings_content .block-content');
     $.post(`/base_func?val_param=ree_recodrs&val_param1=${registryId}&val_param2=${documentType}`, (data) => {
         const registryData = JSON.parse(data);
+        console.log(registryData)
         displayRegistry(registryData, registryId, registryName, registryType, documentType);
     });
 }
@@ -4082,6 +4325,7 @@ function convertContentToExcel(content, fileName) {
 }
 
 function selectRegistriesTypeHandler() {
+    $('#registry_type_select').off('change');
     $('#registry_type_select').on('change', function() {
         if ($(this).val() == 'regular') {
             getRegistryList('regular');
