@@ -326,7 +326,7 @@ class OpFileHandler(tornado.web.RequestHandler):
         attr = self.get_argument('attr')
         fname = self.get_argument('fname')
         if attr=='del':
-           os.remove('upload/'+fname)
+           os.remove('/opt/IORDan/upload/'+fname)
            self.write('success')
         elif attr=='runformat':
             org_id = self.get_argument('org_id')
