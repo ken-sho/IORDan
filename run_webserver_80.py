@@ -459,11 +459,11 @@ application = tornado.web.Application([
     (r"/redmine", RedmineHandler),
     (r"/report_srv", ReportsrvHandler),
     (r"/conver", ConverHandler),
-    (r"/css/(.*)", tornado.web.StaticFileHandler, {'path': 'frontend/css'}),
-    (r"/js/(.*)", tornado.web.StaticFileHandler, {'path': 'frontend/js'}),
+    (r"/css/(.*)", tornado.web.StaticFileHandler, {'path': 'opt/IORDan/frontend/css'}),
+    (r"/js/(.*)", tornado.web.StaticFileHandler, {'path': 'opt/IORDan/frontend/js'}),
     (r"/icon/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/material-design-icons'}),
-    (r"/images/(.*)", tornado.web.StaticFileHandler, {'path': 'frontend/images'}),
-    (r"/download/(.*)", tornado.web.StaticFileHandler, {'path': 'download'}),
+    (r"/images/(.*)", tornado.web.StaticFileHandler, {'path': 'opt/IORDan/frontend/images'}),
+    (r"/download/(.*)", tornado.web.StaticFileHandler, {'path': 'opt/IORDan/download'}),
 #], **settings)
 ], **settings, debug=True)
 
