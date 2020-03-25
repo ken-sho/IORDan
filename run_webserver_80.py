@@ -37,7 +37,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
 class LoginHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render("opt/IORDan/frontend/html/login_page.html")
+        self.render("frontend/html/login_page.html")
 
     def post(self):
         passwd =  self.get_argument('password')
@@ -45,7 +45,6 @@ class LoginHandler(tornado.web.RequestHandler):
         loginname = lname.lower()
         ip_adr = self.request.remote_ip
         asid = login_db.login(loginname, passwd, ip_adr)
-        #print (asid)
         if asid !='no_usr_or_pwd':
             self.set_secure_cookie("user", loginname)
             self.set_secure_cookie("password", passwd)
@@ -63,7 +62,7 @@ class MainHandler(BaseHandler):
         if not self.current_user:
             self.redirect("/")
             return
-        self.render("opt/IORDan/frontend/html/main_page.html")
+        self.render("frontend/html/main_page.html")
         #self.write('Нет прав доступа')
 
 class AnminHandler(BaseHandler):
@@ -83,7 +82,7 @@ class AnminHandler(BaseHandler):
         except:
             utupe = ''
         if utupe=='admin':
-            self.render("opt/IORDan/frontend/html/admin_page.html")
+            self.render("frontend/html/admin_page.html")
         else:
             self.write('Нет прав доступа')
 
@@ -214,7 +213,6 @@ class ReportHandler(BaseHandler):
         cur = conn.cursor()
         if rtype == 'certificate' and multi=='':
             q_sql = "select report.sprav"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"')"
-            print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
@@ -225,7 +223,6 @@ class ReportHandler(BaseHandler):
             dateb = self.get_argument('dateb')
             datee = self.get_argument('datee')
             q_sql = "select report.rep"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"','"+ dateb +"','"+ datee +"')"
-            print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
@@ -245,7 +242,6 @@ class ReportHandler(BaseHandler):
             dateb = self.get_argument('dateb')
             datee = self.get_argument('datee')
             q_sql = "select report.rep_fast_access('"+ asid +"','"+ accid +"','"+ rtype +"','"+ dateb +"','"+ datee +"','"+ multi +"')"
-            print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
@@ -285,7 +281,7 @@ class FilelistHandler(BaseHandler):
         asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
         name = tornado.escape.xhtml_escape(self.current_user)
         self.write ('[')
-        for root, dirs, files in os.walk('upload/'): 
+        for root, dirs, files in os.walk('/opt/IORDan/upload/'): 
                 string=''
                 for f in files:
                     string+='{"name":"'+f+'","creationTime":"'+time.ctime(os.path.getctime(root+"/"+f))+'"},'
@@ -300,12 +296,12 @@ class UploadHandler(tornado.web.RequestHandler):
         file1 = self.request.files['file'][0]
         original_fname = file1['filename']
         #fexist = os.path.exists("www/upload/" + autor + "/" + original_fname)
-        fexist = os.path.exists("upload/" + original_fname)
+        fexist = os.path.exists("/opt/IORDan/upload/" + original_fname)
         if fexist==True:
            for cnt in range (1,1000):
                final_filename = "Копия_"+str(cnt)+"-"+original_fname
                #fexist = os.path.exists("upload/" + autor + "/" + final_filename)
-               fexist = os.path.exists("upload/" + final_filename)
+               fexist = os.path.exists("/opt/IORDan/upload/" + final_filename)
                if fexist==True:
                   cnt =+1
                else:
@@ -313,7 +309,7 @@ class UploadHandler(tornado.web.RequestHandler):
         else:
            final_filename = original_fname
         #output_file = open("upload/" + autor + "/" + final_filename, 'wb')
-        output_file = open("upload/" + final_filename, 'wb')
+        output_file = open("/opt/IORDan/upload/" + final_filename, 'wb')
         output_file.write(file1['body'])
         output_file.close()
         self.write('success')
@@ -326,12 +322,12 @@ class OpFileHandler(tornado.web.RequestHandler):
         attr = self.get_argument('attr')
         fname = self.get_argument('fname')
         if attr=='del':
-           os.remove('upload/'+fname)
+           os.remove('/opt/IORDan/upload/'+fname)
            self.write('success')
         elif attr=='runformat':
             org_id = self.get_argument('org_id')
             fname_short = fname
-            fname = "upload/" + fname
+            fname = "/opt/IORDan/upload/" + fname
             conn = db_conn.db_connect('web_receivables')
             loadxls.LoadFile(fname,conn,asid,fname_short)
             cur = conn.cursor()
@@ -339,7 +335,7 @@ class OpFileHandler(tornado.web.RequestHandler):
             cur.execute(q_sql)
             conn.commit()
             zipname=str(time.time())
-            z = zipfile.ZipFile("archive/" + zipname+'.zip', 'w', zipfile.ZIP_DEFLATED)
+            z = zipfile.ZipFile("/opt/IORDan/archive/" + zipname+'.zip', 'w', zipfile.ZIP_DEFLATED)
             z.write(fname)
             z.close()
             os.remove(fname)
@@ -379,7 +375,6 @@ class BankTemplHandler(BaseHandler):
         conn = db_conn.db_connect('web_receivables')
         cur = conn.cursor()
         q_sql = "select main.load_bank_doc('"+asid +"','"+ doc_id +"','"+ num +"','"+ page_json +"','"+ doc_summ +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -424,11 +419,12 @@ class ReportsrvHandler(BaseHandler):
             conn = db_conn.db_connect('web_receivables')
             cur = conn.cursor()
             q_sql = "select report."+attr+"('"+ asid +"','"+ orgid +"','"+param+"')"
-            print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
             self.write(res)
+            encoded = base64.b64encode(q_sql.encode()).decode()
+            logg_web.add_log(asid,encoded,'Выполение отчёта '+attr)
 
 class ConverHandler(BaseHandler):
     def post(self):
@@ -459,13 +455,13 @@ application = tornado.web.Application([
     (r"/redmine", RedmineHandler),
     (r"/report_srv", ReportsrvHandler),
     (r"/conver", ConverHandler),
-    (r"/css/(.*)", tornado.web.StaticFileHandler, {'path': 'opt/IORDan/frontend/css'}),
-    (r"/js/(.*)", tornado.web.StaticFileHandler, {'path': 'opt/IORDan/frontend/js'}),
+    (r"/css/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/frontend/css'}),
+    (r"/js/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/frontend/js'}),
     (r"/icon/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/material-design-icons'}),
-    (r"/images/(.*)", tornado.web.StaticFileHandler, {'path': 'opt/IORDan/frontend/images'}),
-    (r"/download/(.*)", tornado.web.StaticFileHandler, {'path': 'opt/IORDan/download'}),
+    (r"/images/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/frontend/images'}),
+    (r"/download/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/download'}),
 #], **settings)
-], **settings, debug=True)
+])
 
 if __name__ == "__main__":
     print ("WEB server Running...")
