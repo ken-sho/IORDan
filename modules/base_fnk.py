@@ -37,6 +37,7 @@ import logg_web
 #house_groups_list
 #add_usr_hsgrlst
 #chgthead_reereestrs
+#chg_history_setting
 
 
 def fnk_lst (asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10):
@@ -50,6 +51,7 @@ def fnk_lst (asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_par
             res=(row[0])
     elif val_param=='account_history':
         q_sql = "select main.account_history('','"+ val_param1 +"','"+ val_param2 +"')"
+        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -162,20 +164,16 @@ def fnk_lst (asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_par
         logg_web.add_log(asid,encoded,'Смена настроек пользователя')
     elif val_param=='ree_reestrs':
         q_sql = "select main.ree_reestrs('"+ asid +"','"+ val_param1 +"','"+ orgid +"','"+ val_param2 +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
     elif val_param=='ree_recodrs':
         q_sql = "select main.ree_recodrs('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
     elif val_param=='addchg_ree_recodrs':
         q_sql = "select main.addchg_ree_recodrs('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"','"+ val_param3 +"','"+ val_param4 +"','"+ val_param5 +"','"+ val_param6 +"','"+ val_param7 +"','"+ val_param8 +"','"+ val_param9 +"','"+ val_param10 +"')"
-        print(val_param10)
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -218,6 +216,10 @@ def fnk_lst (asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_par
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Закрытие реестра')
+    elif val_param=='chg_history_setting':
+        #q_sql = "select main.ree_reestrs_close('"+ asid +"','"+ val_param1 +"')"
+        print(adate)
+
 
     conn.commit()
     cur.close()

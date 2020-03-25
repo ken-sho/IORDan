@@ -45,7 +45,6 @@ class LoginHandler(tornado.web.RequestHandler):
         loginname = lname.lower()
         ip_adr = self.request.remote_ip
         asid = login_db.login(loginname, passwd, ip_adr)
-        #print (asid)
         if asid !='no_usr_or_pwd':
             self.set_secure_cookie("user", loginname)
             self.set_secure_cookie("password", passwd)
@@ -214,7 +213,6 @@ class ReportHandler(BaseHandler):
         cur = conn.cursor()
         if rtype == 'certificate' and multi=='':
             q_sql = "select report.sprav"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"')"
-            print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
@@ -225,7 +223,6 @@ class ReportHandler(BaseHandler):
             dateb = self.get_argument('dateb')
             datee = self.get_argument('datee')
             q_sql = "select report.rep"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"','"+ dateb +"','"+ datee +"')"
-            print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
@@ -245,7 +242,6 @@ class ReportHandler(BaseHandler):
             dateb = self.get_argument('dateb')
             datee = self.get_argument('datee')
             q_sql = "select report.rep_fast_access('"+ asid +"','"+ accid +"','"+ rtype +"','"+ dateb +"','"+ datee +"','"+ multi +"')"
-            print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
@@ -379,7 +375,6 @@ class BankTemplHandler(BaseHandler):
         conn = db_conn.db_connect('web_receivables')
         cur = conn.cursor()
         q_sql = "select main.load_bank_doc('"+asid +"','"+ doc_id +"','"+ num +"','"+ page_json +"','"+ doc_summ +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -424,11 +419,12 @@ class ReportsrvHandler(BaseHandler):
             conn = db_conn.db_connect('web_receivables')
             cur = conn.cursor()
             q_sql = "select report."+attr+"('"+ asid +"','"+ orgid +"','"+param+"')"
-            print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
             self.write(res)
+            encoded = base64.b64encode(q_sql.encode()).decode()
+            logg_web.add_log(asid,encoded,'Выполение отчёта '+attr)
 
 class ConverHandler(BaseHandler):
     def post(self):
@@ -465,7 +461,7 @@ application = tornado.web.Application([
     (r"/images/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/frontend/images'}),
     (r"/download/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/download'}),
 #], **settings)
-], **settings, debug=True)
+])
 
 if __name__ == "__main__":
     print ("WEB server Running...")
