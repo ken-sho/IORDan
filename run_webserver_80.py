@@ -460,8 +460,7 @@ application = tornado.web.Application([
     (r"/icon/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/material-design-icons'}),
     (r"/images/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/frontend/images'}),
     (r"/download/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/download'}),
-#], **settings)
-])
+], **settings)
 
 if __name__ == "__main__":
     print ("WEB server Running...")
