@@ -38,6 +38,7 @@ import logg_web
 #add_usr_hsgrlst
 #chgthead_reereestrs
 #chg_history_setting
+#chg_reputation
 
 
 def fnk_lst (asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10):
@@ -219,6 +220,13 @@ def fnk_lst (asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_par
     elif val_param=='chg_history_setting':
         #q_sql = "select main.ree_reestrs_close('"+ asid +"','"+ val_param1 +"')"
         print(adate)
+    elif val_param=='chg_reputation':
+        q_sql = "select main.chg_reputation('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"')"
+        cur.execute(q_sql)
+        for row in cur:
+            res=(row[0])
+        encoded = base64.b64encode(q_sql.encode()).decode()
+        logg_web.add_log(asid,encoded,'Изменение репутации')
 
 
     conn.commit()
