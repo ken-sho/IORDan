@@ -643,8 +643,11 @@ function getObjectData() {
         url: "/base_func",
         data: encodeURI(`val_param=adr_info&val_param1=${CURRENT_OBJECT_DATA.accid}`),
         success: function (data) {
+            // console.log(data)
                         
             OBJECT_DATA = JSON.parse(data);
+
+            initializeObjectReputation();
 
             getObjectAgreementsData();
 
@@ -666,6 +669,90 @@ function getObjectData() {
 
             clickDropdownMenu();
         }
+    });
+}
+
+function initializeObjectReputation() {
+
+    $('#object_reputation_indicator').remove();
+
+    let reputationIcon = 'radio_button_unchecked';
+    let iconColor = 'yellow';
+    let iconTitle = 'Нейтральная репутация (желтый)';
+
+    const reputation = OBJECT_DATA.reputation;
+    if (reputation == 'bad') {
+        reputationIcon = 'sentiment_dissatisfied';
+        iconColor = 'red';
+        iconTitle = 'Плохая репутация (красный)';
+    }
+    else if (reputation == 'good') {
+        reputationIcon = 'sentiment_satisfied';
+        iconColor = 'green';
+        iconTitle = 'Хорошая репутация (зеленый)';
+    }
+
+    const changeReputationContent = $('<div>', {id: 'jq-dropdown-change-object-reputation', class: 'jq-dropdown jq-dropdown-tip jq-dropdown-anchor-right'}).append(
+        $('<div>', {class: 'jq-dropdown-panel'}).append(
+            $('<div>', {class: 'object-reputation-elem', value: 'good'}).append(
+                $('<span>').append(
+                    $('<i>', {class: 'material-icons', text: 'sentiment_satisfied', style: 'color: green; vertical-align: middle'})
+                ),
+                $('<span>', {text: 'Хорошая репутация'})
+            ).on('click',  function() {changeObjectReputation($(this))}),
+            $('<div>', {class: 'object-reputation-elem', value: 'neutral'}).append(
+                $('<span>').append(
+                    $('<i>', {class: 'material-icons', text: 'radio_button_unchecked', style: 'color: yellow; vertical-align: middle'})
+                ),
+                $('<span>', {text: 'Нейтральная репутация'})
+            ).on('click',  function() {changeObjectReputation($(this))}),
+            $('<div>', {class: 'object-reputation-elem', value: 'bad'}).append(
+                $('<span>').append(
+                    $('<i>', {class: 'material-icons', text: 'sentiment_dissatisfied', style: 'color: red; vertical-align: middle'})
+                ),
+                $('<span>', {text: 'Плохая репутация'})
+            ).on('click',  function() {changeObjectReputation($(this))})
+        )
+    )
+
+    changeReputationContent.find(`div[value=${reputation}]`).addClass('active');
+
+    changeReputationContent.appendTo('body');
+
+    $('<i>', {id: 'object_reputation_indicator', class: 'material-icons', title: `${iconTitle}. Нажмите, чтобы изменить`, text: reputationIcon, style: `color:${iconColor}`, 'data-jq-dropdown' : '#jq-dropdown-change-object-reputation'}).appendTo('#obj_ls_info .header-manipulation');
+}
+
+function changeObjectReputation(elem) {
+    const reputationValue = elem.attr('value');
+
+    $('.object-reputation-elem').removeClass('active');
+    elem.addClass('active');
+
+    $.post(encodeURI(`/base_func?val_param=chg_reputation&val_param1=${CURRENT_OBJECT_DATA.accid}&val_param2=${reputationValue}`), function(data) {
+        OBJECT_DATA.reputation = reputationValue;
+        $('#jq-dropdown-change-object-reputation').jqDropdown('hide');
+
+        let reputationIcon = 'radio_button_unchecked';
+        let iconColor = 'yellow';
+        let iconTitle = 'Нейтральная репутация (желтый)';
+
+        const reputation = OBJECT_DATA.reputation;
+        if (reputation == 'bad') {
+            reputationIcon = 'sentiment_dissatisfied';
+            iconColor = 'red';
+            iconTitle = 'Плохая репутация (красный)';
+        }
+        else if (reputation == 'good') {
+            reputationIcon = 'sentiment_satisfied';
+            iconColor = 'green';
+            iconTitle = 'Хорошая репутация (зеленый)';
+        }
+
+        $('#object_reputation_indicator').attr('title', iconTitle);
+        $('#object_reputation_indicator').css({'color': `${iconColor}`});
+        $('#object_reputation_indicator').text(reputationIcon);
+
+        showPopupNotification('Репутация успешно изменена!');
     });
 }
 
