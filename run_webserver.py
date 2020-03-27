@@ -353,7 +353,6 @@ class BankTemplHandler(BaseHandler):
         conn = db_conn.db_connect('web_receivables')
         cur = conn.cursor()
         q_sql = "select loader.bank_template"+tname +"('"+asid +"','"+ pid +"','"+ orgid +"')"
-        print(q_sql)
         cur.execute(q_sql)
         #print(conn.notices)
         #self.write(conn.notices)
@@ -379,6 +378,8 @@ class BankTemplHandler(BaseHandler):
         for row in cur:
             res=(row[0])
             self.write(res)
+        encoded = base64.b64encode(q_sql.encode()).decode()
+        logg_web.add_log(asid,encoded,'Проводка банковского документа')
         conn.commit()
         cur.close()
         conn.close()
