@@ -4426,7 +4426,6 @@ function selectRegistriesTypeHandler() {
 function getCompanyDocumentsList() {
     $.post('/report_srv?attr=list', function(data) {
         const documentsList = JSON.parse(data);
-        console.log(documentsList)
         if (!isEmpty(documentsList)) {
             showCompanyDocumentsList(documentsList);
         }
@@ -4437,6 +4436,7 @@ function getCompanyDocumentsList() {
 }
 
 function showCompanyDocumentsList(data) {
+    console.log(data)
     $('#control_documents .block-content').empty();
     const table = $('<table>', {id: 'control_documents_list_table', class: 'block-table'});
     for (const document in data) {
@@ -4444,8 +4444,13 @@ function showCompanyDocumentsList(data) {
             $('<td>', {text: document})
         ).appendTo(table);
 
-        tr.on('click',  function() {
-            initializeCompanyDocumentPopupWindow(document, data[document].interface, data[document].fnk_name);
+        tr.on('click', function() {
+            if (!isEmpty(data[document].interface[0])) {
+                initializeCompanyDocumentPopupWindow(document, data[document].interface, data[document].fnk_name);
+            }
+            else {
+                getCompanyDocument(data[document].fnk_name, document, 'withoutParameters');
+            }
         });
     }
     table.appendTo('#control_documents .block-content');
@@ -4462,7 +4467,28 @@ function initializeCompanyDocumentPopupWindow(documentName, interfaceData, funcN
         for (const elem of interfaceData[line]) {
             console.log(elem)
             if (elem.type == 'input') {
-                const input = $('<input>', {type: elem.input_type, parameter_name: elem.parameter_name}).appendTo(div);
+                const input = $('<input>', {parameter_name: elem.parameter_name, date_type: elem.date_type});
+                if (elem.date_type == 'full') {
+                    input.attr('type', elem.input_type);
+                }
+                else if (elem.date_type == 'short') {
+                    input.attr('type', 'text');
+                    input.datepicker({
+                        dateFormat: "mm.yy",
+                        changeMonth: true,
+                        changeYear: true,
+                        showButtonPanel: true,
+                        yearRange: '2005:2020',
+                        beforeShow: function(input, inst) {
+                            $('#ui-datepicker-div').addClass('input-datepicker');
+                        },
+    
+                        onClose: function (dateText, inst) {
+                            $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+                        }
+                    });
+                }
+                input.appendTo(div);
                 input.before($('<span>', {text: elem.interface_name}));
             }
         }
@@ -4472,7 +4498,7 @@ function initializeCompanyDocumentPopupWindow(documentName, interfaceData, funcN
 
     $('<div>', {class: 'form-submit-btn'}).append(
         $('<button>', {class: 'button-primary', text: 'Выполнить'}).on('click', function() {
-            getCompanyDocument(funcName, documentName);
+            getCompanyDocument(funcName, documentName, 'withParameters');
         })
     ).appendTo(parentDiv);
 
@@ -4482,24 +4508,39 @@ function initializeCompanyDocumentPopupWindow(documentName, interfaceData, funcN
 
 }
 
-function getCompanyDocument(funcName, documentName) {
+function getCompanyDocument(funcName, documentName, parameters) {
 
-    let parametersData =  {};
-    const validateinputsArray = [];
-
-    $('#popup_company_document_settings input').each(function() {
-        const input = $(this);
-        validateinputsArray.push(input);
-
-
-        if (input.val() !== '') {
-            parametersData[input.attr('parameter_name')] = RemakeDateFormatFromInput(input.val());
+    if (parameters == 'withParameters') {
+        let parametersData =  {};
+        const validateinputsArray = [];
+    
+        $('#popup_company_document_settings input').each(function() {
+            const input = $(this);
+            validateinputsArray.push(input);
+    
+    
+            if (input.val() !== '') {
+                if (input.attr('date_type') == 'full') {
+                    parametersData[input.attr('parameter_name')] = RemakeDateFormatFromInput(input.val());
+                }
+                else if (input.attr('date_type') == 'short') {
+                    parametersData[input.attr('parameter_name')] = input.val();
+                }
+            }
+        })
+    
+        console.log(parametersData);
+    
+        if (validateFormInputs(validateinputsArray)) {
+            performAjax(funcName, documentName, parametersData);
         }
-    })
-
-    console.log(parametersData);
-
-    if (validateFormInputs(validateinputsArray)) {
+    }
+    else if (parameters == 'withoutParameters') {
+        const parametersData = {};
+        performAjax(funcName, documentName, parametersData);
+    }
+    
+    function performAjax(funcName, documentName, parametersData) {
         $('#popup_company_document .popup-content').empty();
         $('#popup_company_document .popup-name').html(documentName);
         openPopupWindow('popup_company_document');
@@ -4510,7 +4551,7 @@ function getCompanyDocument(funcName, documentName) {
             data: JSON.stringify(parametersData),
             success: function(data) {
                 $('#popup_company_document .popup-content').html(data);
-
+    
                 $('#document_convert_to_excel_btn').off('click');
                 $('#document_convert_to_excel_btn').on('click', function() {
                     convertContentToExcel(data, documentName);
