@@ -3948,7 +3948,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                 if (!registryIsBlocked) {    
                     const editEntryIcon = $('<i>', { class: 'material-icons', text: 'edit', title: 'Изменить' }).appendTo(tdOperation);
                     editEntryIcon.on('click', function() {
-                        openEditRegistryEntryPopup(registryId, entry.id, entryData);
+                        openEditRegistryEntryPopup(registryId, entry.id, entryData, registryName, registryType, documentType);
                     });
                     $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить'}).on('click', function() {
                         deleteRegistryEntry(registryId, entry.id, registryName, registryType, documentType)
@@ -4107,7 +4107,7 @@ function openAddRegistryEntryPopup(registryId, registryName, registryType, docum
     openPopupWindow('popup_add_edit_registry_entry');
 }
 
-function openEditRegistryEntryPopup(registryId, entryId, entryData) {
+function openEditRegistryEntryPopup(registryId, entryId, entryData, registryName, registryType, documentType) {
     $('#popup_add_edit_registry_entry .popup-name').text('Изменить запись в реестре');
     $('#add_registry_entry_btn').text('Сохранить');
     $('#add_entry_total_sum').attr('disabled', true);
