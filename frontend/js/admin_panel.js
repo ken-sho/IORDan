@@ -13,6 +13,15 @@ export function createLayout() {
         )
     ).appendTo('body');
 
+    $('<div>', {id: 'popup_background'}).on('click', (e) => {
+        if (e.target !== e.currentTarget) {
+            return;
+        }
+        else {
+            $('#popup_background, .popup-window').fadeOut(200);
+        }
+    }).appendTo('body');
+    
     (function createTabs() {
         for (const tab of PRIMARY_DATA.tabs) {
             $('<div>', { id: tab.id, class: 'main-tab' }).append(
@@ -42,7 +51,9 @@ export function initializeFunctions() {
             const tableHead = $('<tr>');
 
             for (const column of func.table_columns) {
-                $('<th>', {text: column}).appendTo(tableHead);
+                for (const elem in column) {
+                    $('<th>', {text: elem}).appendTo(tableHead);
+                }
             }
 
             tableHead.appendTo(table);
@@ -51,9 +62,9 @@ export function initializeFunctions() {
                 let requestData = JSON.parse(data);
                 console.log(requestData)
 
-                if (func.table_sorting) {
+                // if (func.table_sorting) {
 
-                    console.log(Object.entries(requestData).sort((a, b) => b.date_cre - a.date_cre));
+                    // console.log(Object.entries(requestData).sort((a, b) => b.date_cre - a.date_cre));
 
                     // const sortProperty = func.table_sorting.property;
                     // let sortedRequestData = Object.values(requestData).sort(function (a, b) {
@@ -64,16 +75,22 @@ export function initializeFunctions() {
 
                     // console.log(sortedRequestData)
                     // requestData = sortedRequestData
-                }
+                // }
 
 
 
-                for (const elem in requestData) {
+                for (const elem of requestData) {
                     const row = $('<tr>');
-                    $('<td>', {text: elem}).appendTo(row);
 
-                    for (const cell in requestData[elem]) {
-                        $('<td>', {text: requestData[elem][cell]}).appendTo(row);
+                    for (const column of func.table_columns) {
+                        for (const elem in column) {
+                            $('<td>', {column_name: column[elem]}).appendTo(row);
+                        }
+                    }
+
+                    for (const cell in elem) {
+                        row.find(`td[column_name=${cell}]`).text(elem[cell]);
+                        // $('<td>', {text: elem[cell]}).appendTo(row.find(`td[column_name=${cell}]`));
                     }
 
                     row.appendTo(table);
@@ -83,4 +100,39 @@ export function initializeFunctions() {
             })
         }
     }
+}
+
+export function openPopupWindow(id) {
+    $('.popup-with-menu').each(function() {
+        if ($(this).attr('id') !== 'popup_control') {
+            $(this).hide();
+        }
+    });
+    $('.popup-window, .popup-fullscreen').hide();
+    $(`#${id}, #popup_background`).fadeIn(200);
+
+    if (id == 'popup_search') {
+        setOffsetFastSearchMenu();
+    }
+}
+
+export function closePopupWindow(popupId) {
+    $(`#${popupId}, #popup_background`).fadeOut(200);
+    $('#popup_report .popup-content').empty();
+    $('.main-menu li').removeClass('active');
+    $('#home_page').addClass('active');
+}
+
+export function createPopupLayout(name, id) {
+    const popup = $('<div>', { id: 'add_news_popup', class: 'popup-window' }).append(
+        $('<div>', { class: 'popup-header' }).append(
+            $('<div>', { class: 'popup-name', text: name }),
+            $('<div>', { class: 'popup-close' }).append(
+                $('<i>', { class: 'material-icons', title: 'Закрыть', text: 'close'}).on('click', () => {closePopupWindow(id)})
+            )
+        ),
+        $('<div>', { class: 'popup-content' })
+    )
+
+    return popup;
 }

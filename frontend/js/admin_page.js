@@ -17,11 +17,13 @@ const PRIMARY_DATA = {
             name: 'usr_list',
             parent_tab: 'users_tab_content',
             table_columns: [
-                "Логин",
-                "Id",
-                "Роль",
-                "Примечание",
-                "Название роли"
+                { "Id": "id" },
+                { "Логин": "login" },
+                { "Организация": "organization_name" },
+                { "Id организации": "organization_id" },
+                { "Роль": "role" },
+                { "Примечание": "notation" },
+                { "Название роли": "role_name" }
             ]
         },
         {
@@ -30,10 +32,10 @@ const PRIMARY_DATA = {
             name: 'news_list',
             parent_tab: 'news_tab_content',
             table_columns: [
-                "Id",
-                "Название",
-                "Содержание",
-                "Дата добавления"
+                { "Id": "id" },
+                { "Название": "title" },
+                { "Содержание": "content" },
+                { "Дата добавления": "creation_date" }
             ],
             table_sorting: {property: 'date_cre'} 
         }
@@ -50,7 +52,7 @@ $(document).ready(() => {
             $('<div>', {class: 'block-header-with-manipulation'}).append(
                 $('<div>', {class: 'header', text: 'Список новостей'}),
                 $('<div>', {class: 'header-manipulation'}).append(
-                    $('<i>', {class: 'material-icons', title: 'Добавить новость', text: 'add'})
+                    $('<i>', {class: 'material-icons', title: 'Добавить новость', text: 'add'}).on('click', () => {adminModule.openPopupWindow('add_news_popup')})
                 )
             ),
             $('<div>', {class: 'block-content'})
@@ -68,6 +70,11 @@ $(document).ready(() => {
         );
         $('#users_tab_content').html(usersTabLayout);
     }())
+
+    // (function createPopupLayout() {
+        const addNewsPopup = adminModule.createPopupLayout('Добавить новость', 'add_news_popup');
+        addNewsPopup.appendTo('#popup_background');
+    // }())
 
     adminModule.initializeFunctions();
 });
