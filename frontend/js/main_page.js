@@ -149,7 +149,7 @@ function initializeUserSettings() {
 
     createTrWithToggle('Отображение города', displayCityHandler, currentValue).appendTo(ObjectListSettingTable);
 
-    $('#profile_settings').append(createUserSettingDiv('Дерево объектов', ObjectListSettingTable));
+    $('#object_list_settings_tab').append(createUserSettingDiv('', ObjectListSettingTable));
 
     function displayCityHandler(elem) {
         console.log(elem);
@@ -160,7 +160,10 @@ function initializeUserSettings() {
 
 function createUserSettingDiv(settingName, settingContent) {
     const div = $('<div>');
-    $('<h3>', {text: settingName}).appendTo(div);
+
+    if (settingName !== '') {
+        $('<h3>', {text: settingName}).appendTo(div);
+    }
     settingContent.appendTo(div);
 
     return div;
@@ -275,7 +278,7 @@ function initializeUserRight() {
             $('#control_files_tab').removeClass('default-hidden');
         }
         if (userRights.includes(2)) {
-            getRegistryList('regular');
+            getRegistryList();
             selectRegistriesTypeHandler();
             $('#control_registry_tab').removeClass('default-hidden');
         }    
@@ -284,7 +287,7 @@ function initializeUserRight() {
         getControlFilesList();
         getControlProcessedFilesList();
         getControlPerformedFilesList();
-        getRegistryList('regular');
+        getRegistryList();
         selectRegistriesTypeHandler();
         $('.default-hidden').removeClass('default-hidden');
         getCompanyDocumentsList();
@@ -598,6 +601,8 @@ function createObjectsTree(data) {
                 CURRENT_OBJECT_DATA.apartNum = $(this).text();
                 CURRENT_OBJECT_DATA.adress = $(this).parent().prev().text();
                 CURRENT_OBJECT_DATA.accid = accid;
+
+                $('#obj_ls_info .header').attr('did', accid);
 
                 getObjectData();
 
@@ -1221,7 +1226,7 @@ function createDropdownMenuForFile(menuNum, liArr, fileId, orgId) {
         $('<ul>', {class: 'jq-dropdown-menu'})
     ).appendTo($('body'));
     for (const template of liArr) {
-        $('<li>', {class: 'dropdown-menu-item', onclick: `initializationProcessedFileTemplate(${fileId}, ${orgId}, ${template.number})`}).append(
+        $('<li>', {class: 'dropdown-menu-item', onclick: `initializeProcessedFileTemplate(${fileId}, ${orgId}, ${template.number})`}).append(
             $('<a>', {text: template.name})
         ).appendTo($(`#jq-dropdown-${menuNum} ul`));
     }
@@ -2032,7 +2037,7 @@ function createRegistryCalendar() {
 function registryCalendarChangeDate() {
 
     const handler = function() {
-        getRegistryList('regular');
+        getRegistryList();
         registryCalendarChangeDate();
     }
 
@@ -2429,12 +2434,11 @@ function getControlPerformedFilesList() {
     });
 }
 
-function initializationProcessedFileTemplate(fileId, companyId, templateNum) {
+function initializeProcessedFileTemplate(fileId, companyId, templateNum) {
 
     $('#template_table, #template_total_td').empty();
     $('#popup_processed_file_template, #popup_background').fadeIn(200);
     createContentLoader('#template_table');
-
 
     $.get(`/bank_template?pid=${fileId}&orgid=${companyId}&templ_name=${templateNum}`, function (data) {
         if (data == 'error_no_row') {
@@ -2641,6 +2645,12 @@ function initializationProcessedFileTemplate(fileId, companyId, templateNum) {
             }
         }
     });
+
+    const statusInterval = setInterval( function() {
+        $.post('/web_request?query=bank_log',  function(data) {
+            console.log(data);
+        });
+    }, 1000);
 }
 
 function initializationPerformedFile(fileId, fileName) {
@@ -3576,25 +3586,26 @@ function deleteObjectsGroupUser(groupNumber, userName, userId) {
     }
 }
 
-function getRegistryList(type) {
+function getRegistryList() {
+    const registryType = $('#registry_type_select').val();
     $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon, #registy_convert_to_excel_btn, #no_registries_div').remove();
     let calendarValue = getCalendarValue('registry_settings_calendar');
     let registryUl;
 
-    if (type == 'regular') {
-        $('#registry_settings_calendar, #regular_registries_ul').show();
+    if (registryType == 'regular') {
         $('#constant_registries_ul').hide();
+        $('#registry_settings_calendar, #regular_registries_ul').show();
         registryUl = $('#regular_registries_ul');
         calendarValue = getCalendarValue('registry_settings_calendar');
     }
-    else if (type == 'constant') {
-        $('#registry_settings_calendar, #regular_registries_ul').hide();
+    else if (registryType == 'constant') {
         $('#constant_registries_ul').show();
+        $('#registry_settings_calendar, #regular_registries_ul').hide();
         registryUl = $('#constant_registries_ul');
         calendarValue = '';
     }
     registryUl.empty();
-    $.post(`/base_func?val_param=ree_reestrs&val_param1=${type}&val_param2=${calendarValue}`, (data) => {
+    $.post(`/base_func?val_param=ree_reestrs&val_param1=${registryType}&val_param2=${calendarValue}`, (data) => {
         const registryList = JSON.parse(data);
         console.log(registryList)
 
@@ -3612,7 +3623,7 @@ function getRegistryList(type) {
                     const tabsCollection = registryUl.find('li');
                     tabsCollection.removeClass('active');
                     $(this).addClass('active');
-                    getRegistryData(registry.id, registry.name, type, registry.doc_type);
+                    getRegistryData(registry.id, registry.name, registryType, registry.doc_type);
                 })
             }
 
@@ -3866,38 +3877,40 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
         if(isHidden) {
             thElem.css({'display': 'none'});
         }
+        else {
+            if (inObject(th.name, firstRowElems)) {
+                if (th.name == 'Примечание') {
+                    $('<td>', {text: th.name, colspan: thead.length - 4, class: 'td-bold'}).appendTo(addEntryTable.find('tr:nth-child(1)'));
+                    $('<td>', {colspan: thead.length - 4}).append(
+                        $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
+                    ).appendTo(addEntryTable.find('tr:nth-child(2)'));
+                }
+                else {
+                    $('<td>', {text: th.name, class: 'td-bold'}).appendTo(addEntryTable.find('tr:nth-child(1)'));
+                    $('<td>').append(
+                        $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
+                    ).appendTo(addEntryTable.find('tr:nth-child(2)'));
+                }
+            }
+            else if (th.name == 'Итого') {
+                $('<td>', {text: `Итого`, colspan: thead.length, class: 'td-bold'}).appendTo(addEntryTable.find('tr:nth-child(5)'));
+                $('<td>', {colspan: thead.length}).append(
+                    $('<input>', {id: 'add_entry_total_sum', type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
+                ).appendTo(addEntryTable.find('tr:nth-child(6)'));
+            }
+            else {
+                if (th.name !== 'Автор' && th.name !== 'Адрес') {
+                    $('<td>', {text: th.name, class: 'td-bold'}).appendTo(addEntryTable.find('tr:nth-child(3)'));
+                    $('<td>').append(
+                        $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
+                    ).appendTo(addEntryTable.find('tr:nth-child(4)'));
+                }
+            }
+        }
 
         const nameProp = { 'name': th.name };
         theadData.push(nameProp);
 
-        if (inObject(th.name, firstRowElems)) {
-            if (th.name == 'Примечание') {
-                $('<td>', {text: th.name, colspan: thead.length - 4, class: 'td-bold'}).appendTo(addEntryTable.find('tr:nth-child(1)'));
-                $('<td>', {colspan: thead.length - 4}).append(
-                    $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
-                ).appendTo(addEntryTable.find('tr:nth-child(2)'));
-            }
-            else {
-                $('<td>', {text: th.name, class: 'td-bold'}).appendTo(addEntryTable.find('tr:nth-child(1)'));
-                $('<td>').append(
-                    $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
-                ).appendTo(addEntryTable.find('tr:nth-child(2)'));
-            }
-        }
-        else if (th.name == 'Итого') {
-            $('<td>', {text: `Итого`, colspan: thead.length, class: 'td-bold'}).appendTo(addEntryTable.find('tr:nth-child(5)'));
-            $('<td>', {colspan: thead.length}).append(
-                $('<input>', {id: 'add_entry_total_sum', type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
-            ).appendTo(addEntryTable.find('tr:nth-child(6)'));
-        }
-        else {
-            if (th.name !== 'Автор' && th.name !== 'Адрес') {
-                $('<td>', {text: th.name, class: 'td-bold'}).appendTo(addEntryTable.find('tr:nth-child(3)'));
-                $('<td>').append(
-                    $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
-                ).appendTo(addEntryTable.find('tr:nth-child(4)'));
-            }
-        }
     }
 
     if (!registryIsBlocked) {
@@ -4414,12 +4427,7 @@ function convertContentToExcel(content, fileName) {
 function selectRegistriesTypeHandler() {
     $('#registry_type_select').off('change');
     $('#registry_type_select').on('change', function() {
-        if ($(this).val() == 'regular') {
-            getRegistryList('regular');
-        }
-        else if ($(this).val() == 'constant') {
-            getRegistryList('constant');
-        }
+            getRegistryList();
     });
 }
 
