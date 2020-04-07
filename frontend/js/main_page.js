@@ -2013,10 +2013,13 @@ function sendAccountHistorySettings(data) {
     if (!isEmpty(data)) {
         $.ajax({
             type: 'POST',
-            url: `/base_func?val_param=chg_history_setting`,
+            url: `/base_func?fnk_name=chg_history_setting`,
             data: JSON.stringify(data),
             success: function (data) {
                 console.log(data);
+                getMainTable()
+                showPopupNotification('Настройки таблицы истории успешно сохранены!');
+
             }
         });
     }
@@ -3691,10 +3694,12 @@ function initializeRegistrySettings(registryId, registryData) {
 }
 
 function initializeAccountHistorySettings(tableData) {
+    console.log(tableData)
     let changedSettingsObj = {};
 
     $('#history_settings_content').empty();
     const divColumn = $('<div>');
+    $('<h3>', {text: 'Отображение столбцов', style: 'text-align: center'}).appendTo(divColumn);
     const tableColumn = $('<table>', {id: 'history_column_settings_table', class: 'table-form table-settings'});
 
     $('<tr>').append(
@@ -3738,6 +3743,7 @@ function initializeAccountHistorySettings(tableData) {
     divColumn.appendTo('#history_settings_content');
 
     const divService = $('<div>');
+    $('<h3>', {text: 'Отображение услуг', style: 'text-align: center'}).appendTo(divService);
     const tableService = $('<table>', {id: 'history_service_settings_table', class: 'table-form table-settings'});
 
     $('<tr>').append(
@@ -3986,18 +3992,18 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
 
     if (!$('#registy_add_entry_btn').length) {
         if (!registryIsBlocked) {
-            $('<button>', {id: 'registy_add_entry_btn', class: 'button-primary', style: 'float: right', title: 'Добавить запись в реестр', text: 'Добавить запись'}).appendTo(headerManipulation);
+            $('<button>', {id: 'registy_add_entry_btn', class: 'button-primary', style: 'float: right', title: 'Добавить запись в реестр', text: 'Добавить запись'}).prependTo(headerManipulation);
         }
-        $('<button>', {id: 'registy_convert_to_excel_btn', class: 'excel-button', title: 'Конвертировать в Excel', text: 'Excel'}).appendTo(headerManipulation);
-        $('<i>', {id: 'registry_settings_icon', class: 'material-icons', title: 'Настройки', text: 'settings'}).on('click', () => {openPopupWindow('popup_registry_settings')}).appendTo(headerManipulation);
-        $('<i>', {id: 'registry_print_icon', class: 'material-icons', title: 'Печать', text: 'print'}).appendTo(headerManipulation);
+        $('<button>', {id: 'registy_convert_to_excel_btn', class: 'excel-button', title: 'Конвертировать в Excel', text: 'Excel'}).prependTo(headerManipulation);
+        $('<i>', {id: 'registry_settings_icon', class: 'material-icons', title: 'Настройки', text: 'settings'}).on('click', () => {openPopupWindow('popup_registry_settings')}).prependTo(headerManipulation);
+        $('<i>', {id: 'registry_print_icon', class: 'material-icons', title: 'Печать', text: 'print'}).prependTo(headerManipulation);
 
         if (registryType == 'regular') {
             if (registryIsBlocked) {
-                $('<i>', {id: 'registry_lock_icon', class: 'material-icons', title: 'Реестр закрыт', text: 'lock'}).appendTo(headerManipulation);
+                $('<i>', {id: 'registry_lock_icon', class: 'material-icons', title: 'Реестр закрыт', text: 'lock'}).prependTo(headerManipulation);
             }
             else {
-                const lockIcon = $('<i>', {id: 'registry_lock_icon', class: 'material-icons', title: 'Реестр открыт. Нажмите, чтобы закрыть реестр', text: 'lock_open'}).appendTo(headerManipulation);
+                const lockIcon = $('<i>', {id: 'registry_lock_icon', class: 'material-icons', title: 'Реестр открыт. Нажмите, чтобы закрыть реестр', text: 'lock_open'}).prependTo(headerManipulation);
                 lockIcon.on('click', function() { 
                     blockRegistry(registryId, registryName, registryType, documentType);
                 });
@@ -4558,7 +4564,9 @@ function getCompanyDocument(funcName, documentName, parameters) {
             url: encodeURI(`/report_srv?attr=${funcName}`),
             data: JSON.stringify(parametersData),
             success: function(data) {
+                console.log(data)
                 $('#popup_company_document .popup-content').html(data);
+                // data.appendTo('#popup_company_document .popup-content')
     
                 $('#document_convert_to_excel_btn').off('click');
                 $('#document_convert_to_excel_btn').on('click', function() {
