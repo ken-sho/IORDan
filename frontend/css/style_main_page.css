@@ -114,7 +114,7 @@ h5 {
     height: 18px;
     color: white;
     background-color: var(--element-color);
-    border-radius: 50%;
+    border-radius: 50% !important;
     text-align: center;
     line-height: 18px;
 }
@@ -259,13 +259,14 @@ nav ul, nav li {
 
 #redmine_content, #news_content, #updates_content {
     width: calc((100% - 48px) / 3);
-    max-height: calc(100% - 42px);
+    max-height: calc(100% - 24px);
     float: left;
     box-sizing: border-box;
-    margin-top: 30px;
+    margin-top: 12px;
     background: #FFFFFF;
     box-shadow: 0px 4px 8px #E6E6EA;
     border-radius: 5px;
+    overflow: auto;
 }
 
 #redmine_content {
@@ -468,6 +469,7 @@ nav ul, nav li {
 
 .popup-fullscreen .popup-content {
     width: 100%;
+    padding: 5px;
     height: calc(100% - 35px);
     overflow: auto;
     background-color: #FFFFFF;
@@ -500,7 +502,7 @@ nav ul, nav li {
 } */
 
 .popup-name {
-    width: 50%;
+    width: auto;
     height: 100%;
     padding-left: 19px;
     padding-top: 8px;
@@ -510,16 +512,16 @@ nav ul, nav li {
 }
 
 .popup-report-operation {
-    width: 50%;
+    width: auto;
     height: 100%;
-    float: left;
-    text-align: right;
+    float: right;
+    display: flex;
 }
 
 .popup-report-operation button,
 .header-manipulation button {
-    margin-top: 2px;
-    margin-right: 13px;
+    height: 100%;
+    border-radius: 0;
 }
 
 #popup_add_edit_registry_entry {
@@ -556,14 +558,33 @@ nav ul, nav li {
     cursor: pointer;
 } */
 
-.popup-report-operation i, .popup-close-fullscreen i {
+.popup-report-operation i,
+.popup-close-fullscreen i,
+.header-manipulation i {
     transition: .15s;
-    margin-right: 13px;
-    margin-top: 6px;
     color: #323232;
-    vertical-align: middle;
     font-size: 24px;
     float: right;
+    height: 100%;
+    width: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 7px;
+}
+
+.popup-report-operation i[title='Закрыть'] {
+    background-color: orangered;
+    color: white;
+}
+
+.popup-report-operation i[title='Закрыть']:hover {
+    background-color: #e63d00;
+}
+
+.popup-report-operation *:last-child,
+.header-manipulation *:last-child {
+    border-top-right-radius: 5px;
 }
 
 .popup-fullscreen-print-btn, #export_button {
@@ -622,7 +643,11 @@ button {
     border: 0;
     padding: 0px 14px;
     text-transform: uppercase;
-    float: right;
+    /* float: right; */
+}
+
+.excel-button:hover {
+    background-color: #195d37;
 }
 
 .button-primary:hover,
@@ -1394,20 +1419,11 @@ div {
 }
 
 .block-header-with-manipulation .header-manipulation {
-    width: max-content;
+    width: auto;
     float: right;
     height: 100%;
     text-align: right;
-}
-
-.header-manipulation i {
-    transition: .15s;
-    margin-right: 13px;
-    margin-top: 5px;
-    color: #323232;
-    vertical-align: middle;
-    font-size: 24px;
-    float: right;
+    display: flex;
 }
 
 .header-manipulation i:hover,
@@ -3118,6 +3134,10 @@ textarea {
     text-align: center;
     border-top: 1px solid lightgray;
     border-bottom: 1px solid lightgray
+}
+
+.table-settings th {
+    border-top: 1px solid lightgray;
 }
 
 .delete-td {

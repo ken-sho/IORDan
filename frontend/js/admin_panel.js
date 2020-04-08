@@ -45,60 +45,109 @@ export function createLayout() {
 
 export function initializeFunctions() {
     for (const func of PRIMARY_DATA.functions) {
-        if (func.type == 'GET') {
+        initializeFunction(func);
+    }
+}
 
-            const table = $('<table>', {class: 'main-table'});
-            const tableHead = $('<tr>');
+function initializeFunction(func) {
+    if (func.type == 'get data') {
 
-            for (const column of func.table_columns) {
-                for (const elem in column) {
-                    $('<th>', {text: elem}).appendTo(tableHead);
+        const table = $('<table>', {class: 'main-table'});
+        const tableHead = $('<tr>');
+
+        for (const column of func.table_columns) {
+            for (const elem in column) {
+                $('<th>', {text: elem}).appendTo(tableHead);
+            }
+        }
+
+        if (func.hasOwnProperty('actions')) {
+            $('<th>', {text: 'Действия'}).appendTo(tableHead);
+        }
+
+        tableHead.appendTo(table);
+
+        $.post(`${PRIMARY_DATA.url_endpoint}?fnk_name=${func.name}`, (data) => {
+            let requestData = JSON.parse(data);
+            console.log(requestData)
+
+            // if (func.table_sorting) {
+
+                // console.log(Object.entries(requestData).sort((a, b) => b.date_cre - a.date_cre));
+
+                // const sortProperty = func.table_sorting.property;
+                // let sortedRequestData = Object.values(requestData).sort(function (a, b) {
+                //     console.log(a, b)
+                //     var dateA = new Date(a.date_cre), dateB = new Date(b.date_cre)
+                //     return dateB - dateA //сортировка по убывающей дате
+                // })
+
+                // console.log(sortedRequestData)
+                // requestData = sortedRequestData
+            // }
+
+            for (const elem of requestData) {
+                const row = $('<tr>');
+
+                for (const column of func.table_columns) {
+                    for (const elem in column) {
+                        $('<td>', {column_name: column[elem]}).appendTo(row);
+                    }
                 }
+
+                for (const cell in elem) {
+                    row.find(`td[column_name=${cell}]`).text(elem[cell]);
+                }
+
+                if (func.hasOwnProperty('actions')) {
+                    const td = $('<td>');
+                    for (const action of func.actions) {
+                        $('<i>', { class: 'material-icons', text: action.icon, title: action.title }).on('click', () => {
+                            if (confirm('Вы уверены?')) {
+
+                                let urlString = `fnk_name=${action.name}`;
+                                let dataObject = {};
+
+                                for (const [key, value] of Object.entries(action.request_data)) {
+                                    dataObject[key] = elem[value];
+
+                                }
+
+                                if (action.hasOwnProperty('general_params')) {
+                                    for (const param of action.general_params) {
+                                        urlString += `&${param}`;
+                                    }
+                                }
+
+                                console.log(urlString, dataObject)
+
+                                // $.post(encodeURI(`${PRIMARY_DATA.url_endpoint}?${urlString}`), (data) => {
+                                //     console.log(data)
+                                // });
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: `${PRIMARY_DATA.url_endpoint}?${urlString}`,
+                                    data: JSON.stringify(dataObject),
+                                    success: (data) => {
+                                        console.log(data);
+                                        initializeFunction(func);
+                                    }
+                                })
+                            }
+                        }).appendTo(td);
+                    }
+                    td.appendTo(row);
+                }
+
+                row.appendTo(table);
             }
 
-            tableHead.appendTo(table);
-
-            $.post(`${PRIMARY_DATA.url_endpoint}?fnk_name=${func.name}`, (data) => {
-                let requestData = JSON.parse(data);
-                console.log(requestData)
-
-                // if (func.table_sorting) {
-
-                    // console.log(Object.entries(requestData).sort((a, b) => b.date_cre - a.date_cre));
-
-                    // const sortProperty = func.table_sorting.property;
-                    // let sortedRequestData = Object.values(requestData).sort(function (a, b) {
-                    //     console.log(a, b)
-                    //     var dateA = new Date(a.date_cre), dateB = new Date(b.date_cre)
-                    //     return dateB - dateA //сортировка по убывающей дате
-                    // })
-
-                    // console.log(sortedRequestData)
-                    // requestData = sortedRequestData
-                // }
-
-
-
-                for (const elem of requestData) {
-                    const row = $('<tr>');
-
-                    for (const column of func.table_columns) {
-                        for (const elem in column) {
-                            $('<td>', {column_name: column[elem]}).appendTo(row);
-                        }
-                    }
-
-                    for (const cell in elem) {
-                        row.find(`td[column_name=${cell}]`).text(elem[cell]);
-                        // $('<td>', {text: elem[cell]}).appendTo(row.find(`td[column_name=${cell}]`));
-                    }
-
-                    row.appendTo(table);
-                }
-
-                $(`#${func.parent_tab} .block-content`).html(table);
-            })
-        }
+            $(`#${func.parent_tab} .block-content`).html(table);
+        })
+    }
+    else if (func.type = 'send data') {
+        createInterfaceLayout(func);
     }
 }
 
@@ -135,4 +184,82 @@ export function createPopupLayout(name, id) {
     )
 
     return popup;
+}
+
+function validateFormInputs(inputsArray) {
+    let valid = true;
+
+    for (const input of inputsArray) {
+        if (!input.val()) {
+            input.fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+            valid = false;
+        }
+    }
+
+    return valid;
+}
+
+function createInterfaceLayout(func) {
+    const table = $('<table>', {class: 'interface-table'});
+
+    let interfaceElemsArr = [];
+
+    for (const elem of func.interface) {
+        if (elem.type !== 'submit') {
+            const tr = $('<tr>');
+            $('<td>', {text: elem.name}).appendTo(tr);
+            const trElement = $('<td>').appendTo(tr);
+            const element = $(`<${elem.type}>`, {key: elem.key}).appendTo(trElement);
+            interfaceElemsArr.push(element);
+            tr.appendTo(table);
+        }
+        else {
+            $('<div>', {style: 'text-align: center'}).append(
+                $('<button>', {text: elem.name}).on('click', () => {
+                    initializeSendDataRequest(interfaceElemsArr, func);
+                })
+            ).appendTo(`#${func.parent_tab} .popup-content`);
+        }
+    }
+
+    table.prependTo(`#${func.parent_tab} .popup-content`);
+}
+
+function initializeSendDataRequest(interfaceDataArr, func) {
+    if (interfaceDataArr.length) {
+        if (validateFormInputs(interfaceDataArr)) {
+            let urlString = `fnk_name=${func.name}`;
+            let dataObject = {};
+
+            for (const elem of interfaceDataArr) {
+                dataObject[elem.attr('key')] = elem.val();
+            }
+
+            if (func.hasOwnProperty('general_params')) {
+                for (const param of func.general_params) {
+                    urlString += `&${param}`;
+                }
+            }
+            console.log(urlString, dataObject)
+
+            $.ajax({
+                type: 'POST',
+                url: `${PRIMARY_DATA.url_endpoint}?${urlString}`,
+                data: JSON.stringify(dataObject),
+                success: (data) => {
+                    console.log(data);
+                    closePopupWindow(func.parent_tab);
+                    for (const elem of interfaceDataArr) {
+                        elem.val('')
+                    }
+                    
+                    if (func.hasOwnProperty('callback')) {
+                        for (const callback of func.callback) {
+                            initializeFunction(callback);
+                        }
+                    }
+                }
+            })
+        }
+    }
 }
