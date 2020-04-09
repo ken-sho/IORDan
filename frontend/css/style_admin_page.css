@@ -248,3 +248,20 @@ div {
     max-height: calc(85% - 35px);
     overflow: auto;
 }
+
+.interface-table {
+    width: 100%;
+}
+
+.interface-table input,
+.interface-table textarea {
+    width: 100%;
+}
+
+.interface-table td:first-child {
+    font-weight: bold;
+}
+
+.interface-table textarea {
+    height: 70px;
+}
