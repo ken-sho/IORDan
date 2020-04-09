@@ -1995,12 +1995,18 @@ function createObjectHistoryTable(data) {
         const tr = $('<tr>');
         $('<td>', {text: row.name}).appendTo(tr);
         for (const elem in row.data) {
-            const tdElem = $('<td>', {text: row.data[elem]}).appendTo(tr);
-
-            const isHidden = (data.header[Number(elem) + 1].hidden == 'true');
-
+            const isHidden = (row.hidden == 'true');
+            
             if (isHidden) {
-                tdElem.hide();
+                tr.hide();
+            }
+            else {
+                const tdElem = $('<td>', {text: row.data[elem]}).appendTo(tr);
+                const isHidden = (data.header[Number(elem) + 1].hidden == 'true');
+                
+                if (isHidden) {
+                    tdElem.hide();
+                }
             }
         }
 
