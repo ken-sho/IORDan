@@ -1,4 +1,6 @@
 import psycopg2
+import asyncio
+import asyncpg
 
 def db_connect (dbname):
     handle = open(r"/opt/IORDan/ssl/bd_con.txt", "r")

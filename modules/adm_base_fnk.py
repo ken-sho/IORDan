@@ -9,13 +9,14 @@ import urllib.request
 import urllib.parse
 import base64
 import time
-import db_conn
-import logg_web
+import modules.db_conn as db_conn
+import modules.logg_web as logg_web
 
 #usr_list
 #news_list
+#news
 
-def fnk_lst (asid,orgid,fnk_name,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10):
+def fnk_lst (asid,orgid,fnk_name,adate,operation):
     conn = db_conn.db_connect('web_receivables')
     cur = conn.cursor()
     res=''
@@ -26,10 +27,17 @@ def fnk_lst (asid,orgid,fnk_name,val_param1,val_param2,val_param3,val_param4,val
             res=(row[0])
     elif fnk_name=='news_list':
         q_sql = "select admin.news_list('"+ asid +"')"
-        #print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
+    elif fnk_name=='news':
+        q_sql = "select admin.adddel_news('"+ asid +"','"+ adate +"','"+ operation +"')"
+        print(q_sql)
+        cur.execute(q_sql)
+        for row in cur:
+            res=(row[0])
+        encoded = base64.b64encode(q_sql.encode()).decode()
+        logg_web.add_log(asid,encoded,'Добавление/удаление новости')
 
     conn.commit()
     cur.close()

@@ -9,8 +9,8 @@ import urllib.request
 import urllib.parse
 import base64
 import time
-import db_conn
-import logg_web
+import modules.db_conn as db_conn
+import modules.logg_web as logg_web
 
 #house_tree
 #account_history
@@ -41,18 +41,24 @@ import logg_web
 #chg_reputation
 
 
-def fnk_lst (asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10):
+def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10):
     conn = db_conn.db_connect('web_receivables')
     cur = conn.cursor()
     res=''
+    if fnk_name=='chg_history_setting':
+        q_sql = "select main.chg_history_setting('"+ asid +"','"+ orgid +"','"+ adate +"')"
+        cur.execute(q_sql)
+        for row in cur:
+            res=(row[0])
+        encoded = base64.b64encode(q_sql.encode()).decode()
+        logg_web.add_log(asid,encoded,'Изменение настроект')
     if val_param=='house_tree':
         q_sql = "select main.house_tree('"+ asid +"','"+ orgid +"','"+ val_param1 +"')"
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
     elif val_param=='account_history':
-        q_sql = "select main.account_history('','"+ val_param1 +"','"+ val_param2 +"')"
-        print(q_sql)
+        q_sql = "select main.account_history('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"','"+ orgid +"')"
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -64,7 +70,6 @@ def fnk_lst (asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_par
     elif val_param=='addchg_human':
         q_sql = "select main.addchg_human('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"','"+ val_param3 +"','"+ val_param4 +"','"+ val_param5 +"','"+ val_param6 +"','"+ val_param7 +"','"+ val_param8 +"')"
         cur.execute(q_sql)
-        print(q_sql)
         for row in cur:
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
@@ -92,7 +97,6 @@ def fnk_lst (asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_par
         logg_web.add_log(asid,encoded,'Добавление/удаление контактных данных')
     elif val_param=='sprav_note_chg':
         q_sql = "select report.sprav_note_chg('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"','"+ val_param3 +"','"+ val_param4 +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -175,6 +179,7 @@ def fnk_lst (asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_par
             res=(row[0])
     elif val_param=='addchg_ree_recodrs':
         q_sql = "select main.addchg_ree_recodrs('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"','"+ val_param3 +"','"+ val_param4 +"','"+ val_param5 +"','"+ val_param6 +"','"+ val_param7 +"','"+ val_param8 +"','"+ val_param9 +"','"+ val_param10 +"')"
+        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -217,9 +222,6 @@ def fnk_lst (asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_par
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Закрытие реестра')
-    elif val_param=='chg_history_setting':
-        #q_sql = "select main.ree_reestrs_close('"+ asid +"','"+ val_param1 +"')"
-        print(adate)
     elif val_param=='chg_reputation':
         q_sql = "select main.chg_reputation('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"')"
         cur.execute(q_sql)

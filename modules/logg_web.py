@@ -1,5 +1,5 @@
 import psycopg2
-import db_conn
+import modules.db_conn as db_conn
 
 def add_log (asid,query,note):
     conn = db_conn.db_connect('web_receivables')
