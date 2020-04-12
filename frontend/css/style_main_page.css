@@ -1640,9 +1640,15 @@ div {
 
 .tab-content > .main-list li {
     padding: 10px 0px;
+    height: 20px;
     cursor: pointer;
     padding-left: 20px;
     padding-right: 5px;
+}
+
+.tab-content > .main-list li span {
+    display: flex;
+    align-items: center;
 }
 
 .tab-content > .main-list li:hover {
@@ -2875,8 +2881,12 @@ textarea {
     align-items: center;
 }
 
+.popup-notification > .icon.alert {
+    background-color: orangered;
+}
+
 .popup-notification > .icon i {
-    font-size: 24px !important;
+    font-size: 26px !important;
     text-align: center;
     color: white;
     cursor: default;

@@ -757,7 +757,7 @@ function changeObjectReputation(elem) {
         $('#object_reputation_indicator').css({'color': `${iconColor}`});
         $('#object_reputation_indicator').text(reputationIcon);
 
-        showPopupNotification('Репутация успешно изменена!');
+        showPopupNotification('notification', 'Репутация успешно изменена!');
     });
 }
 
@@ -1172,7 +1172,7 @@ function addObjectCommunication() {
         $.post(encodeURIstring, function (data) {
             $('#object_communication_textarea').val('');
             refreshObjectData([getObjectCommunicationsData]);
-            showPopupNotification('Коммуникация успешно добавлена!')
+            showPopupNotification('notification', 'Коммуникация успешно добавлена!')
         });
     }
     else {
@@ -1600,12 +1600,12 @@ function editOwnerRequest() {
         encodeURIstring = encodeURI(`/base_func?val_param=addchg_human&val_param1=${accid}&val_param2=${name}&val_param3=${date}&val_param4=chg&val_param5=${humanId}&val_param6=${subDate}&val_param7=${unsubDate}&val_param8=${birthPlace}`);
         $.post(encodeURIstring, function (data) {
             if (data == 'success') {
-                showPopupNotification('Прописанный успешно отредактирован!');
+                showPopupNotification('notification', 'Прописанный успешно отредактирован!');
                 closePopupWindow();
                 refreshObjectData([getObjectRegistrationsData, clickDropdownMenu]);
             }
             else if (data == 'lock_value') {
-                showPopupNotification('Прописанного редактировать нельзя, так как с момента его добавления прошло более 24 часов!');
+                showPopupNotification('alert', 'Прописанного редактировать нельзя, так как с момента его добавления прошло более 24 часов!');
             }
         });
     }
@@ -1745,7 +1745,7 @@ function addNewContact() {
         $.post(encodeURIstring, function (data) {
             if (data == 'success') {
                 refreshObjectData([getObjectContactsData]);
-                showPopupNotification('Контакт успешно добавлен!')
+                showPopupNotification('notification', 'Контакт успешно добавлен!')
 
                 // const notationCount = $('#obj_contacts_icon .icon-count');
 
@@ -1780,10 +1780,10 @@ function editContact() {
         $.post(encodeURIstring, function (data) {
             if (data == 'success') {
                 refreshObjectData([getObjectContactsData]);
-                showPopupNotification('Контакт успешно сохранен!');
+                showPopupNotification('notification', 'Контакт успешно сохранен!');
             }
             else if (data == 'lock_value') {
-                showPopupNotification('Контакт редактировать нельзя, так как с момента его добавления прошло более 24 часов!');
+                showPopupNotification('alert', 'Контакт редактировать нельзя, так как с момента его добавления прошло более 24 часов!');
             }
         });
     }
@@ -2043,7 +2043,7 @@ function sendAccountHistorySettings(data) {
             success: function (data) {
                 console.log(data);
                 getObjectHistoryData([createObjectHistoryTable, initializeAccountHistorySettings])
-                showPopupNotification('Настройки таблицы истории успешно сохранены!');
+                showPopupNotification('notification', 'Настройки таблицы истории успешно сохранены!');
             }
         });
     }
@@ -2296,7 +2296,7 @@ function savePrintNotation(reportId) {
     $.post(encodeURIstring, function (data) {
         if (data == 'success') {
             getUserData();
-            showPopupNotification('Примечание для печати успешно сохранено!');
+            showPopupNotification('notification', 'Примечание для печати успешно сохранено!');
         }
     });
     
@@ -3345,10 +3345,10 @@ function changeUserPassword() {
             const encodeURIstring = encodeURI(`/base_func?val_param=chg_passwd&val_param1=${currentPassword.val()}&val_param2=${newPassword.val()}`);
             $.post(encodeURIstring, function (data) {
                 if (data == 'wrong_pwd') {
-                    showPopupNotification('Текущий пароль введен не верно!');
+                    showPopupNotification('alert', 'Текущий пароль введен не верно!');
                 }
                 else if (data == 'success') {
-                    showPopupNotification('Пароль успешно изменен! Вы будете перенаправлены на страницу входа.');
+                    showPopupNotification('notification', 'Пароль успешно изменен! Вы будете перенаправлены на страницу входа.');
                     clearFormInputs(validateinputsArray);
                     setTimeout(logout, 4000);
 
@@ -3359,7 +3359,7 @@ function changeUserPassword() {
             });
         }
         else {
-            showPopupNotification('Новый пароль и подтверждение пароля не совпадают!');
+            showPopupNotification('alert', 'Новый пароль и подтверждение пароля не совпадают!');
         }
     }
 }
@@ -3380,18 +3380,27 @@ function showUserLogin() {
     $('#popup_profile .popup-fullscreen-name').text(`Профиль пользователя ${USER_DATA.user_login}`);
 }
 
-function createPopupNotification(message) {
-    const notification = $('<div>', { class: 'popup-notification' }).append(
-        $('<span>', {class: 'icon'}).append(
-            $('<i>', {class: 'material-icons', text: 'notifications'})
-        ),
-        $('<span>', {class: 'content', text: message}),
-        $('<span>', {class: 'notification-close'}).append(
-            $('<i>', {class: 'material-icons', text: 'close', title: 'Закрыть уведомление'}).on('click', function() {
-                removePopupNotification(notification);
-            })
-        )
-    );
+function createPopupNotification(type, message) {
+    const notification = $('<div>', { class: 'popup-notification' });
+    
+    if (type == 'notification') {
+        $('<span>', { class: 'icon' }).append(
+            $('<i>', { class: 'material-icons', text: 'notifications' })
+        ).appendTo(notification);
+    }
+    else if (type == 'alert') {
+        $('<span>', { class: 'icon alert' }).append(
+            $('<i>', { class: 'material-icons', text: 'error_outline'})
+        ).appendTo(notification);
+    }
+
+    $('<span>', { class: 'content', text: message }).appendTo(notification);
+    $('<span>', { class: 'notification-close' }).append(
+        $('<i>', { class: 'material-icons', text: 'close', title: 'Закрыть уведомление' }).on('click', function () {
+            removePopupNotification(notification);
+        })
+    ).appendTo(notification);
+
     return notification;
 }
 
@@ -3408,8 +3417,8 @@ function removePopupNotification(notification) {
     });
 }
 
-function showPopupNotification(message) {
-    const notification = createPopupNotification(message);
+function showPopupNotification(type , message) {
+    const notification = createPopupNotification(type, message);
 
     if ($('.popup-notification').length) {
         $('.popup-notification').animate({
@@ -3591,15 +3600,15 @@ function addObjectsGroupUser(groupNumber) {
             if (data  == 'success') {
                 $('#add_objects_group_user_select option:first-child').prop('selected', true);
                 getObjectsGroupUsersList(groupNumber);
-                showPopupNotification('Пользователь успешно привязан к группе объектов!'); 
+                showPopupNotification('notification', 'Пользователь успешно привязан к группе объектов!'); 
             }
             else if (data == 'already_exist') {
-                showPopupNotification('Данный пользователь уже привязан к этой группе объектов!');
+                showPopupNotification('alert', 'Данный пользователь уже привязан к этой группе объектов!');
             }
         });
     }
     else {
-        showPopupNotification('Выберите пользователя из списка!');
+        showPopupNotification('alert', 'Выберите пользователя из списка!');
     }
 }
 
@@ -3608,16 +3617,18 @@ function deleteObjectsGroupUser(groupNumber, userName, userId) {
         const encodeURIstring = encodeURI(`/base_func?val_param=add_usr_hsgrlst&val_param1=del&val_param2=${groupNumber}&val_param3=${userId}`);
         $.post(encodeURIstring, function (data) {
             getObjectsGroupUsersList(groupNumber);
-            showPopupNotification(`Пользователь ${userName} успешно удален!`);
+            showPopupNotification('notification', `Пользователь ${userName} успешно удален!`);
         });
     }
 }
 
 function getRegistryList() {
     const registryType = $('#registry_type_select').val();
-    $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon, #registy_convert_to_excel_btn, #no_registries_div').remove();
+    $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon, #registy_convert_to_excel_btn, #no_registries_div, #create_registry_div').remove();
     let calendarValue = getCalendarValue('registry_settings_calendar');
     let registryUl;
+
+    console.log(calendarValue)
 
     if (registryType == 'regular') {
         $('#constant_registries_ul').hide();
@@ -3640,11 +3651,28 @@ function getRegistryList() {
             createRegistrySettingsPopup();
 
             for (const registry of registryList) {
+                let type;
+
+                if (registry.doc_type == 'bank_manual') {
+                    type = 'Банки';
+                }
+                else if (registry.doc_type == 'bailiffs_manual') {
+                    type = 'Приставы'
+                }
+                else if (registry.doc_type == 'overgrown') {
+                    type = 'Перебросы'
+                }
+
                 const li = $('<li>', {registry_id: registry.id}).append(
                     $('<a>').append(
-                        $('<span>', {text: registry.name})
+                        $('<span>', {text: `${registry.name} (${type})`})
                     )
                 ).appendTo(registryUl);
+
+                if (registry.status == 'Обработан') {
+                    $('<i>', {class: 'material-icons', text: 'lock', style: 'font-size: 20px'}).appendTo(li.find('span'));
+                    li.attr('title', 'Реестр закрыт');
+                }
 
                 li.on('click', function () {
                     const tabsCollection = registryUl.find('li');
@@ -3661,14 +3689,96 @@ function getRegistryList() {
         else {
             $('#registry_settings_content .block-content').empty();
 
-            $('<div>', {id: 'no_registries_div', style: 'text-align: center'}).append(
-                $('<p>', {text: 'Реестры отсутствуют', style: 'font-size: 16px'}),
-                $('<p>').append(
-                    $('<button>', {class: 'button-secondary', text: 'Создать'})
-                )
+            $('<div>', { id: 'no_registries_div', style: 'text-align: center; padding-top: 5px'}).append(
+                $('<p>', { text: 'Реестры отсутствуют', style: 'font-size: 16px' })
             ).appendTo('#registry_settings_select_menu');
         }
+
+        if (registryType == 'regular') {
+
+            const currentDate = new Date;
+
+            const validMonth = ($('#registry_settings_calendar .ui-datepicker-month').val() == currentDate.getMonth());
+            const validYear = ($('#registry_settings_calendar .ui-datepicker-year').val() == currentDate.getFullYear());
+
+            if (validMonth && validYear) {
+                initializePopupAddRegistry();
+
+                $('<div>', { id: 'create_registry_div', style: 'text-align: center; padding: 10px 0px' }).append(
+                    $('<button>', { class: 'button-secondary', text: 'Создать' }).on('click', () => {
+                        openPopupWindow('popup_create_registry');
+                    })
+                ).appendTo('#registry_settings_select_menu');
+            }
+        }
     });
+
+    function initializePopupAddRegistry() {
+        if (!$("div").is('#popup_create_registry')) {
+            const popup = createPopupLayout('Создать реестр', 'popup_create_registry');
+            
+            $('<table>', {class: 'table-form'}).append(
+                $('<tr>').append(
+                    $('<td>', {class: 'table-input-name', text: 'Название *'}),
+                    $('<td>').append(
+                        $('<input>', {id: 'create_registry_name', class: 'input-main', type: 'text'})
+                    )
+                ),
+                $('<tr>').append(
+                    $('<td>', {class: 'table-input-name', text: 'Тип'}),
+                    $('<td>').append(
+                        $('<select>', {id: 'create_registry_type', class: 'input-main'}).append(
+                            $('<option>', {text: 'Банки', value: 'bank_manual'}),
+                            $('<option>', {text: 'Приставы', value: 'bailiffs_manual'}),
+                            $('<option>', {text: 'Перебросы', value: 'overgrown'})
+
+                        )
+                    )
+                )
+            ).appendTo(popup.find('.popup-content'));
+
+            $('<div>', {class: 'notification', text: 'Поля, отмеченные звездочкой (*), обязательны для заполнения'}).appendTo(popup.find('.popup-content'));
+
+            $('<div>', {class: 'form-submit-btn'}).append(
+                $('<button>', {class: 'button-primary', text: 'Создать'}).on('click',() => {
+                    sendNewRegistryData();
+                })
+            ).appendTo(popup.find('.popup-content'));
+            
+            popup.appendTo('#popup_background');
+
+            function sendNewRegistryData() {
+                let validateinputsArray = [];
+
+                validateinputsArray.push($('#create_registry_name'));
+
+                if (validateFormInputs(validateinputsArray)) {
+                    let registryData = {}
+
+                    registryData.name = $('#create_registry_name').val();
+                    registryData.type = $('#create_registry_type').val();
+
+                    console.log(registryData)
+
+                    $.ajax({
+                        url: '/base_func?fnk_name=ree_regular_create',
+                        type: 'POST',
+                        data: JSON.stringify(registryData),
+                        success: function(data) {
+                            if (data == 'success') {
+                                showPopupNotification('notification', 'Реестр успешно создан!');
+                                closePopupWindow('popup_create_registry');
+                                getRegistryList();
+                            }
+                            else if (data == 'error') {
+                                showPopupNotification('alert', `Во время выполнения операции произошла ошибка. Обратитесь в техподдержку!`);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    }
 }
 
 function initializeRegistrySettings(registryId, registryData) {
@@ -4212,7 +4322,7 @@ function saveRegisrtrySettings(registryId, registryName, registryType, documentT
         contentType: 'application/json',
         success: function() {
             closePopupWindow('popup_registry_settings');
-            showPopupNotification('Отображение столбцов в реестре успешно сохранено!');
+            showPopupNotification('notification', 'Отображение столбцов в реестре успешно сохранено!');
             getRegistryData(registryId, registryName, registryType, documentType);
         }
     });
@@ -4269,17 +4379,17 @@ function addRegistryEntry(registryId, registryName, registryType, documentType) 
 
         $.post(encodeURIstring, (data) => {
             if (data == 'wrong_ls') {
-                showPopupNotification('Значение ЛС не найдено в базе данных!');
+                showPopupNotification('alert', 'Значение ЛС не найдено в базе данных!');
             }
             else if (data == 'success') {
                 closePopupWindow('popup_add_edit_registry_entry');
                 getRegistryData(registryId, registryName, registryType, documentType);
-                showPopupNotification('Запись в реестр успешно добавлена!');
+                showPopupNotification('notification', 'Запись в реестр успешно добавлена!');
             }
         });
     }
     else {
-        showPopupNotification('Отсутствует значение ЛС, Месяц или Год!');
+        showPopupNotification('alert', 'Отсутствует значение ЛС, Месяц или Год!');
     }
 }
 
@@ -4334,24 +4444,24 @@ function editRegistryEntry(registryId, entryId, registryName, registryType, docu
 
         $.post(encodeURIstring, (data) => {
             if (data == 'wrong_ls') {
-                showPopupNotification('Значение ЛС не найдено в базе данных!');
+                showPopupNotification('alert', 'Значение ЛС не найдено в базе данных!');
             }
             else if (data == 'success') {
                 closePopupWindow('popup_add_edit_registry_entry');
                 getRegistryData(registryId, registryName, registryType, documentType);
-                showPopupNotification('Запись в реестре успешно изменена!');
+                showPopupNotification('notification', 'Запись в реестре успешно изменена!');
             }
             else if (data == 'wrong_user') {
-                showPopupNotification('У Вас нет прав на изменение этой записи!')
+                showPopupNotification('alert', 'У Вас нет прав на изменение этой записи!')
             }
             else if (data == 'already_deleted') {
                 getRegistryData(registryId, registryName, registryType, documentType);
-                showPopupNotification('Данная запись уже удалена из реестра!'); 
+                showPopupNotification('alert', 'Данная запись уже удалена из реестра!'); 
             }
         });
     }
     else {
-        showPopupNotification('Отсутствует значение ЛС, Месяц или Год!');
+        showPopupNotification('alert', 'Отсутствует значение ЛС, Месяц или Год!');
     }
 }
 
@@ -4362,32 +4472,40 @@ function deleteRegistryEntry(registryId, entryId, registryName, registryType, do
         $.post(encodeURIstring, (data) => {
             if (data == 'success') {
                 getRegistryData(registryId, registryName, registryType, documentType);
-                showPopupNotification('Запись из реестра успешно удалена!');
+                showPopupNotification('notification', 'Запись из реестра успешно удалена!');
             }
             else if (data == 'wrong_user') {
-                showPopupNotification('У Вас нет прав на удаление этой записи!')
+                showPopupNotification('alert', 'У Вас нет прав на удаление этой записи!')
             }
             else if (data == 'already_deleted') {
                 getRegistryData(registryId, registryName, registryType, documentType);
-                showPopupNotification('Данная запись уже удалена из реестра!'); 
+                showPopupNotification('alert', 'Данная запись уже удалена из реестра!'); 
             }
         });
     }
 }
 
-function blockRegistry(registryId, registryName, registryName, registryType, documentType) {
+function blockRegistry(registryId, registryName, registryType, documentType) {
     if (confirm(`Вы уверены, что хотите закрыть реестр "${registryName}"?`)) {
         encodeURIstring = encodeURI(`/base_func?val_param=ree_reestrs_close&val_param1=${registryId}`);
         $.post(encodeURIstring, function (data) { 
+            console.log(data)
             if (data == 'success') {
-                showPopupNotification(`Реестр "${registryName}" успешно закрыт!`);
+                showPopupNotification('notification', `Реестр "${registryName}" успешно закрыт!`);
                 getRegistryData(registryId, registryName, registryType, documentType);
+
+                const li = $('#registry_settings_select_menu').find(`li[registry_id=${registryId}]`);
+                $('<i>', {class: 'material-icons', text: 'lock', style: 'font-size: 20px'}).appendTo(li.find('span'));
+                li.attr('title', 'Реестр закрыт');
             }
             else if (data == 'already_close') {
-                showPopupNotification(`Реестр "${registryName}" уже закрыт!`);
+                showPopupNotification('alert', `Реестр "${registryName}" уже закрыт!`);
             }
             else if (data == 'no_rule') {
-                showPopupNotification(`У Вас нет прав на закрытие реестра "${registryName}"!`);
+                showPopupNotification('alert', `У Вас нет прав на закрытие реестра "${registryName}"!`);
+            }
+            else if (data == 'error') {
+                showPopupNotification('alert', `Во время выполнения операции произошла ошибка. Обратитесь в техподдержку!`);
             }
         });
     }
@@ -4404,20 +4522,20 @@ function createObjectGroup() {
 
     if (validateFormInputs([$('#object_group_name')])) {
         if  (objectsIdArray.length < 2) {
-            showPopupNotification('Выбирите минимум 2 объекта для создания группы!');
+            showPopupNotification('alert', 'Выбирите минимум 2 объекта для создания группы!');
         }
         else {
             const groupName = $('#object_group_name').val();
             encodeURIstring = encodeURI(`/base_func?val_param=house_groups&val_param1=add&val_param2=${groupName}&val_param3=${objectsIdArray}`);
             $.post(encodeURIstring, function (data) {
                 if (data == 'group_exist') {
-                    showPopupNotification('Группа с таким именем уже существует! Пожалуйста, укажите другое имя.');
+                    showPopupNotification('alert', 'Группа с таким именем уже существует! Пожалуйста, укажите другое имя.');
                 }
                 else if (data == 'success') {
                     closePopupWindow('popup_create_object_group');
                     $('#object_group_name').val('');
                     $('#create_object_group_ul input:checked').prop('checked', false);
-                    showPopupNotification('Группа объектов успешно создана!');
+                    showPopupNotification('notification', 'Группа объектов успешно создана!');
                     getObjectsGroupsList();
                 }
             });
@@ -4430,7 +4548,7 @@ function deleteObjectsGroup(groupName) {
         const encodeURIstring = encodeURI(`/base_func?val_param=house_groups&val_param1=del&val_param2=${groupName}&val_param3=`);
         $.post(encodeURIstring, function (data) {
             getObjectsGroupsList();
-            showPopupNotification(`Группа объектов "${groupName}" успешно удалена!`);
+            showPopupNotification('notification', `Группа объектов "${groupName}" успешно удалена!`);
         });
     }
 }
@@ -4444,7 +4562,7 @@ function changeRegistryLock(registryId) {
 }
 
 function convertContentToExcel(content, fileName) {
-    showPopupNotification('Загрузка файла начнется автоматически!');
+    showPopupNotification('notification', 'Загрузка файла начнется автоматически!');
     $.ajax({
         url: encodeURI(`/conver?type=xls&file_name=${fileName}`),
         type: 'POST',
@@ -4601,4 +4719,18 @@ function getCompanyDocument(funcName, documentName, parameters) {
             }
         });
     }
+}
+
+function createPopupLayout(name, id) {
+    const popup = $('<div>', { id: id, class: 'popup-window' }).append(
+        $('<div>', { class: 'popup-header' }).append(
+            $('<div>', { class: 'popup-name', text: name }),
+            $('<div>', { class: 'popup-close' }).append(
+                $('<i>', { class: 'material-icons', title: 'Закрыть', text: 'close'}).on('click', () => {closePopupWindow(id)})
+            )
+        ),
+        $('<div>', { class: 'popup-content' })
+    );
+
+    return popup;
 }
