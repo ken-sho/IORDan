@@ -3628,8 +3628,6 @@ function getRegistryList() {
     let calendarValue = getCalendarValue('registry_settings_calendar');
     let registryUl;
 
-    console.log(calendarValue)
-
     if (registryType == 'regular') {
         $('#constant_registries_ul').hide();
         $('#registry_settings_calendar, #regular_registries_ul').show();
@@ -3642,6 +3640,7 @@ function getRegistryList() {
         registryUl = $('#constant_registries_ul');
         calendarValue = '';
     }
+    
     registryUl.empty();
     $.post(`/base_func?val_param=ree_reestrs&val_param1=${registryType}&val_param2=${calendarValue}`, (data) => {
         const registryList = JSON.parse(data);
@@ -4158,7 +4157,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
             });
         }
         else if (valueType == 'date') {
-            input.inputmask('99.99.9999')
+            input.inputmask({alias: 'datetime', inputFormat: "dd.mm.yyyy", placeholder: '__.__.____'});
         }
     });
 
