@@ -4147,13 +4147,46 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
 
     }
 
+    const inputCollection = $('#add_registry_entry_table').find('tr:nth-child(4) input');
+    inputCollection.each(function() {
+        $(this).off('keyup');
+        $(this).on('keyup', () => {
+            $('#add_entry_total_sum').val(sumUpInputValues(inputCollection));
+            inputCollection.each(function() {
+                if ($(this).val() !== '') {
+                    $('#add_entry_total_sum').attr('disabled', true);
+                    return false;
+                }
+                else {
+                    $('#add_entry_total_sum').attr('disabled', false);
+                }
+            });
+        });
+    });
+
+    $('#add_entry_total_sum').on('keyup', function() {
+        if ($(this).val() !== '') {
+            inputCollection.each(function() {
+                $(this).val('');
+                $(this).attr('disabled', true);
+            });
+        }
+        else {
+            inputCollection.each(function() {
+                $(this).attr('disabled', false);
+            });
+        }
+    });
 
     $('#add_registry_entry_table input').each(function() {
         const input = $(this);
         const valueType = $(this).attr('value_type')
         if (valueType == 'numeric') {
-            input.inputmask('numeric', {
-                rightAlign: false
+            console.log(input);
+            input.inputmask('9{1,}[(.|,)9{1,2}]');
+
+            input.on('keyup', () => {
+                input.val(input.val().replace(/,/g, '.'));
             });
         }
         else if (valueType == 'date') {
@@ -4206,43 +4239,11 @@ function openAddRegistryEntryPopup(registryId, registryName, registryType, docum
     $('#popup_add_edit_registry_entry .popup-name').text('Добавить запись в реестр');
     $('#add_registry_entry_btn').text('Добавить');
     $('#add_registry_entry_table input').val('');
-    $('#add_entry_total_sum').attr('disabled', false);
+    $('#add_entry_total_sum, #add_registry_entry_table tr:nth-child(4) input').attr('disabled', false);
 
     $('#add_registry_entry_btn').off('click');
     $('#add_registry_entry_btn').on('click', () => {
         addRegistryEntry(registryId, registryName, registryType, documentType);
-    });
-
-    const inputCollection = $('#add_registry_entry_table').find('tr:nth-child(4) input');
-    inputCollection.each(function() {
-        $(this).off('keyup');
-        $(this).on('keyup', function() {
-            $('#add_entry_total_sum').val(sumUpInputValues(inputCollection));
-            inputCollection.each(function() {
-                if ($(this).val() !== '') {
-                    $('#add_entry_total_sum').attr('disabled', true);
-                    return false;
-                }
-                else {
-                    $('#add_entry_total_sum').attr('disabled', false);
-                }
-            });
-
-        });
-    });
-
-    $('#add_entry_total_sum').on('keyup', function() {
-        if ($(this).val() !== '') {
-            inputCollection.each(function() {
-                $(this).val('');
-                $(this).attr('disabled', true);
-            });
-        }
-        else {
-            inputCollection.each(function() {
-                $(this).attr('disabled', false);
-            });
-        }
     });
 
     openPopupWindow('popup_add_edit_registry_entry');
@@ -4251,6 +4252,7 @@ function openAddRegistryEntryPopup(registryId, registryName, registryType, docum
 function openEditRegistryEntryPopup(registryId, entryId, entryData, registryName, registryType, documentType) {
     $('#popup_add_edit_registry_entry .popup-name').text('Изменить запись в реестре');
     $('#add_registry_entry_btn').text('Сохранить');
+    $('#add_registry_entry_table tr:nth-child(4) input').attr('disabled', false);
     $('#add_entry_total_sum').attr('disabled', true);
 
     $('#add_registry_entry_btn').off('click');
