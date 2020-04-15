@@ -441,6 +441,11 @@ function getObjectsTreeData() {
     $('.object-list-tree, #control_object_groups_left_column .block-content').empty();
     createContentLoader('#object_list_tree');
     createContentLoader('#control_object_groups_left_column .block-content');
+
+    if (sessionStorage.getItem('printMode') == 'on') {
+        switchToggle('object_list_toggle');
+    }
+
     $.ajax({
         type: "POST",
         url: "/base_func",
@@ -544,7 +549,6 @@ function createObjectsTree(data) {
         });
     });
 
-    showSelectedObjectNum();
 
     templateSelect.empty();
 
@@ -1285,6 +1289,17 @@ function printObjectsGroup() {
     printWindow.focus(); // necessary for IE >= 10*/
 }
 
+function printDocument() {
+    var printWindow = window.open('', 'PRINT');
+    let printingContent = document.querySelector('#popup_company_document .popup-content').innerHTML;
+    printWindow.document.write('<html><head><link href="/css/style_main_page.css" rel="stylesheet" type="text/css"><script src="/js/jquery-3.4.1.min.js"></script><script src="/js/print_objects_group_page.js"></script>');
+    printWindow.document.write('</head><body id="report_print">');
+    printWindow.document.write(printingContent);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close(); // necessary for IE >= 10
+    printWindow.focus(); // necessary for IE >= 10*/
+}
+
 function printRegistry() {
     var printWindow = window.open('', 'PRINT');
     let printingContent = document.querySelector('#registry_settings_content .block-content').innerHTML;
@@ -1481,7 +1496,8 @@ function clearObjectSearchInput() {
 
     if  (isActivePrintMode()) {
         $('.object-list-tree input').prop('checked', false);
-        $('#print_mode_object_num').hide();
+        $('#print_mode_object_num').text('Выбрано: 0');
+        $('#objects_list_reports').hide();
     }
 
     objectListSearch();
@@ -1500,11 +1516,14 @@ function switchToggle(toggleId) {
         toggle.attr('state', 'on');
         toggle.css({'color': '#0091EA'});
 
-        $('#objects_list_reports, #print_mode_object_num, .object-tree-apartament-input, .object-tree-parent-li-input').show();
+        showSelectedObjectNum();
+
+        $('#print_mode_object_num, .object-tree-apartament-input, .object-tree-parent-li-input').show();
     }
     else {
         sessionStorage.setItem('printMode', 'off');
 
+        $('.object-list-tree input').prop('checked', false);
         toggle.text('radio_button_unchecked');
         toggle.attr('state', 'off');
         toggle.css({'color': '#263238'});
@@ -1524,15 +1543,20 @@ function createAccidsArray() {
 }
 
 function showSelectedObjectNum() {
+    $('#print_mode_object_num').text('Выбрано: 0');
+
     $('.object-tree-parent-li-input, .object-tree-apartament-input, .object-tree-li').each(function() {
         $(this).on('click', function() {
-            let objectNum = $('.object-tree-apartament-input:checked').length;
+            const objectNum = $('.object-tree-apartament-input:checked').length;
+            $('#print_mode_object_num').text(`Выбрано: ${objectNum}`);
+
             if (objectNum > 0) {
-                $('#print_mode_object_num').text(`Выбрано: ${objectNum}`);
-                $('#print_mode_object_num').css({'display': 'inline-block'});
+                if ($('#objects_list_reports').is(':hidden')) {
+                    $('#objects_list_reports').fadeOut(200).fadeIn(200).fadeOut(200).fadeIn(200);
+                }
             }
             else {
-                $('#print_mode_object_num').hide();
+                $('#objects_list_reports').hide();
             }
         });
     });

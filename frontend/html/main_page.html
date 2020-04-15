@@ -102,7 +102,7 @@
                                     settings_applications
                                 </i>
                                 <i id="objects_list_reports" data-jq-dropdown="#jq-dropdown-objects-list"
-                                    class="material-icons object-search-icon">print</i>
+                                    class="material-icons object-search-icon" title="Печать">print</i>
                                 <div id="print_mode_object_num"></div>
                             </div>
                         </div>
@@ -750,7 +750,7 @@
                     <div class="popup-name"></div>
                     <div class="popup-report-operation">
                         <button id="document_convert_to_excel_btn" class="excel-button" onclick="">Excel</button>
-                        <button class="button-primary">Печать</button>
+                        <button class="button-primary"  onclick="printDocument()">Печать</button>
                         <i class="material-icons" title="Закрыть" onclick="closePopupWindow('popup_objects_group')">close</i>
                     </div>
                 </div>
@@ -1193,7 +1193,7 @@
         </ul>
     </div>
 
-    <div id="jq-dropdown-objects-list" class="jq-dropdown dropdown-report jq-dropdown-tip">
+    <div id="jq-dropdown-objects-list" class="jq-dropdown jq-dropdown-tip">
         <ul class="jq-dropdown-menu">
         </ul>
     </div>
