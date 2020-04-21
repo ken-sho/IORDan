@@ -96,7 +96,13 @@ function initializeFunction(func) {
                 }
 
                 for (const cell in elem) {
-                    row.find(`td[column_name=${cell}]`).text(elem[cell]);
+                    let value = elem[cell];
+                    
+                    if (cell == 'content') {
+                        value = value.replace(/<br ?\/?>/g, '\n');
+                    }
+
+                    row.find(`td[column_name=${cell}]`).text(value);
                 }
 
                 if (func.hasOwnProperty('actions')) {
@@ -173,7 +179,7 @@ export function closePopupWindow(popupId) {
 }
 
 export function createPopupLayout(name, id) {
-    const popup = $('<div>', { id: 'add_news_popup', class: 'popup-window' }).append(
+    const popup = $('<div>', { id: id, class: 'popup-window' }).append(
         $('<div>', { class: 'popup-header' }).append(
             $('<div>', { class: 'popup-name', text: name }),
             $('<div>', { class: 'popup-close' }).append(
@@ -232,7 +238,7 @@ function initializeSendDataRequest(interfaceDataArr, func) {
             let dataObject = {};
 
             for (const elem of interfaceDataArr) {
-                dataObject[elem.attr('key')] = elem.val();
+                dataObject[elem.attr('key')] = elem.val().replace(/\n/g, "<br>");
             }
 
             if (func.hasOwnProperty('general_params')) {

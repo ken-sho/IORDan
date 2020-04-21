@@ -1,4 +1,5 @@
-$(document).ready(function() {
+$(document).ready(function () {
+
     let printNotation = sessionStorage.getItem('printNotation');
 
     if (printNotation !== '') {
@@ -7,5 +8,6 @@ $(document).ready(function() {
     }
 
     window.print();
-    setTimeout(function(){window.close();},10);
+    setTimeout(function () { window.close(); }, 10);
+
 });

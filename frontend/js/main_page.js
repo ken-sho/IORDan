@@ -787,6 +787,7 @@ function clickDropdownMenu() {
             const repType = $(this).attr('rep_type');
             const accid = $(this).parent().parent().attr('accid');
             const humanId = $(this).parent().parent().attr('humanid');
+            const personName = $(this).parent().parent().attr('person_name');
 
             const reportId = `${repType}_${repNum}`;
             setPrintNotation(reportId);
@@ -803,7 +804,7 @@ function clickDropdownMenu() {
                 $('#pep_range_btn').click(function () {
                     let startDate = $('#start_date').val();
                     let endDate = $('#final_date').val();
-                    sendReportRange(repName, repNum, repType, accid, humanId, startDate, endDate);
+                    sendReportRange(repName, repNum, repType, accid, humanId, startDate, endDate, personName);
                 });
 
                 $("#start_date, #final_date").datepicker({
@@ -822,19 +823,33 @@ function clickDropdownMenu() {
                 });
             }
             else {
-                createContentLoader('#popup_report .popup-content');
-                openPopupWindow('popup_report');
+                // createContentLoader('#popup_report .popup-content');
+                // openPopupWindow('popup_report');
                 $.get(`/report?rnum=${repNum}&rtype=${repType}&accid=${accid}&humanid=${humanId}`, function (data) {
-                    $('#popup_report .popup-name-fullscreen').text(repName);
-                    $('#popup_report .popup-content').html(data);
+                    // $('#popup_report .popup-name-fullscreen').text(repName);
+                    // $('#popup_report .popup-content').html(data);
                     if (repNum == '2' || repNum == '3') {
                         $('#popup_report table').addClass('export-table-border');
                         // createButtonToExport(createFileToExport);
                     }
+                    initializeReportNewWindow(data, repName, personName);
                 });
             }
         });
     });
+}
+
+function initializeReportNewWindow(reportContent, reportName, personName) {
+    const objectAdress = `${CURRENT_OBJECT_DATA.adress} - ${CURRENT_OBJECT_DATA.apartNum}`;
+    console.log(reportName, objectAdress, personName)
+    var printWindow = window.open('');
+    printWindow.document.write(`<html><head><title>${objectAdress}, ${personName}, ${reportName}</title><link href="/css/style_report_page.css" rel="stylesheet" type="text/css"><link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"><script src="/js/jquery-3.4.1.min.js"></script><script src="/js/report_page.js"></script>`);
+    printWindow.document.write(`</head><body id="report_print"><div id="header"><div id="report_name"><p><i class="material-icons">home</i>${objectAdress}</p><p><i class="material-icons">person</i>${personName}</p><p><i class="material-icons">event_note</i>${reportName}</p></div><div id="navigation"><button id="excel_btn">Excel</button><button id="print_btn">Печать</button></div></div><div id="content"><div id="report_content">`);
+    printWindow.document.write(reportContent);
+    printWindow.document.write('</div></div></body></html>');
+
+    printWindow.document.close(); // necessary for IE >= 10
+    printWindow.focus(); // necessary for IE >= 10*/
 }
 
 function setPrintNotation(reportId) {
@@ -872,7 +887,7 @@ function getObjectAgreementsData() {
 
         agreementsPeopleArr.push(`${propData[0]}&${propData[2]}`);
 
-        createDropdownMenu(DROPDOWN_NUM, propData[1], propData[2], getCurrentCompanyReportsArray());
+        createDropdownMenu(DROPDOWN_NUM, propData[1], propData[2], getCurrentCompanyReportsArray(), propData[0]);
         DROPDOWN_NUM++;
 
         for (i = 0; i < agreementsData[prop].length; i++) {
@@ -939,7 +954,7 @@ function getObjectRegistrationsData() {
             $('<i>', { class: 'material-icons owner-edit-icon', humanId: registrationData[2], text: 'edit', title: 'Редактировать' })
         ).appendTo(tr);
 
-        createDropdownMenu(DROPDOWN_NUM, registrationData[1], registrationData[2], getCurrentCompanyReportsArray());
+        createDropdownMenu(DROPDOWN_NUM, registrationData[1], registrationData[2], getCurrentCompanyReportsArray(), registrationData[0]);
         DROPDOWN_NUM++;
     }
 
@@ -1213,8 +1228,8 @@ function objectListSearch() {
     });
 }
 
-function createDropdownMenu(index, accid, humanid, reportsArr) {
-    $('<div>', {id: `jq-dropdown-${index}`, class: 'jq-dropdown dropdown-report jq-dropdown-tip', accid: accid, humanid: humanid}).append(
+function createDropdownMenu(index, accid, humanid, reportsArr, personName) {
+    $('<div>', {id: `jq-dropdown-${index}`, class: 'jq-dropdown dropdown-report jq-dropdown-tip', accid: accid, humanid: humanid, person_name: personName}).append(
         $('<ul>', {class: 'jq-dropdown-menu'})
     ).appendTo($('body'));
     for (const elem in reportsArr) {
@@ -1253,16 +1268,13 @@ function formPopupNotFullscreen(header, content) {
     $('#popup_not_fullscreen .popup-content').html(content);
 }
 
-function sendReportRange(repName, repNum, repType, accid, humanId, startDate, endDate) {
-    createContentLoader('#popup_report .popup-content');
-    openPopupWindow('popup_report');
+function sendReportRange(repName, repNum, repType, accid, humanId, startDate, endDate, personName) {
+    // createContentLoader('#popup_report .popup-content');
+    // openPopupWindow('popup_report');
 
     $.get(`/report?rnum=${repNum}&rtype=${repType}&accid=${accid}&humanid=${humanId}&dateb=${startDate}&datee=${endDate}`, function (data) {
-        $('#popup_report .popup-name-fullscreen').text(repName);
-        $('#popup_report .popup-content').html(data);
-        if (repNum == '21') {
-            // createButtonToExport(createFileToExport);
-        }
+        initializeReportNewWindow(data, repName, personName);
+        closePopupWindow('popup_report');
     });
 }
 
@@ -4209,7 +4221,6 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
         const input = $(this);
         const valueType = $(this).attr('value_type')
         if (valueType == 'numeric') {
-            console.log(input);
             input.inputmask('9{1,}[(.|,)9{1,2}]');
 
             input.on('keyup', () => {

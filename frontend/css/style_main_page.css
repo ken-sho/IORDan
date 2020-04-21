@@ -1640,10 +1640,12 @@ div {
 
 .tab-content > .main-list li {
     padding: 10px 0px;
-    height: 20px;
+    min-height: 20px;
     cursor: pointer;
     padding-left: 20px;
     padding-right: 5px;
+    display: flex;
+    align-items: center;
 }
 
 .tab-content > .main-list li span {
