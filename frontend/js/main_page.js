@@ -3685,6 +3685,9 @@ function getRegistryList() {
                 else if (registry.doc_type == 'overgrown') {
                     type = 'Перебросы'
                 }
+                else if (registry.doc_type == 'discounts') {
+                    type = 'Скидки'
+                }
 
                 const li = $('<li>', {registry_id: registry.id}).append(
                     $('<a>').append(
@@ -3753,8 +3756,8 @@ function getRegistryList() {
                         $('<select>', {id: 'create_registry_type', class: 'input-main'}).append(
                             $('<option>', {text: 'Банки', value: 'bank_manual'}),
                             $('<option>', {text: 'Приставы', value: 'bailiffs_manual'}),
-                            $('<option>', {text: 'Перебросы', value: 'overgrown'})
-
+                            $('<option>', {text: 'Перебросы', value: 'overgrown'}),
+                            $('<option>', {text: 'Скидки', value: 'discounts'})
                         )
                     )
                 )
