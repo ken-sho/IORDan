@@ -477,6 +477,7 @@ nav ul, nav li {
     border-top: 0;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
+    font-size: 14px; 
 }
 
 .form-submit-btn {
@@ -1274,6 +1275,11 @@ div {
     border-collapse: collapse;
 }
 
+#report_print,
+#report_print table {
+    font-size:14px;
+}
+
 #report_print tr {
     page-break-inside: avoid;
 }
@@ -1422,8 +1428,6 @@ div {
     width: auto;
     float: right;
     height: 100%;
-    text-align: right;
-    display: flex;
 }
 
 .header-manipulation i:hover,

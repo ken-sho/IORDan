@@ -840,11 +840,11 @@ function clickDropdownMenu() {
 }
 
 function initializeReportNewWindow(reportContent, reportName, personName) {
+    const theme = localStorage.getItem('color_theme');
     const objectAdress = `${CURRENT_OBJECT_DATA.adress} - ${CURRENT_OBJECT_DATA.apartNum}`;
-    console.log(reportName, objectAdress, personName)
     var printWindow = window.open('');
-    printWindow.document.write(`<html><head><title>${objectAdress}, ${personName}, ${reportName}</title><link href="/css/style_report_page.css" rel="stylesheet" type="text/css"><link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"><script src="/js/jquery-3.4.1.min.js"></script><script src="/js/report_page.js"></script>`);
-    printWindow.document.write(`</head><body id="report_print"><div id="header"><div id="report_name"><p><i class="material-icons">home</i>${objectAdress}</p><p><i class="material-icons">person</i>${personName}</p><p><i class="material-icons">event_note</i>${reportName}</p></div><div id="navigation"><button id="excel_btn">Excel</button><button id="print_btn">Печать</button></div></div><div id="content"><div id="report_content">`);
+    printWindow.document.write(`<html theme=${theme}><head><title>${objectAdress}, ${personName}, ${reportName}</title><link href="/css/style_report_page.css" rel="stylesheet" type="text/css"><link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"><script src="/js/jquery-3.4.1.min.js"></script><script src="/js/report_page.js"></script>`);
+    printWindow.document.write(`</head><body id="report_print"><div id="header"><div id="report_name"><p><i class="material-icons">home</i>${objectAdress}</p><p><i class="material-icons">person</i>${personName}</p><p><i class="material-icons">event_note</i>${reportName}</p></div><div id="navigation"><select id="font_size_select" title="Размер шрифта. Изменение размера текста."><option>10</option><option>11</option><option>12</option><option>13</option><option selected>14</option><option>15</option><option>16</option><option>17</option><option>18</option></select><button id="excel_btn">Excel</button><button id="print_btn">Печать</button><button id="exit_btn" title="Закрыть"><i class="material-icons">close</i></button></div></div><div id="content"><div id="report_content">`);
     printWindow.document.write(reportContent);
     printWindow.document.write('</div></div></body></html>');
 
@@ -3685,25 +3685,37 @@ function getRegistryList() {
         if (!isEmpty(registryList)) {
             createRegistrySettingsPopup();
 
+            const showType = (registryType == 'regular');
+
+            
             for (const registry of registryList) {
-                let type;
+                let registryName;
 
-                if (registry.doc_type == 'bank_manual') {
-                    type = 'Банки';
-                }
-                else if (registry.doc_type == 'bailiffs_manual') {
-                    type = 'Приставы'
-                }
-                else if (registry.doc_type == 'overgrown') {
-                    type = 'Перебросы'
-                }
-                else if (registry.doc_type == 'discounts') {
-                    type = 'Скидки'
-                }
+                if (showType) {
+                    let type;
+                    
+                    if (registry.doc_type == 'bank_manual') {
+                        type = 'Банки';
+                    }
+                    else if (registry.doc_type == 'bailiffs_manual') {
+                        type = 'Приставы'
+                    }
+                    else if (registry.doc_type == 'overgrown') {
+                        type = 'Перебросы'
+                    }
+                    else if (registry.doc_type == 'discounts') {
+                        type = 'Скидки'
+                    }
 
+                    registryName = `${registry.name} (${type})`;
+                }
+                else {
+                    registryName = registry.name;
+                }
+                    
                 const li = $('<li>', {registry_id: registry.id}).append(
                     $('<a>').append(
-                        $('<span>', {text: `${registry.name} (${type})`})
+                        $('<span>', {text: registryName})
                     )
                 ).appendTo(registryUl);
 

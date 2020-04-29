@@ -10,6 +10,28 @@
          url(/icon/iconfont/MaterialIcons-Regular.ttf) format('truetype');
 }
 
+:root {
+    --first-color: #002F6C;
+    --second-color: #19437A;
+    --third-color: #01579B;
+    --fourth-color: #0277BD;
+
+    --element-color: #0091EA;
+    --element-hover-color: #0088DB;
+    --element-active-color: #1A9CED;
+}
+
+:root[theme='dark'] {
+    --first-color: #111C29;
+    --second-color: #222A33;
+    --third-color: #374452;
+    --fourth-color: #4B5A6B;
+
+    --element-color: #004ECB;
+    --element-hover-color: #0045B2;
+    --element-active-color: #1661D9;  
+}
+
 .material-icons {
     font-family: 'Material Icons';
     font-weight: normal;
@@ -49,6 +71,7 @@ button {
     padding: 0px 14px;
     border: 0;
     cursor: pointer;
+    transition: .15s;
 }
 
 #header {
@@ -58,7 +81,7 @@ button {
     padding: 0px 20px;
     position: relative;
     border-bottom: 1px solid lightgray;
-    background-color: #0277bd;
+    background-color: var(--third-color);
 }
 
 #content {
@@ -77,6 +100,11 @@ button {
     box-shadow: 0px 0px 15px #E6E6EA;
     border-radius: 4px;
     overflow: auto;
+    font-size: 14px;
+}
+
+#report_content table {
+    font-size: 14px;
 }
 
 #report_name {
@@ -106,16 +134,34 @@ button {
     padding: 15px 0px;
 }
 
-#navigation button {
+#navigation button,
+#navigation select {
     margin-left: 10px;
     height: 100%;
     border-radius: 4px;
     font-weight: bold;
+    float: left;
+}
+
+#navigation select {
+    font-size: 16px;
+    font-weight: normal;
 }
 
 #print_btn {
     background-color: white;
-    color: #0091ea;
+    color: var(--element-color); 
+}
+
+#exit_btn {
+    width: 39px;
+    padding: 0px;
+    color: white;
+    background-color: orangered;
+}
+
+#exit_btn:hover {
+    background-color: #e63d00;
 }
 
 #print_btn:hover {
