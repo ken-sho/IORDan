@@ -183,6 +183,7 @@ class ReportHandler(BaseHandler):
             self.redirect("/")
             return
         asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
+        orgid = str(self.get_cookie('companyId'))
         accid = self.get_argument('accid')
         humanid = self.get_argument('humanid')
         rtype = self.get_argument('rtype')
