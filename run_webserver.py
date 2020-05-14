@@ -234,6 +234,7 @@ class ReportHandler(BaseHandler):
                 self.write(res)
             encoded = base64.b64encode(q_sql.encode()).decode()
             logg_web.add_log(asid,encoded,'Выполнение групового отчёта/справки')
+        conn.commit()
         cur.close()
         conn.close()
 
