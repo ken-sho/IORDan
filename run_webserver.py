@@ -54,7 +54,6 @@ class LoginHandler(tornado.web.RequestHandler):
         loginname = lname.lower()
         ip_adr = self.request.remote_ip
         asid = login_db.login(loginname, passwd, ip_adr)
-        #print (asid)
         if asid !='no_usr_or_pwd':
             self.set_secure_cookie("user", loginname)
             self.set_secure_cookie("password", passwd)
@@ -156,7 +155,6 @@ class Base_FNCHandler(BaseHandler):
         res=base_fnk.fnk_lst(asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10)
         if res == None:
             res=''
-        #print(res)            
         self.write(res)
 
 class Base_ADMINHandler(BaseHandler):
@@ -176,7 +174,6 @@ class Base_ADMINHandler(BaseHandler):
         res=adm_base_fnk.fnk_lst(asid,orgid,fnk_name,adate,operation)
         if res == None:
             res=''
-        #print(fnk_name +' '+res)            
         self.write(res)
 
 
@@ -198,7 +195,6 @@ class ReportHandler(BaseHandler):
         cur = conn.cursor()
         if rtype == 'certificate' and multi=='':
             q_sql = "select report.sprav"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"')"
-            print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
@@ -209,7 +205,6 @@ class ReportHandler(BaseHandler):
             dateb = self.get_argument('dateb')
             datee = self.get_argument('datee')
             q_sql = "select report.rep"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"','"+ dateb +"','"+ datee +"')"
-            print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
@@ -217,19 +212,21 @@ class ReportHandler(BaseHandler):
             encoded = base64.b64encode(q_sql.encode()).decode()
             logg_web.add_log(asid,encoded,'Выполнение отчёта')
         elif multi=='true':
+            createRegistry = self.get_argument('createRegistry')
             q_sql = "select report.rep_multi('"+ asid +"','"+ accid +"','"+ rtype +"','"+ rnum +"')"
-            #print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
                 self.write(res)
+            if createRegistry== 'true':
+                q_sql = "select main.ree_registry_create('"+ asid +"','"+ orgid +"','"+ res +"','"+ accid +"')"
+                cur.execute(q_sql)
             encoded = base64.b64encode(q_sql.encode()).decode()
             logg_web.add_log(asid,encoded,'Выполнение массового отчёта/справки')
         elif multi!='true' and multi!='':
             dateb = self.get_argument('dateb')
             datee = self.get_argument('datee')
             q_sql = "select report.rep_fast_access('"+ asid +"','"+ accid +"','"+ rtype +"','"+ dateb +"','"+ datee +"','"+ multi +"')"
-            print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
@@ -252,7 +249,6 @@ class WebRequestHandler(BaseHandler):
             q_sql = "select access.user_rights('"+asid +"')"
         else:
             q_sql = "select main.webrqst('"+asid +"','"+ val_param +"')"
-        #print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -269,7 +265,7 @@ class FilelistHandler(BaseHandler):
         asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
         name = tornado.escape.xhtml_escape(self.current_user)
         self.write ('[')
-        for root, dirs, files in os.walk('upload/'): 
+        for root, dirs, files in os.walk('/opt/IORDan/upload/'): 
                 string=''
                 for f in files:
                     string+='{"name":"'+f+'","creationTime":"'+time.ctime(os.path.getctime(root+"/"+f))+'"},'
@@ -284,12 +280,12 @@ class UploadHandler(tornado.web.RequestHandler):
         file1 = self.request.files['file'][0]
         original_fname = file1['filename']
         #fexist = os.path.exists("www/upload/" + autor + "/" + original_fname)
-        fexist = os.path.exists("upload/" + original_fname)
+        fexist = os.path.exists("/opt/IORDan/upload/" + original_fname)
         if fexist==True:
            for cnt in range (1,1000):
                final_filename = "Копия_"+str(cnt)+"-"+original_fname
                #fexist = os.path.exists("upload/" + autor + "/" + final_filename)
-               fexist = os.path.exists("upload/" + final_filename)
+               fexist = os.path.exists("/opt/IORDan/upload/" + final_filename)
                if fexist==True:
                   cnt =+1
                else:
@@ -297,7 +293,7 @@ class UploadHandler(tornado.web.RequestHandler):
         else:
            final_filename = original_fname
         #output_file = open("upload/" + autor + "/" + final_filename, 'wb')
-        output_file = open("upload/" + final_filename, 'wb')
+        output_file = open("/opt/IORDan/upload/" + final_filename, 'wb')
         output_file.write(file1['body'])
         output_file.close()
         self.write('success')
@@ -310,12 +306,12 @@ class OpFileHandler(tornado.web.RequestHandler):
         attr = self.get_argument('attr')
         fname = self.get_argument('fname')
         if attr=='del':
-           os.remove('upload/'+fname)
+           os.remove('/opt/IORDan/upload/'+fname)
            self.write('success')
         elif attr=='runformat':
             org_id = self.get_argument('org_id')
             fname_short = fname
-            fname = "upload/" + fname
+            fname = "/opt/IORDan/upload/" + fname
             conn = db_conn.db_connect('web_receivables')
             loadxls.LoadFile(fname,conn,asid,fname_short)
             cur = conn.cursor()
@@ -323,7 +319,7 @@ class OpFileHandler(tornado.web.RequestHandler):
             cur.execute(q_sql)
             conn.commit()
             zipname=str(time.time())
-            z = zipfile.ZipFile("archive/" + zipname+'.zip', 'w', zipfile.ZIP_DEFLATED)
+            z = zipfile.ZipFile("/opt/IORDan/archive/" + zipname+'.zip', 'w', zipfile.ZIP_DEFLATED)
             z.write(fname)
             z.close()
             os.remove(fname)
@@ -341,7 +337,6 @@ class BankTemplHandler(BaseHandler):
         conn = db_conn.db_connect('web_receivables')
         cur = conn.cursor()
         q_sql = "select loader.bank_template"+tname +"('"+asid +"','"+ pid +"','"+ orgid +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -358,7 +353,6 @@ class BankTemplHandler(BaseHandler):
         conn = db_conn.db_connect('web_receivables')
         cur = conn.cursor()
         q_sql = "select main.load_bank_doc('"+asid +"','"+ doc_id +"','"+ num +"','"+ page_json +"','"+ doc_summ +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
