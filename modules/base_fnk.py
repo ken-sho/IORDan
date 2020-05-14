@@ -40,7 +40,8 @@ import modules.logg_web as logg_web
 #chg_history_setting
 #chg_reputation
 #ree_regular_create
-
+#ree_print_registry_content
+#chg_history_foropl
 
 def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10):
     conn = db_conn.db_connect('web_receivables')
@@ -170,18 +171,17 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         logg_web.add_log(asid,encoded,'Смена настроек пользователя')
     elif val_param=='ree_reestrs':
         q_sql = "select main.ree_reestrs('"+ asid +"','"+ val_param1 +"','"+ orgid +"','"+ val_param2 +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
     elif val_param=='ree_recodrs':
         q_sql = "select main.ree_recodrs('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"')"
+        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
     elif val_param=='addchg_ree_recodrs':
         q_sql = "select main.addchg_ree_recodrs('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"','"+ val_param3 +"','"+ val_param4 +"','"+ val_param5 +"','"+ val_param6 +"','"+ val_param7 +"','"+ val_param8 +"','"+ val_param9 +"','"+ val_param10 +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -232,14 +232,31 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         logg_web.add_log(asid,encoded,'Изменение репутации')
     elif fnk_name=='ree_regular_create':
         q_sql = "select main.ree_regular_create('"+ asid +"','"+ orgid +"','"+ adate +"')"
+        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Создание регулярного реестра')
+    elif fnk_name=='ree_print_registry_content':
+        q_sql = "select main.ree_print_registry_content('"+ asid +"','"+ orgid +"','"+ adate +"')"
+        cur.execute(q_sql)
+        for row in cur:
+            res=(row[0])
+        encoded = base64.b64encode(q_sql.encode()).decode()
+        logg_web.add_log(asid,encoded,'Просмотр документа массовой печати')
+    elif fnk_name=='chg_history_foropl':
+        q_sql = "select main.chg_history_foropl('"+ asid +"','"+ orgid +"','"+ adate +"')"
+        cur.execute(q_sql)
+        print(q_sql)
+        #for row in cur:
+            #res=(row[0])
+        #encoded = base64.b64encode(q_sql.encode()).decode()
+        #logg_web.add_log(asid,encoded,'Просмотр документа массовой печати')
 
 
 
+        
     conn.commit()
     cur.close()
     conn.close()

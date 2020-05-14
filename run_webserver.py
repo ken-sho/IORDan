@@ -19,6 +19,16 @@ import modules.login_db as login_db
 import modules.loadxls as loadxls
 import modules.unloadxls as unloadxls
 
+class chck_sid(tornado.web.RequestHandler):
+    def post(self):
+        asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
+        res = login_db.chck_ss(asid)
+        if res=='0':
+            stt = '{"is_active": false}'
+        else:
+            stt = '{"is_active": true}'
+        self.write(stt)
+
 class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
         asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
@@ -417,6 +427,7 @@ settings = {
 
 application = tornado.web.Application([
     (r"/", LoginHandler),
+    (r"/chck_sid", chck_sid),
     (r"/main", MainHandler),
     (r"/base_func", Base_FNCHandler),
     (r"/admin_func", Base_ADMINHandler),
