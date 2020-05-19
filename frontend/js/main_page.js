@@ -71,6 +71,8 @@ $(document).ready(function() {
         yearRange: '2005: +1',
     });
 
+    $('#history_calendar_navigation p').append(createCheckboxToggle({ name: 'Клиент', value: 'client', checked: true }, { name: 'Оборотка', value: 'turnover', checked: false }));
+
     if (CURRENT_OBJECT_DATA.debtDate) {
         let debtDate = CURRENT_OBJECT_DATA.debtDate.split('.');
         let debtDateMonth = debtDate[1];
@@ -1980,26 +1982,11 @@ function addOwnerReportFastAccess() {
     }
 }
 
-// function createMainCalendar() {
-//     $("#main_calendar").datepicker({
-//         dateFormat: "mm.yy",
-//         changeMonth: true,
-//         changeYear: true,
-//         showButtonPanel: true,
-//         yearRange: '2005: +1',
-//     });
-
-//     if (CURRENT_OBJECT_DATA.debtDate) {
-//         let debtDate = CURRENT_OBJECT_DATA.debtDate.split('.');
-//         let debtDateMonth = debtDate[1];
-//         let debtDateYear = debtDate[2];
-//         $("#main_calendar").datepicker("setDate", new Date(debtDateYear, debtDateMonth - 1));
-//     }
-
-//     getObjectHistoryData();
-// }
-
 function mainCalendarChangeDate() {
+    $('#main_calendar .ui-datepicker-buttonpane').append(
+        $('<button>', {text: 'Последняя оплата'})
+    );
+    
     $('#main_calendar .ui-datepicker-prev, #main_calendar .ui-datepicker-next, #main_calendar .ui-datepicker-current').click(function() {
         getObjectHistoryData([createObjectHistoryTable]);
         mainCalendarChangeDate();
@@ -2020,9 +2007,12 @@ function getCalendarValue(calendarId) {
 }
 
 function getObjectHistoryData(callback) {
-
-    $('#obj_main_table').empty();
-    createContentLoader('#obj_main_table');
+    for (const func of callback) {
+        if (func.name == 'createObjectHistoryTable') {
+            $('#obj_main_table').empty();
+            createContentLoader('#obj_main_table');
+        }
+    }
 
     let date = getCalendarValue('main_calendar');
     let accid = CURRENT_OBJECT_DATA.accid;
@@ -2080,7 +2070,12 @@ function createObjectHistoryTable(data) {
 
                 if (isEditable) {
                     tdElem.css({'padding':'0'});
-                    $('<input>', {type: 'text', text: row.data[elem]}).appendTo(tdElem);
+                    const input = $('<input>', {type: 'text', service: row.name}).appendTo(tdElem);
+                    input.val(row.data[elem]);
+
+                    input.on('focusout', () => {
+                        sendHistoryTableServicePayment(row.name, input.val(), CURRENT_OBJECT_DATA.accid);
+                    });
                 }
                 else {
                     tdElem.text(row.data[elem]);
@@ -2108,7 +2103,12 @@ function createObjectHistoryTable(data) {
 
         if (isEditable) {
             tdElem.css({'padding':'0'});
-            $('<input>', {type: 'text', text: data.footer.data[elem]}).appendTo(tdElem);
+            const input = $('<input>', {type: 'text', service: data.footer.name}).appendTo(tdElem);
+            input.val(data.footer.data[elem]);
+
+            input.on('focusout', () => {
+                sendHistoryTableServicePayment(data.footer.name, input.val(), CURRENT_OBJECT_DATA.accid);
+            });
         }
         else {
             tdElem.text(data.footer.data[elem]);
@@ -2126,7 +2126,35 @@ function createObjectHistoryTable(data) {
 
 
     $('#obj_main_table').html(table);
-    if ($('#main_calendar').is(':hidden')) $('#main_calendar').show();
+    if ($('#history_calendar').is(':hidden')) $('#history_calendar').show();
+
+    function sendHistoryTableServicePayment(service, value, accid) {
+        const objectData = {accid: accid, service: service, value: value, date: getCalendarValue('main_calendar')};
+        console.log(objectData)
+        $.ajax({
+            type: 'POST',
+            url: '/base_func?fnk_name=chg_history_foropl',
+            data: JSON.stringify(objectData),
+            success: (data) => {
+                getObjectHistoryData([refreshHistoryTableServicePayments])
+            }
+        });
+    }
+
+    function refreshHistoryTableServicePayments(tableData) {
+        let tdIndex;
+        for (const th in tableData.header) {
+            if (tableData.header[th].name == 'К оплате') tdIndex = th;
+        }
+        console.log(tdIndex);
+
+        for (const elem of tableData.body) {
+            console.log(elem.data[tdIndex - 1]);
+            $(`#history_table input[service='${elem.name}']`).val(elem.data[tdIndex - 1]);
+        }
+
+        $(`#history_table input[service='${tableData.footer.name}']`).val(tableData.footer.data[tdIndex - 1]);
+    }
 }
 
 function sendAccountHistorySettings(data) {
@@ -4867,4 +4895,23 @@ function createPopupLayout(name, id) {
     );
 
     return popup;
+}
+
+function createCheckboxToggle(firstElem, secondElem) {
+    const div = $('<div>', { style: 'width: max-content; margin: 10px' });
+    const firstElemLabel = $('<label>', { class: 'checkbox-container', text: firstElem.name, style: 'float: left; margin-right: 10px; display: block; text-align: center' }).appendTo(div);
+    const firstElemInput = $('<input>', { class: 'checkbox', type: 'checkbox', value: firstElem.value}).appendTo(firstElemLabel);
+    $('<span>', { class: 'checkmark' }).appendTo(firstElemLabel);
+    firstElemInput.prop('checked', firstElem.checked);
+
+    const secondElemLabel = $('<label>', { class: 'checkbox-container', text: secondElem.name, style: 'float: left; margin-right: 10px; display: block; text-align: center' }).appendTo(div);
+    const secondElemInput = $('<input>', { class: 'checkbox', type: 'checkbox', value: secondElem.value}).appendTo(secondElemLabel);
+    $('<span>', { class: 'checkmark' }).appendTo(secondElemLabel);
+    secondElemInput.prop('checked', secondElem.checked);
+
+    addEventOnOffToggle(firstElemInput, secondElemInput);
+
+    console.log(div)
+
+    return div;
 }

@@ -1,6 +1,6 @@
 $(document).ready(function () {
 
-    let fontSize;
+    let fontSize = $('#font_size_select').val();
 
     $('#font_size_select').on('change', function() {
         fontSize = $(this).val();
@@ -11,7 +11,7 @@ $(document).ready(function () {
 
         var printWindow = window.open('', 'PRINT');
         let printingContent = document.querySelector('#report_content').innerHTML;
-        printWindow.document.write(`<html><head><script src="/js/jquery-3.4.1.min.js"></script><script src="/js/print_report_page.js"></script><style type="text/css">body, table {font-size: ${fontSize}px;}</style>`);
+        printWindow.document.write(`<html><head><script src="/js/jquery-3.4.1.min.js"></script><script src="/js/print_report_page.js"></script><style type="text/css">body, table {font-size: ${fontSize}px;} table {border-collapse: collapse;} .report-table th, .report-table td {border: 1px solid black;}</style>`);
         printWindow.document.write('</head><body id="report_print">');
         printWindow.document.write(printingContent);
         printWindow.document.write('</body></html>');

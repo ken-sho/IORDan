@@ -798,40 +798,29 @@ div {
     float: left;
 } */
 
-#calendar_navigation {
+#history_calendar {
     width: 100%;
     height: 80px;
+    display: none;
+
+}
+
+#history_calendar_navigation {
+    float: left;
+    height: 60px;
+    width: calc(30% - 10px);
+    background: #F4F6F8;
+    border-radius: 5px 0px 0px 5px;
+    margin: 10px;
+    margin-right: 0px;
 }
 
 #main_calendar {
-    width: 100%;
+    width: 70%;
     height: 100%;
     float: right;
-    text-align: center;
-    display: none;
+    text-align: center; 
 }
-
-/* #obj_info_content {
-    height: 105px;
-    width: 100%;
-    float: left;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-content: baseline;
-    border-bottom: 1px solid #F0F2F4;
-    box-sizing: border-box;
-}
-
-#obj_info_notation {
-    padding-left: 20px;
-    padding-top: 11px;
-    padding-right: 5px;
-    height: 35px;
-    float: left;
-    border-bottom: 1px solid #F0F2F4;
-    width: 100%;
-} */
 
 .obj-info-block {
     height: calc(100% / 3);
@@ -1080,7 +1069,7 @@ div {
 #owners_table td, #agreement_list_table td,
 #owners_table th, #agreement_list_table th,
 #obj_additional_info_table td {
-    border: 1px solid #e3e8ed;
+    border: 1px solid #D9E0E3;
     height: 30px;
     font-size: 12px;
     color: #263238;
@@ -1320,7 +1309,7 @@ div {
 .block-main-header-with-icon {
     width: 100%;
     height: 60px;
-    border-bottom: 2px solid #e3e8ed;
+    border-bottom: 2px solid #D9E0E3;
 }
 
 .block-main-header>.header {
@@ -1713,7 +1702,7 @@ div {
 }
 
 .task-table td, .task-table th {
-    border: 1px solid #e3e8ed;
+    border: 1px solid #D9E0E3;
     text-align: center;
     font-size: 16px;
     height: 50px;
@@ -1864,7 +1853,7 @@ p {
     background-color: #D9E0E3;
     position: sticky;
     top: 0px;
-    border: 1px solid #e3e8ed;
+    border: 1px solid #D9E0E3;
 }
 
 td.add-template-adress {
@@ -1909,7 +1898,7 @@ td.add-template-adress {
 }
 
 .template-table td {
-    border: 1px solid #e3e8ed;
+    border: 1px solid #D9E0E3;
 }
 
 .template-table tr:hover {
@@ -2020,15 +2009,16 @@ td.add-template-adress {
     width: 300px;
     margin: auto;
     margin: 10px;
+    margin-left: 0px;
     height: 120px;
     background: #F4F6F8;
-    border-radius: 5px;
+    border-radius: 0px 5px 5px 0px;
 }
 
 #main_calendar .ui-widget.ui-widget-content {
     border: 0;
-    float: right;
-    width: calc(100% - 20px);
+    float: left;
+    width: calc(100% - 10px);
     height: 60px;
 }
 
@@ -2046,6 +2036,9 @@ td.add-template-adress {
 #main_calendar .ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-current,
 #main_calendar .ui-datepicker .ui-datepicker-buttonpane button {
     float: right;
+    margin-left: 10px;
+    opacity: 1;
+    text-transform: uppercase;
 }
 
 #main_calendar .ui-datepicker-buttonpane button {
@@ -2056,10 +2049,10 @@ td.add-template-adress {
     border: 1px solid var(--element-color);
     color: var(--element-color);
     border-radius: 5px;
-    width: 212px;
     height: 30px;
     margin: 0;
     margin-top: 12px;
+    padding: 0px 10px;
 }
 
 #main_calendar .ui-datepicker .ui-datepicker-header {
@@ -2119,7 +2112,7 @@ td.add-template-adress {
 }
 
 #history_table td {
-    border: 1px solid #e3e8ed;
+    border: 1px solid #D9E0E3;
     height: 33px;
     font-size: 14px;
     color: #263238;
@@ -2131,13 +2124,15 @@ td.add-template-adress {
     border: 0;
     text-align: right;
     font-size: 14px;
+    box-sizing: border-box;
+    padding-right: 1px;
 }
 
 #history_table th {
     background-color: #F4F6F8;
     z-index: 0;
     font-weight: bold;
-    border: 1px solid #e3e8ed;
+    border: 1px solid #D9E0E3;
     border-top: 0;
     height: 30px;
     font-size: 14px;
@@ -2343,7 +2338,7 @@ form[name="add_objects_group_user"] td:first-child {
 }
 
 .block-table td, .block-table th {
-    border: 1px solid #e3e8ed;
+    border: 1px solid #D9E0E3;
     height: 30px;
     font-size: 16px;
     color: #263238;
@@ -2635,7 +2630,7 @@ textarea {
 
 .obj-notation {
     padding: 15px 20px;
-    border-bottom: 1px solid #e3e8ed;
+    border-bottom: 1px solid #D9E0E3;
     color: #263238;
     font-size: 16px;
 }
@@ -3244,4 +3239,11 @@ textarea {
     vertical-align: middle;
     font-size: 20px;
     cursor: default;
+}
+
+.p-vertical-center {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    align-items: center;
 }
