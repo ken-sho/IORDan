@@ -1845,12 +1845,12 @@ p {
 }
 
 .column-table-main {
-    background-color: #D9E0E3;
+    background-color: #F4F6F8;
 }
 
 .template-table th {
     border-top: 0;
-    background-color: #D9E0E3;
+    background-color: #F4F6F8;
     position: sticky;
     top: 0px;
     border: 1px solid #D9E0E3;

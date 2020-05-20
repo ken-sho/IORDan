@@ -42,6 +42,7 @@ import modules.logg_web as logg_web
 #ree_regular_create
 #ree_print_registry_content
 #chg_history_foropl
+#get_last_pay_date
 
 def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10):
     conn = db_conn.db_connect('web_receivables')
@@ -59,8 +60,8 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
-    elif val_param=='account_history':
-        q_sql = "select main.account_history('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"','"+ orgid +"')"
+    elif fnk_name=='account_history':
+        q_sql = "select main.account_history('"+ asid +"','"+ orgid +"','"+ adate +"')"
         print(q_sql)
         cur.execute(q_sql)
         for row in cur:
@@ -253,8 +254,12 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Разбивка оплаты')
-
-
+    elif fnk_name=='get_last_pay_date':
+        q_sql = "select main.get_last_pay_date('"+ asid +"','"+ orgid +"','"+ adate +"')"
+        print(q_sql)
+        cur.execute(q_sql)
+        for row in cur:
+            res=(row[0])
 
         
     conn.commit()

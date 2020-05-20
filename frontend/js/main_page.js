@@ -71,7 +71,24 @@ $(document).ready(function() {
         yearRange: '2005: +1',
     });
 
-    $('#history_calendar_navigation p').append(createCheckboxToggle({ name: 'Клиент', value: 'client', checked: true }, { name: 'Оборотка', value: 'turnover', checked: false }));
+    if (getCookie('history_table_mode') == undefined) {
+        setCookie('history_table_mode', 'client');
+    }
+
+    $('#history_calendar_navigation p').append(createCheckboxToggle(
+        {
+            name: 'Клиент', value: 'client', checked: getCookie('history_table_mode') == 'client', callback: function(input) {
+                setCookie('history_table_mode', input.val());
+                getObjectHistoryData([createObjectHistoryTable, initializeAccountHistorySettings]);
+            }
+        },
+        {
+            name: 'Оборотка', value: 'turnover', checked: getCookie('history_table_mode') == 'turnover', callback: function(input) {
+                setCookie('history_table_mode', input.val());
+                getObjectHistoryData([createObjectHistoryTable, initializeAccountHistorySettings]);
+            }
+        }
+    ));
 
     if (CURRENT_OBJECT_DATA.debtDate) {
         let debtDate = CURRENT_OBJECT_DATA.debtDate.split('.');
@@ -2014,17 +2031,43 @@ function getObjectHistoryData(callback) {
         }
     }
 
-    let date = getCalendarValue('main_calendar');
-    let accid = CURRENT_OBJECT_DATA.accid;
+    // const date = getCalendarValue('main_calendar');
 
-    $.post(`/base_func?val_param=account_history&val_param1=${accid}&val_param2=${date}`, function (data) {
-        const tableData = JSON.parse(data);
-        console.log(tableData)
+    // $.post(`/base_func?val_param=account_history&val_param1=${accid}&val_param2=${date}`, function (data) {
+    //     const tableData = JSON.parse(data);
+    //     console.log(tableData)
 
-        if (!isEmpty(callback)) {
-            for (const func of callback) {
-                func(tableData);
+    //     if (!isEmpty(callback)) {
+    //         for (const func of callback) {
+    //             func(tableData);
+    //         }
+    //     }
+    // });
+
+    $.ajax({
+        type: 'POST',
+        url: '/base_func?fnk_name=account_history',
+        data: JSON.stringify({ accid: CURRENT_OBJECT_DATA.accid, date: getCalendarValue('main_calendar'), mode: getCookie('history_table_mode') }),
+        success: (data) => {
+            const tableData = JSON.parse(data);
+            console.log(tableData)
+
+            if (!isEmpty(callback)) {
+                for (const func of callback) {
+                    func(tableData);
+                }
             }
+        }
+    });
+}
+
+function getLastPayDate() {
+    $.ajax({
+        type: 'POST',
+        url: '/base_func?fnk_name=get_last_pay_date',
+        data: JSON.stringify({accid: CURRENT_OBJECT_DATA.accid, mode: getCookie('history_table_mode')}),
+        success: (data) => {
+            console.log(data);
         }
     });
 }
@@ -2073,8 +2116,10 @@ function createObjectHistoryTable(data) {
                     const input = $('<input>', {type: 'text', service: row.name}).appendTo(tdElem);
                     input.val(row.data[elem]);
 
-                    input.on('focusout', () => {
-                        sendHistoryTableServicePayment(row.name, input.val(), CURRENT_OBJECT_DATA.accid);
+                    input.keypress((event) => {
+                        if (event.key == 'Enter') {
+                            sendHistoryTableServicePayment(row.name, input.val(), CURRENT_OBJECT_DATA.accid);
+                        }
                     });
                 }
                 else {
@@ -2106,8 +2151,11 @@ function createObjectHistoryTable(data) {
             const input = $('<input>', {type: 'text', service: data.footer.name}).appendTo(tdElem);
             input.val(data.footer.data[elem]);
 
-            input.on('focusout', () => {
-                sendHistoryTableServicePayment(data.footer.name, input.val(), CURRENT_OBJECT_DATA.accid);
+            input.keypress((event) => {
+                if (event.key == 'Enter') {
+                    sendHistoryTableServicePayment(data.footer.name, input.val(), CURRENT_OBJECT_DATA.accid);
+
+                }
             });
         }
         else {
@@ -2797,11 +2845,11 @@ function initializeProcessedFileTemplate(fileId, companyId, templateNum) {
         }
     });
 
-    const statusInterval = setInterval( function() {
-        $.post('/web_request?query=bank_log',  function(data) {
-            console.log(data);
-        });
-    }, 1000);
+    // const statusInterval = setInterval( function() {
+    //     $.post('/web_request?query=bank_log',  function(data) {
+    //         console.log(data);
+    //     });
+    // }, 1000);
 }
 
 function initializationPerformedFile(fileId, fileName) {
@@ -3038,11 +3086,12 @@ function keyupSearch(inputId, menuId, searchBtnId) {
             if (data !== '') {
                 let searchListArray = JSON.parse(data);
                 for (const elem of searchListArray) {
-                    let dataArray = elem.split('&');
-                    let name = dataArray[0];
-                    let accid = dataArray[1];
-                    let adress = dataArray[2];
-                    $('<li>', {text: name, accid: accid, adress: adress}).appendTo(parentDiv);
+                    const dataArray = elem.split('&');
+                    const name = dataArray[0];
+                    const accid = dataArray[1];
+                    const adress = dataArray[2];
+                    const ls = dataArray[3];
+                    $('<li>', {text: `${ls} ${name}`, accid: accid, adress: adress}).appendTo(parentDiv);
                 }
 
                 $(`#${menuId} ul li`).each(function() {
@@ -3094,7 +3143,7 @@ function searchInputValue(input, valueType) {
                     const accid = dataArray[1];
                     const adress = dataArray[2];
                     const ls = dataArray[3];
-                    $('<li>', {text: name, accid: accid, adress: adress, ls: ls}).appendTo(divList.find('ul'));
+                    $('<li>', {text: `${ls} ${name}`, accid: accid, adress: adress, ls: ls}).appendTo(divList.find('ul'));
                 }
 
                 input.after(divList);
@@ -3129,12 +3178,14 @@ function mainSearchKeyup(inputId, menuId) {
         $.post(encodeURIstring, function (data) {
             if (data !== '') {
                 let searchListArray = JSON.parse(data);
+                console.log(searchListArray)
                 for (const elem of searchListArray) {
-                    let dataArray = elem.split('&');
-                    let name = dataArray[0];
-                    let accid = dataArray[1];
-                    let adress = dataArray[2];
-                    $('<li>', {text: name, accid: accid, adress: adress}).appendTo(parentDiv);
+                    const dataArray = elem.split('&');
+                    const name = dataArray[0];
+                    const accid = dataArray[1];
+                    const adress = dataArray[2];
+                    const ls = dataArray[3];
+                    $('<li>', {text: `${ls} ${name}`, accid: accid, adress: adress}).appendTo(parentDiv);
                 }
 
                 $(`#${menuId} ul li`).each(function() {
@@ -4903,11 +4954,17 @@ function createCheckboxToggle(firstElem, secondElem) {
     const firstElemInput = $('<input>', { class: 'checkbox', type: 'checkbox', value: firstElem.value}).appendTo(firstElemLabel);
     $('<span>', { class: 'checkmark' }).appendTo(firstElemLabel);
     firstElemInput.prop('checked', firstElem.checked);
+    firstElemInput.on('click',  function() {
+        firstElem.callback($(this));
+    })
 
     const secondElemLabel = $('<label>', { class: 'checkbox-container', text: secondElem.name, style: 'float: left; margin-right: 10px; display: block; text-align: center' }).appendTo(div);
     const secondElemInput = $('<input>', { class: 'checkbox', type: 'checkbox', value: secondElem.value}).appendTo(secondElemLabel);
     $('<span>', { class: 'checkmark' }).appendTo(secondElemLabel);
     secondElemInput.prop('checked', secondElem.checked);
+    secondElemInput.on('click',  function() {
+        secondElem.callback($(this));
+    })
 
     addEventOnOffToggle(firstElemInput, secondElemInput);
 
