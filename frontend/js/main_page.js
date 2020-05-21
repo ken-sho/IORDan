@@ -2001,7 +2001,9 @@ function addOwnerReportFastAccess() {
 
 function mainCalendarChangeDate() {
     $('#main_calendar .ui-datepicker-buttonpane').append(
-        $('<button>', {text: 'Последняя оплата'})
+        $('<button>', {text: 'Последняя оплата'}).on('click',  function() {
+            getLastPayDate();
+        })
     );
     
     $('#main_calendar .ui-datepicker-prev, #main_calendar .ui-datepicker-next, #main_calendar .ui-datepicker-current').click(function() {
@@ -2012,6 +2014,27 @@ function mainCalendarChangeDate() {
     $('#main_calendar .ui-datepicker-month, #main_calendar .ui-datepicker-year').change(function () {
         getObjectHistoryData([createObjectHistoryTable]);
         mainCalendarChangeDate();
+    });
+}
+
+function getLastPayDate() {
+    $.ajax({
+        type: 'POST',
+        url: '/base_func?fnk_name=get_last_pay_date',
+        data: JSON.stringify({accid: CURRENT_OBJECT_DATA.accid, mode: getCookie('history_table_mode')}),
+        success: (data) => {
+            if (data == 'none') {
+                showPopupNotification('notification', 'Последняя оплата по данному адресу отсутствует!')
+            }
+            else {
+                const fullDate = data.split('.');
+                const month = fullDate[0];
+                const year = fullDate[1];
+                $("#main_calendar").datepicker("setDate", new Date(year, month - 1));
+                getObjectHistoryData([createObjectHistoryTable]);
+                mainCalendarChangeDate();
+            }
+        }
     });
 }
 
@@ -2031,19 +2054,6 @@ function getObjectHistoryData(callback) {
         }
     }
 
-    // const date = getCalendarValue('main_calendar');
-
-    // $.post(`/base_func?val_param=account_history&val_param1=${accid}&val_param2=${date}`, function (data) {
-    //     const tableData = JSON.parse(data);
-    //     console.log(tableData)
-
-    //     if (!isEmpty(callback)) {
-    //         for (const func of callback) {
-    //             func(tableData);
-    //         }
-    //     }
-    // });
-
     $.ajax({
         type: 'POST',
         url: '/base_func?fnk_name=account_history',
@@ -2057,17 +2067,6 @@ function getObjectHistoryData(callback) {
                     func(tableData);
                 }
             }
-        }
-    });
-}
-
-function getLastPayDate() {
-    $.ajax({
-        type: 'POST',
-        url: '/base_func?fnk_name=get_last_pay_date',
-        data: JSON.stringify({accid: CURRENT_OBJECT_DATA.accid, mode: getCookie('history_table_mode')}),
-        success: (data) => {
-            console.log(data);
         }
     });
 }
