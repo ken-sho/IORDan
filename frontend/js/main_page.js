@@ -2005,16 +2005,14 @@ function mainCalendarChangeDate() {
             getLastPayDate();
         })
     );
-    
-    $('#main_calendar .ui-datepicker-prev, #main_calendar .ui-datepicker-next, #main_calendar .ui-datepicker-current').click(function() {
-        getObjectHistoryData([createObjectHistoryTable]);
-        mainCalendarChangeDate();
-    });
 
-    $('#main_calendar .ui-datepicker-month, #main_calendar .ui-datepicker-year').change(function () {
+    const handler = function() {
         getObjectHistoryData([createObjectHistoryTable]);
         mainCalendarChangeDate();
-    });
+    }
+    
+    $('#main_calendar .ui-datepicker-prev, #main_calendar .ui-datepicker-next, #main_calendar .ui-datepicker-current').on('click', handler);
+    $('#main_calendar .ui-datepicker-month, #main_calendar .ui-datepicker-year').on('change', handler);
 }
 
 function getLastPayDate() {
@@ -2047,6 +2045,7 @@ function getCalendarValue(calendarId) {
 }
 
 function getObjectHistoryData(callback) {
+    setCookie('history_table_date', getCalendarValue('main_calendar'));
     for (const func of callback) {
         if (func.name == 'createObjectHistoryTable') {
             $('#obj_main_table').empty();
@@ -4160,8 +4159,8 @@ function addSettingChangeToObj(obj, elem, objKey, hiddenCurrentState) {
 
 function getRegistryData(registryId, registryName, registryType, documentType) {
     $('#registry_print_icon').off('click');
-    $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon, #registy_convert_to_excel_btn, #no_registries_div, #registry_printed_document_icon').remove();
-    $('#registry_settings_content .block-content, #add_registry_entry_table').empty();
+    $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon, #registy_convert_to_excel_btn, #no_registries_div, #registry_printed_document_icon, #add_registry_entry_table').remove();
+    $('#registry_settings_content .block-content').empty();
     createContentLoader('#registry_settings_content .block-content');
     $.post(`/base_func?val_param=ree_recodrs&val_param1=${registryId}&val_param2=${documentType}`, (data) => {
         const registryData = JSON.parse(data);
@@ -4365,46 +4364,11 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
         }
     }
 
-    const inputCollection = $('#add_registry_entry_table').find('tr:nth-child(4) input');
-    inputCollection.each(function() {
-        $(this).off('keyup');
-        $(this).on('keyup', () => {
-            $('#add_entry_total_sum').val(sumUpInputValues(inputCollection));
-            inputCollection.each(function() {
-                if ($(this).val() !== '') {
-                    $('#add_entry_total_sum').attr('disabled', true);
-                    return false;
-                }
-                else {
-                    $('#add_entry_total_sum').attr('disabled', false);
-                }
-            });
-        });
-    });
-
-    $('#add_entry_total_sum').on('keyup', function() {
-        if ($(this).val() !== '') {
-            inputCollection.each(function() {
-                $(this).val('');
-                $(this).attr('disabled', true);
-            });
-        }
-        else {
-            inputCollection.each(function() {
-                $(this).attr('disabled', false);
-            });
-        }
-    });
-
     $('#add_registry_entry_table input').each(function() {
         const input = $(this);
         const valueType = $(this).attr('value_type')
         if (valueType == 'numeric') {
             input.inputmask('[-]9{1,}[(.|,)9{1,2}]');
-
-            input.on('keyup', () => {
-                input.val(input.val().replace(/,/g, '.'));
-            });
         }
         else if (valueType == 'date') {
             input.inputmask({alias: 'datetime', inputFormat: "dd.mm.yyyy", placeholder: '__.__.____'});
@@ -4458,6 +4422,47 @@ function openAddRegistryEntryPopup(registryId, registryName, registryType, docum
         addRegistryEntry(registryId, registryName, registryType, documentType);
     });
 
+    const inputCollection = $('#add_registry_entry_table').find('tr:nth-child(4) input');
+    inputCollection.each(function() {
+        $(this).off('keyup');
+        $(this).on('keyup', () => {
+            $('#add_entry_total_sum').val(sumUpInputValues(inputCollection));
+            inputCollection.each(function() {
+                if ($(this).val() !== '') {
+                    $('#add_entry_total_sum').attr('disabled', true);
+                    return false;
+                }
+                else {
+                    $('#add_entry_total_sum').attr('disabled', false);
+                }
+            });
+        });
+    });
+
+    $('#add_entry_total_sum').on('keyup', function() {
+        if ($(this).val() !== '') {
+            inputCollection.each(function() {
+                $(this).val('');
+                $(this).attr('disabled', true);
+            });
+        }
+        else {
+            inputCollection.each(function() {
+                $(this).attr('disabled', false);
+            });
+        }
+    });
+
+    $('#add_registry_entry_table input').each(function() {
+        const input = $(this);
+        const valueType = $(this).attr('value_type')
+        if (valueType == 'numeric') {
+            input.on('keyup', () => {
+                input.val(input.val().replace(/,/g, '.'));
+            });
+        }
+    });
+
     openPopupWindow('popup_add_edit_registry_entry');
 }
 
@@ -4480,12 +4485,22 @@ function openEditRegistryEntryPopup(registryId, entryId, entryData, registryName
     const inputCollection = $('#add_registry_entry_table').find('tr:nth-child(4) input');
     inputCollection.each(function() {
         $(this).off('keyup');
-        $(this).on('keyup', function() {
+        $(this).on('keyup', () => {
             $('#add_entry_total_sum').val(sumUpInputValues(inputCollection));
         });
     });
 
-    openPopupWindow('popup_add_edit_registry_entry')
+    $('#add_registry_entry_table input').each(function() {
+        const input = $(this);
+        const valueType = $(this).attr('value_type')
+        if (valueType == 'numeric') {
+            input.on('keyup', () => {
+                input.val(input.val().replace(/,/g, '.'));
+            });
+        }
+    });
+
+    openPopupWindow('popup_add_edit_registry_entry');
 }
 
 function sumUpInputValues(inputCollection) {

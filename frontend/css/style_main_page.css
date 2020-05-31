@@ -2961,6 +2961,7 @@ textarea {
     border: 0;
     height: 100%;
     text-align: center;
+    box-sizing: border-box;
 }
 
 .td-bold {
