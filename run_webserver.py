@@ -184,6 +184,7 @@ class ReportHandler(BaseHandler):
             return
         asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
         orgid = str(self.get_cookie('companyId'))
+        hdate = str(self.get_cookie('history_table_date'))
         accid = self.get_argument('accid')
         humanid = self.get_argument('humanid')
         rtype = self.get_argument('rtype')
@@ -202,6 +203,16 @@ class ReportHandler(BaseHandler):
                 self.write(res)
             encoded = base64.b64encode(q_sql.encode()).decode()
             logg_web.add_log(asid,encoded,'Выполнение справки')
+        elif rtype == 'certificate' and multi=='' and rnum==16:
+            dateb = self.get_argument('dateb')
+            datee = self.get_argument('datee')
+            q_sql = "select report.rep"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"','"+ hdate +"')"
+            cur.execute(q_sql)
+            for row in cur:
+                res=(row[0])
+                self.write(res)
+            encoded = base64.b64encode(q_sql.encode()).decode()
+            logg_web.add_log(asid,encoded,'Выполнение отчёта')
         elif rtype == 'report' and multi=='':
             dateb = self.get_argument('dateb')
             datee = self.get_argument('datee')
