@@ -1613,6 +1613,43 @@ div {
     border: 1px solid #D9E0E3;
 }
 
+.tab-content.grid > div .block-header {
+    height: 25px;
+    background-color: inherit;
+}
+
+.tab-content.grid > div .block-navigation {
+    height: 35px;
+}
+
+.tab-content.grid > div .block-content {
+    padding: 0;
+    overflow: auto;
+    height: calc(100% - 25px);
+}
+
+.profile-info-row {
+    
+}
+
+.profile-info-row .info-name {
+    float: left;
+    width: 40%;
+    text-transform: capitalize;
+}
+
+.profile-info-row .info-content {
+    float: left;
+    width: 60%;
+}
+
+.tab-content.grid h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
 .tab-content.active {
     display: block;
 }

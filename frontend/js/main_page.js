@@ -282,8 +282,10 @@ function getUserRightsData() {
     $.get( "/web_request?query=user_rights", function( data ) {
         const userRightsData = JSON.parse(data);
         USER_DATA = Object.assign(USER_DATA, userRightsData);
-        acceptColorTheme();
         showUserLogin();
+        initializeUserProfileBasicData();
+        initializeUserProfileChangePassword();
+        initializeUserProfileSettings();
 
         if (getCookie('companyId')) {
             if (USER_DATA.org_list.length > 1) {
@@ -326,6 +328,112 @@ function initializeUserRight() {
         $('.default-hidden').removeClass('default-hidden');
         getCompanyDocumentsList();
     }
+}
+
+function initializeUserProfileBasicData() {
+    const dataObj = {'Логин': USER_DATA.user_login, 'Роль': USER_DATA.u_type, 'Email': USER_DATA.user_email};
+
+    const block = createBlockforGridTab('Основные данные', true);
+
+    for (const elem in dataObj) {
+        $('<div>', {class: 'profile-info-row'}).append(
+            $('<div>', {class: 'info-name', text: `${elem}:`}),
+            $('<div>', {class: 'info-content', text: dataObj[elem]})
+        ).appendTo(block.find('.block-content'));
+    }
+
+    $('<button>', {id: 'save_login_password', class: 'button-primary', text: 'Изменить'}).on('click', () => {
+        // changeUserPassword();
+    }).appendTo(block.find('.block-navigation'));
+
+    block.appendTo('#profile_basic_data');
+}
+
+function initializeUserProfileChangePassword() {
+    const block = createBlockforGridTab('Изменить пароль', true);
+
+    const blockContent = $('<form>', {name: 'change_login_password'}).append(
+        $('<table>', {class: 'table-form'}).append(
+            $('<tr>').append(
+                $('<td>').append(
+                    $('<input>', {id: 'change_login_input', type: 'password', class: 'input-main', placeholder: 'Текущий пароль'})
+                )
+            ),
+            $('<tr>').append(
+                $('<td>').append(
+                    $('<input>', {id: 'change_password_input', type: 'password', class: 'input-main', placeholder: 'Новый пароль'})
+                )
+            ),
+            $('<tr>').append(
+                $('<td>').append(
+                    $('<input>', {id: 'change_password_repeat_input', type: 'password', class: 'input-main', placeholder: 'Подтвердить пароль'})
+                )
+            )
+        )
+    ).appendTo(block.find('.block-content'));
+
+    $('<button>', {id: 'save_login_password', class: 'button-primary', text: 'Сохранить', style: 'margin-right: 5px'}).on('click', () => {
+        changeUserPassword();
+    }).appendTo(block.find('.block-navigation'));
+
+    $('<button>', {id: 'cancel_login_passford', class: 'button-secondary', text: 'Отменить'}).on('click', () => {
+        cancelUserPassword();
+    }).appendTo(block.find('.block-navigation'));
+
+    block.appendTo('#profile_basic_data');
+}
+
+function initializeUserProfileSettings() {
+    const block = createBlockforGridTab('Цветовая схема', false);
+
+    const blockContent = $('<div>', {id: 'color_theme_setting'}).append(
+        $('<div>').append(
+            $('<label>', {class: 'checkbox-container', text: 'По умолчанию'}).append(
+                $('<input>', {id: 'default_theme_checkbox', type: 'checkbox', class: 'checkbox', checked: 'checked'}).on('click', () => {
+                    chooseDefaultTheme();
+                }),
+                $('<span>', {class: 'checkmark'})
+            ),
+            $('<div>', {id: 'color_palette_default', class: 'color-palette'}).append(
+                $('<div>', {class: 'palette-color-1'}),
+                $('<div>', {class: 'palette-color-2'}),
+                $('<div>', {class: 'palette-color-3'})
+            )
+        ),
+        $('<div>').append(
+            $('<label>', {class: 'checkbox-container', text: 'Ночной режим'}).append(
+                $('<input>', {id: 'dark_theme_checkbox', type: 'checkbox', class: 'checkbox'}).on('click', () => {
+                    chooseDarkTheme();
+                }),
+                $('<span>', {class: 'checkmark'})
+            ),
+            $('<div>', {id: 'color_palette_dark', class: 'color-palette'}).append(
+                $('<div>', {class: 'palette-color-1'}),
+                $('<div>', {class: 'palette-color-2'}),
+                $('<div>', {class: 'palette-color-3'})
+            )
+        )
+    ).appendTo(block.find('.block-content'));
+
+    
+    block.appendTo('#profile_settings');
+    acceptColorTheme();
+}
+
+function createBlockforGridTab(name, isNavigation) {
+    const block = $('<div>');
+    const header = $('<div>', { class: 'block-header' }).append(
+        $('<h3>', { text: name })
+    ).appendTo(block);
+    
+    const content = $('<div>', {class: 'block-content'}).appendTo(block);
+
+    if (isNavigation) {
+        content.height('calc(100% - 60px)');
+        $('<div>', {class: 'block-navigation'}).appendTo(block);
+    }
+
+    return block;
 }
 
 function showCurrentCompany() {
@@ -3609,7 +3717,9 @@ function showPopupNotification(type , message) {
         notification.animate({
             right: 0
         }, 400, () => {
-            // setTimeout(removePopupNotification(notification), 4000);
+            setTimeout(() => {
+                removePopupNotification(notification);
+            }, 7000);
         });
     }
 }
@@ -4981,8 +5091,6 @@ function createCheckboxToggle(firstElem, secondElem) {
     })
 
     addEventOnOffToggle(firstElemInput, secondElemInput);
-
-    console.log(div)
 
     return div;
 }
