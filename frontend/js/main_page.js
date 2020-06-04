@@ -2222,8 +2222,11 @@ function createObjectHistoryTable(data) {
                     const input = $('<input>', {type: 'text', service: row.name}).appendTo(tdElem);
                     input.val(row.data[elem]);
 
+                    console.log('here');
+                    
                     input.keypress((event) => {
-                        if (event.key == 'Enter') {
+                        console.log(event.code);
+                        if (event.code == 'Enter') {
                             sendHistoryTableServicePayment(row.name, input.val(), CURRENT_OBJECT_DATA.accid);
                         }
                     });

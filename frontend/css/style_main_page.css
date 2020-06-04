@@ -1228,13 +1228,14 @@ div {
 }
 
 #object_list_search_input {
-    height: 37px;
+    height: 100%;
     border: 1px solid #D9E0E3;
     border-radius: 5px;
     width: 100%;
     font-size: 16px;
     color: #A8ADAF;
     padding-left: 10px;
+    box-sizing: border-box;
 }
 
 .object-tree-li.active {
@@ -1948,7 +1949,7 @@ td.add-template-adress {
 } */
 
 #search_input {
-    width: calc(100% - 124px);
+    width: calc(100% - 110px);
     height: 40px;
     float: left;
 }
@@ -1956,7 +1957,7 @@ td.add-template-adress {
 #clear_search_input {
     height: 100%;
     float: left;
-    margin-left: 15px;
+    margin-left: 5px;
 }
 
 #print_mode_object_num {
@@ -1970,6 +1971,7 @@ td.add-template-adress {
 
 #clear_object_btn {
     height: 100%;
+    width: 105px;
 }
 
 .object-tree-btn {
