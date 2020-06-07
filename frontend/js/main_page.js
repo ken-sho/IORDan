@@ -25,6 +25,28 @@ $(document).ready(function() {
         }
     });
 
+    const objectNumDiv = $('#print_mode_object_num');
+    objectNumDiv.text('Выбрано: 0');
+    
+    objectNumDiv.on('click', () => {
+        const objectNum = $('.object-tree-apartament-input:checked').length;
+        
+        if (objectNum > 0) {
+            $('.object-list-tree input').prop('checked', false);
+            objectNumDiv.attr('title', 'Нажмите, чтобы выбрать все');
+            $('#objects_list_reports').hide();
+        }
+        else {
+            $('.object-list-tree input').prop('checked', true);
+            objectNumDiv.attr('title', 'Нажмите, чтобы отменить выбор');
+            if ($('#objects_list_reports').is(':hidden')) {
+                $('#objects_list_reports').fadeOut(200).fadeIn(200).fadeOut(200).fadeIn(200);
+            }
+        }
+        
+        showPrintingObjectsNum();
+    });
+
     $('#popup_background_layer2').on('click', (e) => {
         if (e.target !== e.currentTarget) {
             return;
@@ -282,8 +304,9 @@ function getUserRightsData() {
     $.get( "/web_request?query=user_rights", function( data ) {
         const userRightsData = JSON.parse(data);
         USER_DATA = Object.assign(USER_DATA, userRightsData);
+        const userData = { 'Логин': { value: USER_DATA.user_login }, 'Роль': { value: USER_DATA.u_type }, 'Email': { value: USER_DATA.user_email, editable: true } };
         showUserLogin();
-        initializeUserProfileBasicData();
+        initializeUserProfileBasicData(userData);
         initializeUserProfileChangePassword();
         initializeUserProfileSettings();
 
@@ -330,23 +353,52 @@ function initializeUserRight() {
     }
 }
 
-function initializeUserProfileBasicData() {
-    const dataObj = {'Логин': USER_DATA.user_login, 'Роль': USER_DATA.u_type, 'Email': USER_DATA.user_email};
-
+function initializeUserProfileBasicData(data) {
     const block = createBlockforGridTab('Основные данные', true);
 
-    for (const elem in dataObj) {
+    for (const elem in data) {
         $('<div>', {class: 'profile-info-row'}).append(
             $('<div>', {class: 'info-name', text: `${elem}:`}),
-            $('<div>', {class: 'info-content', text: dataObj[elem]})
+            $('<div>', {class: 'info-content', text: data[elem].value})
         ).appendTo(block.find('.block-content'));
     }
 
-    $('<button>', {id: 'save_login_password', class: 'button-primary', text: 'Изменить'}).on('click', () => {
-        // changeUserPassword();
+    $('<button>', {id: '', class: 'button-primary', text: 'Изменить'}).on('click', () => {
+        openPopupWindow('popup_edit_user_basic_data');
     }).appendTo(block.find('.block-navigation'));
 
     block.appendTo('#profile_basic_data');
+
+    const popup = createPopupLayout('Редактировать основные данные', 'popup_edit_user_basic_data');
+
+    const table = $('<table>', {class: 'table-form'});
+
+    for (const elem in data) {
+        if (data[elem].editable) {
+            $('<tr>').append(
+                $('<td>', { class: 'table-input-name', text: elem }),
+                $('<td>').append(
+                    $('<input>', { class: 'input-main', type: 'text', value: data[elem].value, name: elem})
+                )
+            ).appendTo(table);
+        }
+    }
+
+    table.appendTo(popup.find('.popup-content'));
+
+    $('<div>', {class: 'form-submit-btn'}).append(
+        $('<button>', {id: '', class: 'button-primary', text: 'Сохранить'}).on('click', () => {
+            let dataObj = {};
+            const inputsCollection = table.find('input');
+            for (const input of inputsCollection) {
+                dataObj[$(input).attr('name')] = $(input).val();
+            }
+            console.log(dataObj)
+        })
+    ).appendTo(popup.find('.popup-content'))
+
+
+    popup.appendTo('#popup_background');
 }
 
 function initializeUserProfileChangePassword() {
@@ -494,11 +546,11 @@ function openCloseMainMenu () {
 }
 
 function openPopupWindow(id) {
-    $('.popup-with-menu').each(function() {
-        if ($(this).attr('id') !== 'popup_control') {
-            $(this).hide();
-        }
-    });
+    // $('.popup-with-menu').each(function() {
+    //     if ($(this).attr('id') !== 'popup_control') {
+    //         $(this).hide();
+    //     }
+    // });
     $('.popup-window, .popup-fullscreen').hide();
     $(`#${id}, #popup_background`).fadeIn(200);
 
@@ -794,6 +846,7 @@ function createObjectsTree(data) {
         });
     });
 
+    showSelectedObjectNum();
     removeContentLoader('body', '#page_body');
 }
 
@@ -1687,14 +1740,11 @@ function switchToggle(toggleId) {
     let state = toggle.attr('state');
     if (state == 'off') {
 
-        // $('.object-tree-li').removeClass('active');
         sessionStorage.setItem('printMode', 'on');
 
         toggle.text('radio_button_checked');
         toggle.attr('state', 'on');
         toggle.css({'color': '#0091EA'});
-
-        showSelectedObjectNum();
 
         $('#print_mode_object_num, .object-tree-apartament-input, .object-tree-parent-li-input').show();
     }
@@ -1721,12 +1771,10 @@ function createAccidsArray() {
 }
 
 function showSelectedObjectNum() {
-    $('#print_mode_object_num').text('Выбрано: 0');
-
     $('.object-tree-parent-li-input, .object-tree-apartament-input, .object-tree-li').each(function() {
         $(this).on('click', function() {
             const objectNum = $('.object-tree-apartament-input:checked').length;
-            $('#print_mode_object_num').text(`Выбрано: ${objectNum}`);
+            showPrintingObjectsNum();
 
             if (objectNum > 0) {
                 if ($('#objects_list_reports').is(':hidden')) {
@@ -1738,6 +1786,10 @@ function showSelectedObjectNum() {
             }
         });
     });
+}
+
+function showPrintingObjectsNum() {
+    $('#print_mode_object_num').text(`Выбрано: ${$('.object-tree-apartament-input:checked').length}`);
 }
 
 function isActivePrintMode() {
@@ -2221,11 +2273,8 @@ function createObjectHistoryTable(data) {
                     tdElem.css({'padding':'0'});
                     const input = $('<input>', {type: 'text', service: row.name}).appendTo(tdElem);
                     input.val(row.data[elem]);
-
-                    console.log('here');
                     
                     input.keypress((event) => {
-                        console.log(event.code);
                         if (event.code == 'Enter') {
                             sendHistoryTableServicePayment(row.name, input.val(), CURRENT_OBJECT_DATA.accid);
                         }

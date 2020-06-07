@@ -1966,7 +1966,8 @@ td.add-template-adress {
     display: none;
     height: 100%;
     padding-top: 3px;
-    width: 120px;
+    cursor: pointer;
+    /* width: 120px; */
 }
 
 #clear_object_btn {
