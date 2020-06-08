@@ -1913,9 +1913,17 @@ td.add-template-adress {
 }
 
 .report-content {
-    page-break-after: always;
+    /* page-break-after: always; */
     padding: 0px 5px;
     text-align: justify;
+}
+
+.report-content.break-afrer {
+    page-break-after: always;
+}
+
+.report-content.break-inside-avoid {
+    page-break-inside: avoid;
 }
 
 /* .report-content p {
