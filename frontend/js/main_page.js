@@ -132,6 +132,7 @@ $(document).ready(function() {
     if (currentCompany == undefined) {
         $('#main_search_input').attr('disabled', true);
         $('#main_search_input').val('Выберите компанию');
+        $('#main_menu li[title="КОМПАНИИ"]').addClass('blinking');
         $('.li-change-events').addClass('li-disabled');
     }
 
@@ -518,6 +519,7 @@ function chooseCompany(li, companyName, companyId) {
     if(!$(li).hasClass('active')) {
         $('#main_search_input').attr('disabled', false);
         $('#main_search_input').val('');
+        $('#main_menu li[title="КОМПАНИИ"]').removeClass('blinking');
         $('.li-change-events').removeClass('li-disabled');
         $('.object-list-tree').empty();
         $('#main_menu_company_name').text(companyName);
@@ -3979,7 +3981,7 @@ function getRegistryList(callback) {
     registryUl.empty();
     $.post(`/base_func?val_param=ree_reestrs&val_param1=${registryType}&val_param2=${calendarValue}`, (data) => {
         const registryList = JSON.parse(data);
-        console.log(registryList)
+        console.log(registryList);
 
         if (!isEmpty(registryList)) {
             createRegistrySettingsPopup();
@@ -3998,7 +4000,8 @@ function getRegistryList(callback) {
                         'overgrown': 'Перебросы',
                         'discounts': 'Скидки',
                         'print_registry': 'Реестр массовой печати',
-                        'pay_storno': 'Возврат'
+                        'pay_storno': 'Возврат',
+                        'debit_act': 'Акт списания'
                     };
 
                     const type = registryTypes[registry.doc_type];
@@ -4080,7 +4083,8 @@ function getRegistryList(callback) {
                             $('<option>', {text: 'Приставы', value: 'bailiffs_manual'}),
                             $('<option>', {text: 'Перебросы', value: 'overgrown'}),
                             $('<option>', {text: 'Скидки', value: 'discounts'}),
-                            $('<option>', {text: 'Возврат', value: 'pay_storno'})
+                            $('<option>', {text: 'Возврат', value: 'pay_storno'}),
+                            $('<option>', {text: 'Акт списания', value: 'debit_act'})
 
                         )
                     )

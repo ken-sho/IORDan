@@ -25,6 +25,18 @@
     75% {transform:rotate(-40deg);}
 }
 
+@keyframes blink {
+    50% {
+        background: var(--element-color);
+    }
+}
+
+.blinking {
+    -webkit-animation:blink 1.5s linear infinite;
+    -moz-animation:blink 1.5s linear infinite;
+    animation:blink 1.5s linear infinite;
+}
+
 html, body {
     width: 100%;
     height: 100%;
@@ -1913,7 +1925,7 @@ td.add-template-adress {
 }
 
 .report-content {
-    /* page-break-after: always; */
+    page-break-after: always;
     padding: 0px 5px;
     text-align: justify;
 }
