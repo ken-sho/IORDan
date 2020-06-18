@@ -1935,6 +1935,7 @@ td.add-template-adress {
 }
 
 .report-content.break-inside-avoid {
+    page-break-after: auto !important;
     page-break-inside: avoid;
 }
 
