@@ -12,7 +12,7 @@ import time
 import modules.db_conn as db_conn
 import modules.logg_web as logg_web
 
-#house_tree
+#objects_tree_filters
 #account_history
 #adr_info
 #addchg_human
@@ -55,20 +55,21 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Изменение настроект')
-    #if val_param=='house_tree':objects_tree_filters
     if fnk_name=='objects_tree_filters':
         q_sql = "select main.house_tree('"+ asid +"','"+ orgid +"','"+ adate +"')"
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
+        encoded = base64.b64encode(q_sql.encode()).decode()
+        logg_web.add_log(asid,encoded,'Применение фильтра объектов')
     elif fnk_name=='account_history':
         q_sql = "select main.account_history('"+ asid +"','"+ orgid +"','"+ adate +"')"
         print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
-    elif val_param=='adr_info':
-        q_sql = "select main.adr_info('','"+ val_param1 +"')"
+    elif fnk_name=='adr_info':
+        q_sql = "select main.adr_info('','"+ adate +"')"
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
