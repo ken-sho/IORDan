@@ -4,8 +4,7 @@ var USER_DATA;
 var OBJECT_DATA;
 var DROPDOWN_NUM = 1; 
 var CURRENT_OBJECT_DATA = {};
-var OBJECT_TREE_TEMPLATES;
-var COMPANY_OBJECTS_DATA;
+var OBJECTS_TREE_DATA;
 
 $(document).ready(function() {
     sessionStorage.setItem('printMode', 'off');
@@ -187,7 +186,7 @@ $(document).ready(function() {
 function checkSession() {
     $.post('/chck_sid', (data) => {
         const session = JSON.parse(data);
-        console.log(session)
+        console.log('session info',session);
 
         if (!session.is_active) {
             location.reload();
@@ -211,7 +210,7 @@ function initializeUserSettings() {
     function displayCityHandler(elem) {
         console.log(elem);
         addPropertyToStorage('local', 'user_settings_display_city', elem.attr('value'));
-        getObjectsTreeData();
+        getObjectsTreeData([]);
     }
 }
 
@@ -276,9 +275,10 @@ function addPropertyToStorage(storageType, key, value) {
 function getUserData(callback) {
     $.get( "/web_request?query=", function( data ) {
         USER_DATA = JSON.parse(data);
+        console.log(USER_DATA)
 
         $('#obj_create_reminder').on('click', function() {
-            if (USER_DATA.user_login == 'demo') {
+            if (USER_DATA.login == 'demo') {
                 alert('Разного рода уведомления. По типу квартиросъёмщик «попросил связаться завтра», «обещал внести оплату такого-то числа» или любое другое по требованию заказчика. Программа напомнит об этом событии пользователю.');
             }
             else {
@@ -301,20 +301,190 @@ function getUserData(callback) {
     });
 }
 
+class Label {
+    constructor(root, name, value, isEditable = false) {
+        this._name = name;
+        this._value = value;
+        this._isEditable = isEditable;
+
+        this._content = this._createNode(root);
+    }
+
+    set value(val) {
+        this._value = val;
+        this._content.text(val);
+    }
+
+    get name() {
+        return this._name;
+    }
+
+    get value() {
+        return this._value;
+    }
+
+    get isEditable() {
+        return this._isEditable;
+    }
+
+    _createNode(root) {
+        const name = $('<div>', {class: 'info-name', text: `${this.name}:`});
+        const content = $('<div>', {class: 'info-content', text: this.value});
+
+        $('<div>', {class: 'profile-info-row'}).append(name, content).appendTo(root);
+
+        if (this.isEditable)
+            content.css({ 'color': 'var(--third-color)' });
+
+        return content;
+    }
+};
+
+class UserInfoPopup {
+    constructor(rootId, data, callback) {
+        this._rootId = rootId;
+        const popup = createPopupLayout('Редактировать основные данные', rootId);
+
+        const table = $('<table>', {class: 'table-form'});
+
+        for (const elem in data) {
+            if (data[elem].editable) {
+                const tr = $('<tr>').append(
+                    $('<td>', { class: 'table-input-name', text: elem }),
+                    $('<td>').append(
+                        $('<input>', { class: 'input-main', type: 'text', name: data[elem].name}).val(data[elem].value)
+                    )
+                ).appendTo(table);
+
+                if ('mask' in data[elem]) {
+                    addInputmask(tr.find('input'), data[elem].mask);
+                }
+            }
+        }
+
+        table.appendTo(popup.find('.popup-content'));
+        const mapToName = (name) => {
+            for (const key in data) {
+                const value = data[key];
+                if (value.name && value.name === name)
+                    return key;
+            }
+
+            throw `UserInfoPopup: unable to map parameter's name ${name}`
+        };
+
+        $('<div>', {class: 'form-submit-btn'}).append(
+            $('<button>', {id: '', class: 'button-primary', text: 'Сохранить'}).on('click', () => {
+                let dataObj = {};
+                const inputsCollection = table.find('input');
+                for (const input of inputsCollection) {
+                    dataObj[$(input).attr('name')] = $(input).val();
+                }
+                console.log(dataObj);
+
+                $.ajax({
+                    url: '/base_func?val_param=chg_user_attr',
+                    type: 'POST',
+                    data: JSON.stringify(dataObj),
+                    contentType: 'application/json',
+                    success: function(data) {
+                        closePopupWindow(rootId);
+                        popup.remove();
+                        const changes = {};
+                        for (const key in dataObj)
+                            changes[mapToName(key)] = dataObj[key];
+                        callback(changes);
+                        showPopupNotification('notification', 'Основные данные сохранены успешно!');
+                    }
+                });
+            })
+        ).appendTo(popup.find('.popup-content'))
+
+        popup.appendTo('#popup_background');
+    }
+
+    show() {
+        openPopupWindow(this._rootId);
+    }
+};
+
+class UserInfoWidget {
+    constructor(root, name, isNavigation, dict) {
+        this._block = this._createNode(root, name, isNavigation);
+        this._data = dict;
+        this._labels = {};
+        for (const key in dict) {
+            const value = dict[key];
+            const label = new Label(this._block, key, value.value, value.editable);
+            this._labels[key] = label;
+        }
+
+    }
+
+    _handleNewData(changes) {
+        for (const key in changes) {
+            const label = this._labels[key];
+
+            if (label)
+            {
+                label.value = changes[key];
+                this._data[key].value = changes[key];
+            }
+            else
+            {
+                throw `UserInfoWidget: can't find label for ${key}`;
+            }
+        }
+    }
+
+    _onChangeButton() {
+        new UserInfoPopup(
+            "popup_edit_user_basic_data",
+            this._data,
+            (data) => this._handleNewData(data)).show();
+    }
+
+    _createNode(root, name, isNavigation) {
+        const block = $('<div>');
+
+        const header = $('<div>', { class: 'block-header' })
+        header.append($('<h3>', { text: name }));
+        header.appendTo(block);
+        
+        const content = $('<div>', {class: 'block-content'})
+        content.appendTo(block);
+    
+        if (isNavigation) {
+            const navigationBlock = $('<div>', {class: 'block-navigation'});
+            navigationBlock.appendTo(block);
+
+            content.height('calc(100% - 60px)');
+
+            $('<button>', {id: '', class: 'button-primary', text: 'Изменить'}).on('click', () => {
+                this._onChangeButton();
+            }).appendTo(navigationBlock);
+        }
+
+        block.appendTo(root);
+        return content;
+    }
+}
+
 function getUserRightsData() {
     $.get( "/web_request?query=user_rights", function( data ) {
         const userRightsData = JSON.parse(data);
+        console.log(userRightsData);
         USER_DATA = Object.assign(USER_DATA, userRightsData);
-        const userData = { 'Логин': { value: USER_DATA.user_login }, 'Роль': { value: USER_DATA.u_type }, 'Email': { value: USER_DATA.user_email, editable: true } };
+        const userData = { 'Логин': { value: USER_DATA.login }, 'ФИО': { value: USER_DATA.full_name, editable: true, mask: 'fio', name: 'fio' }, 'Роль': { value: USER_DATA.account_type }, 'Email': { value: USER_DATA.email, editable: true , mask: 'email', name: 'email'}, 'Телефон': { value: USER_DATA.phone, editable: true , mask: 'mobile number', name: 'phone'} };
         showUserLogin();
-        initializeUserProfileBasicData(userData);
+        initializeUserProfileBasicData2(userData);
         initializeUserProfileChangePassword();
         initializeUserProfileSettings();
 
         if (getCookie('companyId')) {
             if (USER_DATA.org_list.length > 1) {
                 initializationPopupControl();
-                getObjectsTreeData();
+                getObjectsTreeData([initializeObjectsTreeFilters]);
                 initializeUserRight();
             }
         }
@@ -327,8 +497,7 @@ function getUserRightsData() {
 }
 
 function initializeUserRight() {
-    const userRights = USER_DATA.u_right;
-
+    const userRights = USER_DATA.rights;
 
     if(!isEmpty(userRights)) {
         if (userRights.includes(1)) {
@@ -354,34 +523,47 @@ function initializeUserRight() {
     }
 }
 
+function initializeUserProfileBasicData2(data) {
+    new UserInfoWidget($('#profile_settings'), 'Основные данные', true, data);
+}
+
 function initializeUserProfileBasicData(data) {
     const block = createBlockforGridTab('Основные данные', true);
 
     for (const elem in data) {
-        $('<div>', {class: 'profile-info-row'}).append(
+        const div = $('<div>', {class: 'profile-info-row'}).append(
             $('<div>', {class: 'info-name', text: `${elem}:`}),
             $('<div>', {class: 'info-content', text: data[elem].value})
         ).appendTo(block.find('.block-content'));
+
+        if (data[elem].editable) {
+            div.find('.info-content').css({ 'color': 'var(--third-color)' });
+        }
     }
 
     $('<button>', {id: '', class: 'button-primary', text: 'Изменить'}).on('click', () => {
-        openPopupWindow('popup_edit_user_basic_data');
+        openPopupWindow(popupId);
     }).appendTo(block.find('.block-navigation'));
 
-    block.appendTo('#profile_basic_data');
+    block.appendTo('#profile_settings');
 
-    const popup = createPopupLayout('Редактировать основные данные', 'popup_edit_user_basic_data');
+    const popupId = 'popup_edit_user_basic_data';
+    const popup = createPopupLayout('Редактировать основные данные', popupId);
 
     const table = $('<table>', {class: 'table-form'});
 
     for (const elem in data) {
         if (data[elem].editable) {
-            $('<tr>').append(
+            const tr = $('<tr>').append(
                 $('<td>', { class: 'table-input-name', text: elem }),
                 $('<td>').append(
-                    $('<input>', { class: 'input-main', type: 'text', value: data[elem].value, name: elem})
+                    $('<input>', { class: 'input-main', type: 'text', name: data[elem].name}).val(data[elem].value)
                 )
             ).appendTo(table);
+
+            if ('mask' in data[elem]) {
+                addInputmask(tr.find('input'), data[elem].mask);
+            }
         }
     }
 
@@ -394,7 +576,18 @@ function initializeUserProfileBasicData(data) {
             for (const input of inputsCollection) {
                 dataObj[$(input).attr('name')] = $(input).val();
             }
-            console.log(dataObj)
+            console.log(dataObj);
+
+            $.ajax({
+                url: '/base_func?val_param=chg_user_attr',
+                type: 'POST',
+                data: JSON.stringify(dataObj),
+                contentType: 'application/json',
+                success: function(data) {
+                    closePopupWindow(popupId);
+                    showPopupNotification('notification', 'Основные данные сохранены успешно!');
+                }
+            });
         })
     ).appendTo(popup.find('.popup-content'))
 
@@ -433,7 +626,7 @@ function initializeUserProfileChangePassword() {
         cancelUserPassword();
     }).appendTo(block.find('.block-navigation'));
 
-    block.appendTo('#profile_basic_data');
+    block.appendTo('#profile_settings');
 }
 
 function initializeUserProfileSettings() {
@@ -485,6 +678,19 @@ function createBlockforGridTab(name, isNavigation) {
         content.height('calc(100% - 60px)');
         $('<div>', {class: 'block-navigation'}).appendTo(block);
     }
+
+    return block;
+}
+
+function createContentBlock(name, styles) {
+    const block = $('<div>', {class: 'block'});
+    const header = $('<div>', { class: 'block-header' }).append(
+        $('<div>', { class: 'header', text: name })
+    ).appendTo(block);
+    
+    const content = $('<div>', {class: 'block-content'}).appendTo(block);
+
+    block.css(styles);
 
     return block;
 }
@@ -633,7 +839,7 @@ function closeObjectList() {
     $('#home_page').addClass('active');
 }
 
-function getObjectsTreeData() {
+function getObjectsTreeData(callback) {
     $('.object-list-tree, #control_object_groups_left_column .block-content').empty();
     createContentLoader('#object_list_tree');
     createContentLoader('#control_object_groups_left_column .block-content');
@@ -644,29 +850,29 @@ function getObjectsTreeData() {
 
     $.ajax({
         type: "POST",
-        url: "/base_func",
-        data: encodeURI("val_param=house_tree"),
+        url: "/base_func?fnk_name=objects_tree_filters",
         success: function (data) {
-            COMPANY_OBJECTS_DATA = JSON.parse(data).object_tree.object_list;
-            createObjectsTree(data);
+            console.log(data)
+            OBJECTS_TREE_DATA = JSON.parse(data);
+            console.log(JSON.parse(data))
+            createObjectsTree(OBJECTS_TREE_DATA.objects_list);
+            
+            if (!isEmpty(callback)) {
+                for (const func of callback) {
+                    func();
+                }
+            }
+
             removeContentLoader('#object_list_tree', '.object-list-tree');
         }
     });
 }
 
-function createObjectsTree(data) {
-
-    const templateSelect = $('#choose_template_select');
-
-    var objectTree = JSON.parse(data).object_tree;
-
-    console.log(objectTree);
-
-    const objectList = objectTree.object_list;
-    OBJECT_TREE_TEMPLATES = objectTree.templates;
+function createObjectsTree(objectsList) {
+    // const objectList = objectTree.object_list;
     const controlUl = $('<ul>', {id: 'create_object_group_ul'});
 
-    for (const object of objectList) {
+    for (const object of objectsList) {
         let objectAdress = `${object.city} ${object.street} ${object.house}`;
     
         if (localStorage.hasOwnProperty('user_settings_display_city') && localStorage.getItem('user_settings_display_city') == 'off') {
@@ -760,19 +966,6 @@ function createObjectsTree(data) {
         });
     });
 
-
-    templateSelect.empty();
-
-    for (const template in OBJECT_TREE_TEMPLATES) {
-        const name = template;
-        $('<option>', { text: name }).appendTo('#choose_template_select');
-    }
-
-    const currentTemplateName = templateSelect.val();
-    const currentTemplateDescription = OBJECT_TREE_TEMPLATES[currentTemplateName];
-    $('#choose_template_description').text(currentTemplateDescription);
-
-
     $('#object_list_settings_left, #object_list_settings_right').show();
 
     $('#object_list_tree .parent-li').click(function (event) {
@@ -852,6 +1045,69 @@ function createObjectsTree(data) {
     removeContentLoader('body', '#page_body');
 }
 
+function initializeObjectsTreeFilters() {
+    const filters = OBJECTS_TREE_DATA.filters;
+    const selectedFilters = [];
+
+    const filtersListDiv = $('<div>', {class: 'popup-window-tab-block', style: 'padding: 0px 5px;'});
+    for (const filter of filters) {
+        const input = $('<input>', {type: 'checkbox', class: 'checkbox'}).on('change', () => {
+            const isSelected = input.prop('checked');
+            if (isSelected) {
+                selectedFilters.push(filter.value)
+            }
+            else {
+                selectedFilters.pop(filter.value);
+            }
+        });
+        const span = $('<span>', {class: 'checkmark'});
+        const label = $('<label>', {class: 'checkbox-container', text: filter.name, style: 'font-size: 16px'}).append(input, span);
+        const div = $('<div>').append(label);
+        div.appendTo(filtersListDiv);
+    }
+    filtersListDiv.appendTo('#object_list_template');
+
+    const inputStyle = 'width: 60px; text-align: center; margin: 0px 5px';
+    const filterSumDiv = $('<div>', {class: 'popup-window-tab-block', style: 'padding: 5px;'});
+    const fromInput = $('<input>', {type: 'text', class: 'input-main', style: inputStyle});
+    const toInput = $('<input>', {type: 'text', class: 'input-main', style: inputStyle});
+    filterSumDiv.append('Сумма от', fromInput, 'до', toInput, 'руб.');
+    filterSumDiv.appendTo('#object_list_template');
+
+    const submitBtn = $('<button>', {class: 'button-primary', text: 'Применить'}).on('click', () => {
+        if (fromInput.val() !== '' || toInput.val() !== '') {
+            const data = {filters: selectedFilters};
+            data.sum = {from: fromInput.val(), to: toInput.val()};
+            sendFilters(data);
+        }
+        else {
+            const data = {filters: selectedFilters};
+            sendFilters(data);
+        }
+    });
+
+    const submitBtnDiv = $('<div>', {class: 'form-submit-btn'}).append(submitBtn);
+    submitBtnDiv.appendTo('#object_list_template');
+
+    function sendFilters(data) {
+        createContentLoader('#object_list_tree');
+        $('.object-list-tree, #control_object_groups_left_column .block-content').empty();
+        $.ajax({
+            type: 'POST',
+            url: '/base_func?fnk_name=objects_tree_filters',
+            data: JSON.stringify(data),
+            success: function (data) {
+                console.log(JSON.parse(data));
+                createObjectsTree(JSON.parse(data).objects_list);
+                removeContentLoader('#object_list_tree', '.object-list-tree');
+                // $('#current_template_name').text(name);
+                // $('#clear_template_btn').attr('disabled', false);
+            }
+        });
+    }
+    
+}
+
 function getObjectData() {
     $('#obj_ls_info .icon-count').remove();
     $('#agreements_owners_content, #obj_main_table, #add_agreement_owner_select, #obj_additional_info .block-content').empty();
@@ -864,9 +1120,11 @@ function getObjectData() {
         url: "/base_func",
         data: encodeURI(`val_param=adr_info&val_param1=${CURRENT_OBJECT_DATA.accid}`),
         success: function (data) {
-            // console.log(data)
-                        
+            
             OBJECT_DATA = JSON.parse(data);
+            console.log(OBJECT_DATA)
+
+            initializeObjectFiles();
 
             initializeObjectReputation();
 
@@ -891,6 +1149,79 @@ function getObjectData() {
             clickDropdownMenu();
         }
     });
+}
+
+function initializeObjectFiles() {
+    
+    const popupId = 'popup_object_files';
+    
+    if (!$('div').is(`#${popupId}`)) {
+        $('<i>', {class: 'material-icons', title: 'Файлы', text: 'folder_open'}).on('click', () => {
+            openPopupWindow(popupId);
+        }).appendTo('#obj_ls_info .header-manipulation');
+
+        const popupLayout = createPopupLayout('Файлы', popupId);
+        popupLayout.appendTo('#popup_background');
+
+        const popupContent = $(popupLayout).find('.popup-content');
+
+        const filesDownloadDiv = $('<div>', {id: 'object_files_upload'});
+        const uploadFormBlock = createContentBlock('Загрузка', {'width': '100%', 'height': '120px'}).appendTo(filesDownloadDiv);
+        const numverUploadedFilesDiv = $('<div>', {style: 'height: 50%'}).append(
+            $('<span>', {text: 'Выбрано файлов: 0', style: 'display: flex; align-items: center; height: 100%'})
+        ).appendTo(uploadFormBlock.find('.block-content'));
+
+        $('<div>', {style: 'height: 50%'}).append(
+            $('<button>', {class: 'button-primary', style: 'margin-right: 5px'}).append(
+            $('<label>', {for: 'object_files_input', text: 'Выбрать файлы'})
+            ),
+            $('<input>', {id: 'object_files_input', type: 'file', style: 'display: none', multiple: 'true'}).on('change', function() {
+                numverUploadedFilesDiv.find('span').text(`Выбрано файлов: ${this.files.length}`);
+                uploadFilesListBlockContent.empty();
+                if (this.files.length > 0) {
+                    for (const file of this.files) {
+                        const fileDiv = $('<div>', { style: 'padding: 5px; background-color: #F4F6F8; border-radius: 5px; margin-bottom: 5px' }).append(
+                            $('<div>', { style: 'padding-bottom: 5px' }).append(
+                                $('<span>', { text: file.name, style: 'color: var(--third-color)' })
+                            ),
+                            $('<div>').append(
+                                $('<select>', { class: 'input-main' }).on('change', function() {
+                                    if ($(this).val() == 'Другое') {
+                                        $('<input>', {class: 'input-main', type: 'text', placeholder: 'Укажите свой вариант', style: 'margin-top: 5px'}).insertAfter($(this));
+                                    }
+                                    else {
+                                        const nextElem = $(this).next();
+                                        if (nextElem.is('input')) {
+                                            nextElem.remove();
+                                        }
+                                    }
+                                })
+                            )
+                        ).appendTo(uploadFilesListBlockContent);
+
+                        const fileTypesSelect = fileDiv.find('select');
+                        $('<option>', { text: 'Выбрать тип файла', disabled: 'true', selected: 'true' }).appendTo(fileTypesSelect);
+                        $('<option>', { text: 'Другое'}).appendTo(fileTypesSelect);
+
+                    }
+                }
+                else {
+                    $('<span>', { class: 'text-center-small', text: 'Выберите файлы для загрузки' }).appendTo(uploadFilesListBlockContent);
+                }
+            }),
+            $('<button>', { class: 'button-secondary', text: 'Загрузить' })
+        ).appendTo(uploadFormBlock.find('.block-content'));
+
+        const uploadFilesListBlock = createContentBlock('Список загружаемых файлов', { 'width': '100%', 'height': 'calc(100% - 130px)', 'margin-top': '10px' }).appendTo(filesDownloadDiv);
+        const uploadFilesListBlockContent = $(uploadFilesListBlock).find('.block-content');
+        $('<span>', { class: 'text-center-small', text: 'Выберите файлы для загрузки' }).appendTo(uploadFilesListBlockContent);
+        filesDownloadDiv.appendTo(popupContent);
+
+        const filesList = $('<div>', {id: 'object_files_list'});
+        const filesListBlock = createContentBlock('Список файлов', {'width': '100%', 'height': '100%'}).appendTo(filesList);
+        filesList.appendTo(popupContent);
+    }
+
 }
 
 function initializeObjectReputation() {
@@ -2622,15 +2953,23 @@ function savePrintNotation(reportId) {
     $('#save_print_notation').hide();
     $('#change_print_notation').show();
 
-    let currentCompanyId = getCookie('companyId');
     let notationValue = $('#print_notation_textarea').val().replace(/\n/g, "<br>");
-    encodeURIstring = encodeURI(`/base_func?val_param=sprav_note_chg&val_param1=${currentCompanyId}&val_param2=${report.rep_type}&val_param3=${report.rep_num}&val_param4=${notationValue}`);
-    $.post(encodeURIstring, function (data) {
-        if (data == 'success') {
-            getUserData();
-            showPopupNotification('notification', 'Примечание для печати успешно сохранено!');
+
+    const data = JSON.stringify({setting: "print_notation", rep_type : report.rep_type, rep_num : report.rep_num, "value" : notationValue});
+
+    $.ajax({
+        type: "POST",
+        url: "/base_func?fnk_name=reports_setting",
+        data: data,
+        success: function (data) {
+            if (data == 'success') {
+                getUserData();
+                showPopupNotification('notification', 'Примечание для печати успешно сохранено!');
+            }
         }
-    });
+    })
+
+    const obj = {"setting": "print_notation", "company_id" : "4", "rep_type" : "report", "rep_num" : "3", "value" : ""};
     
 }
 
@@ -3481,50 +3820,105 @@ function changeTabControlReportSettings() {
 
         getReportPreview(report.rep_num, report.rep_type);
 
-        if ('state' in report) {
-            const stateSettingContent = $('<div>').append(
-                $('<label>', {class: 'checkbox-container', text: 'Вкл.'}).append(
-                    $('<input>', {id: 'report_setting_report_on', class: 'checkbox', type: 'checkbox'}),
-                    $('<span>', {class: 'checkmark'})
-                ),
-                $('<label>', {class: 'checkbox-container', text: 'Выкл.'}).append(
-                    $('<input>', {id: 'report_setting_report_off',class: 'checkbox', type: 'checkbox'}),
-                    $('<span>', {class: 'checkmark'})
-                )
+        const stateSettingContent = $('<div>').append(
+            $('<label>', {class: 'checkbox-container', text: 'Вкл.'}).append(
+                $('<input>', {id: 'report_setting_report_on', class: 'checkbox', type: 'checkbox'}),
+                $('<span>', {class: 'checkmark'})
+            ),
+            $('<label>', {class: 'checkbox-container', text: 'Выкл.'}).append(
+                $('<input>', {id: 'report_setting_report_off', class: 'checkbox', type: 'checkbox'}),
+                $('<span>', {class: 'checkmark'})
             )
+        );
+        
+        const isDisplayed = (report.is_displayed == 'true');
+        console.log(isDisplayed)
 
-            function changeDisplayReport() {
-                const displayOnInput = $('#report_setting_report_on');
-                const displayOffInput = $('#report_setting_report_off');
+        if (isDisplayed) {
+            stateSettingContent.find('#report_setting_report_on').prop('checked', true);
+        }
+        else {
+            stateSettingContent.find('#report_setting_report_off').prop('checked', true);
+        }
 
-                displayOnInput.on('click', function() {
-                    if (displayOnInput.prop('checked')) {
-                        displayOffInput.prop('checked', false);
+        function changeDisplayReport() {
+            const displayOnInput = $('#report_setting_report_on');
+            const displayOffInput = $('#report_setting_report_off');
+
+            displayOnInput.on('click', function() {
+                if (displayOnInput.prop('checked')) {
+                    displayOffInput.prop('checked', false);
+                    changeRequest('true');
+                }
+                else {
+                    displayOnInput.prop('checked', true);
+                }
+            });
+
+            displayOffInput.on('click', function() {
+                if (displayOffInput.prop('checked')) {
+                    displayOnInput.prop('checked', false);
+                    changeRequest('false');
+                }
+                else {
+                    displayOffInput.prop('checked', true);
+                }
+            });
+
+            function changeRequest(value) {
+                const data = JSON.stringify({ setting: "display_report", rep_type: report.rep_type, rep_num: report.rep_num, value: value });
+                $.ajax({
+                    type: "POST",
+                    url: "/base_func?fnk_name=reports_setting",
+                    data: data,
+                    success: function (data) {
+                        if (data == 'success') {
+                            getUserData([() => {
+
+                            }]);
+                            showPopupNotification('notification', 'Отображение справки успешно сохранено!');
+                        }
                     }
-                    else {
-                        displayOnInput.prop('checked', true);
-                    }
-                });
-
-                displayOffInput.on('click', function() {
-                    if (displayOffInput.prop('checked')) {
-                        displayOnInput.prop('checked', false);
-                    }
-                    else {
-                        displayOffInput.prop('checked', true);
-                    }
-                });
-            }
-
-            initializeSettingItem('#report_settings .block-content', 'Отображение', stateSettingContent, [changeDisplayReport]);
-
-            if (report.state == 'on') {
-                $('#report_setting_report_on').prop('checked', true);
-            }
-            else {
-                $('#report_setting_report_off').prop('checked', true);
+                })
             }
         }
+        
+        initializeSettingItem('#report_settings .block-content', 'Отображение справки', stateSettingContent, [changeDisplayReport]);
+
+        const TrusteeSignatureContent = $('<div>');
+        const textarea = $('<textarea>', {id: '', class: 'fixed-textarea', rows:'1', disabled: 'true'}).appendTo(TrusteeSignatureContent);
+        textarea.val(report.trustee_signature);
+        const changeButton = $('<button>', {class: 'button-primary', text: 'Изменить'}).on('click', () => {
+            textarea.attr('disabled', false);
+            changeButton.hide();
+            saveButton.show();
+        }).appendTo(TrusteeSignatureContent);
+
+        const saveButton = $('<button>', { class: 'button-primary', text: 'Сохранить', style: 'display : none' }).on('click', () => {
+            
+            const data = JSON.stringify({ setting: "trustee_signature", rep_type: report.rep_type, rep_num: report.rep_num, value: textarea.val() });
+
+            $.ajax({
+                type: "POST",
+                url: "/base_func?fnk_name=reports_setting",
+                data: data,
+                success: function (data) {
+                    if (data == 'success') {
+                        textarea.attr('disabled', true);
+                        saveButton.hide();
+                        changeButton.show();
+                        getUserData([() => {
+                            const reportsArr = getCurrentCompanyReportsArray();    
+                            const report = reportsArr[repId];
+                            textarea.val(report.trustee_signature);
+                        }]);
+                        showPopupNotification('notification', 'Подпись доверенного лица успешно сохранена!');
+                    }
+                }
+            })
+        }).appendTo(TrusteeSignatureContent);
+
+        initializeSettingItem('#report_settings .block-content', 'Подпись доверенного лица', TrusteeSignatureContent, () => {});
 
         if ('print_notation' in report) {
             const stateSettingContent = $('<div>').append(
@@ -3533,9 +3927,10 @@ function changeTabControlReportSettings() {
                     $('<button>', {id: 'change_print_notation', class: 'button-primary', onclick: 'changePrintNotation()', text: 'Изменить'}),
                     $('<button>', {id: 'save_print_notation', class: 'button-primary', onclick: `savePrintNotation('${repId}')`, text: 'Сохранить'})
                 )
-            )
+            );
             initializeSettingItem('#report_settings .block-content', 'Примечание для печати', stateSettingContent);
-            $('#print_notation_textarea').val(report.print_notation.replace(/<br ?\/?>/g, '\n'));
+
+            if (report.print_notation !== null) $('#print_notation_textarea').val(report.print_notation.replace(/<br ?\/?>/g, '\n'));
         }
 
         if (report.rep_type == 'report') {
@@ -3571,41 +3966,34 @@ function clearFormInputs(inputsArray) {
     }
 }
 
-function applyTemplateObjectList() {
-    event.preventDefault();
-    closePopupWindow('popup_object_list_settings');
+// function applyTemplateObjectList() {
+//     event.preventDefault();
+//     closePopupWindow('popup_object_list_settings');
 
-    const name = $('#choose_template_select').val();
+//     const name = $('#choose_template_select').val();
 
-    $('.object-list-tree').empty();
-    createContentLoader('#object_list_tree');
-    $.ajax({
-        type: "POST",
-        url: "/base_func",
-        data: encodeURI(`val_param=house_tree&val_param1=${name}`),
-        success: function (data) {
-            createObjectsTree(data);
-            removeContentLoader('#object_list_tree', '.object-list-tree');
-            $('#current_template_name').text(name);
-            $('#clear_template_btn').attr('disabled', false);
-        }
-    });
-}
+//     $('.object-list-tree').empty();
+//     createContentLoader('#object_list_tree');
+//     $.ajax({
+//         type: "POST",
+//         url: "/base_func?fnk_name=objects_tree_filters",
+//         success: function (data) {
+//             createObjectsTree(data);
+//             removeContentLoader('#object_list_tree', '.object-list-tree');
+//             $('#current_template_name').text(name);
+//             $('#clear_template_btn').attr('disabled', false);
+//         }
+//     });
+// }
 
-function changeTemplateSelect() {
-    const name = $('#choose_template_select').val();
-    const description = OBJECT_TREE_TEMPLATES[name];
-    $('#choose_template_description').text(description);
-}
-
-function clearTemplateObjectList() {
-    event.preventDefault();
-    $('.object-list-tree').empty();
-    closePopupWindow('popup_object_list_settings');
-    $('#current_template_name').text('Отсутствует');
-    $('#clear_template_btn').attr('disabled', true);
-    getObjectsTreeData();
-}
+// function clearTemplateObjectList() {
+//     event.preventDefault();
+//     $('.object-list-tree').empty();
+//     closePopupWindow('popup_object_list_settings');
+//     $('#current_template_name').text('Отсутствует');
+//     $('#clear_template_btn').attr('disabled', true);
+    // getObjectsTreeData();
+// }
 
 function getRegistriesData(callback) {
     $.post( "/base_func?val_param=registries_list", function( data ) {
@@ -3648,8 +4036,16 @@ function chooseDefaultTheme() {
 }
 
 function changeColorTheme(theme) {
-    encodeURIstring = encodeURI(`/base_func?val_param=chg_user_attr&val_param1=color_theme&val_param2=${theme}`);
-    $.post(encodeURIstring, function (data) {
+    const data = {theme: theme};
+
+    $.ajax({
+        url: '/base_func?val_param=chg_user_attr',
+        type: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function(data) {
+            console.log(data);
+        }
     });
 }
 
@@ -3712,7 +4108,7 @@ function cancelUserPassword() {
 }
 
 function showUserLogin() {
-    $('#popup_profile .popup-fullscreen-name').text(`Профиль пользователя ${USER_DATA.user_login}`);
+    $('#popup_profile .popup-fullscreen-name').text(`Профиль пользователя ${USER_DATA.login}`);
 }
 
 function createPopupNotification(type, message) {
@@ -3830,7 +4226,7 @@ function createRegistrySettingsPopup() {
                 
                 $('<i>', {class: 'material-icons', text: 'supervisor_account', title: 'Управление пользователями', onclick: `showObjectGroupUsers(${groupData.number})`}).appendTo(manipulationTd);
 
-                if (groupData.author == USER_DATA.user_login) {
+                if (groupData.author == USER_DATA.login) {
                     $('<i>', {class: 'material-icons', text: 'delete', title: 'Удалить', onclick: `deleteObjectsGroup('${group}')`}).appendTo(manipulationTd);
                 }
 
@@ -5149,4 +5545,28 @@ function createCheckboxToggle(firstElem, secondElem) {
     addEventOnOffToggle(firstElemInput, secondElemInput);
 
     return div;
+}
+
+function addInputmask(input, mask) {
+    if (mask == 'email') {
+        $(input).inputmask({
+            mask: "*{1,20}[.*{1,20}][.*{1,20}][.*{1,20}]@*{1,20}[.*{2,6}][.*{1,2}]",
+            greedy: false,
+            onBeforePaste: function (pastedValue, opts) {
+              pastedValue = pastedValue.toLowerCase();
+              return pastedValue.replace("mailto:", "");
+            },
+            definitions: {
+              '*': {
+                validator: "[0-9A-Za-z!#$%&'*+/=?^_`{|}~\-]",
+                casing: "lower"
+              }
+            }
+          });
+    }
+    else if (mask == 'mobile number') {
+        $(input).inputmask('(999) 999-99-99');
+    }
+    else if (mask == 'fio') {
+    }
 }

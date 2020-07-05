@@ -19,7 +19,7 @@ import modules.logg_web as logg_web
 #addchg_kvdocs
 #chg_place_val
 #addchg_contact
-#sprav_note_chg
+#reports_setting
 #fast_find
 #news_portal
 #addchg_accnote
@@ -55,8 +55,9 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Изменение настроект')
-    if val_param=='house_tree':
-        q_sql = "select main.house_tree('"+ asid +"','"+ orgid +"','"+ val_param1 +"')"
+    #if val_param=='house_tree':objects_tree_filters
+    if fnk_name=='objects_tree_filters':
+        q_sql = "select main.house_tree('"+ asid +"','"+ orgid +"','"+ adate +"')"
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -99,8 +100,9 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Добавление/удаление контактных данных')
-    elif val_param=='sprav_note_chg':
-        q_sql = "select report.sprav_note_chg('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"','"+ val_param3 +"','"+ val_param4 +"')"
+    elif fnk_name=='reports_setting':
+        q_sql = "select report.sprav_note_chg('"+ asid +"','"+ orgid +"','"+ adate +"')"
+        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -165,7 +167,7 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Смена пароля')
     elif val_param=='chg_user_attr':
-        q_sql = "select access.chg_user_attr('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"')"
+        q_sql = "select access.chg_user_attr('"+ asid +"','"+ adate +"')"
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -184,6 +186,7 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
             res=(row[0])
     elif val_param=='addchg_ree_recodrs':
         q_sql = "select main.addchg_ree_recodrs('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"','"+ val_param3 +"','"+ val_param4 +"','"+ val_param5 +"','"+ val_param6 +"','"+ val_param7 +"','"+ val_param8 +"','"+ val_param9 +"','"+ val_param10 +"')"
+        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])

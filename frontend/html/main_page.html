@@ -256,12 +256,12 @@
             <div class="popup-content">
                 <div class="popup-tabs" id="object_list_settings_tabs">
                     <button class="tab-button active" onclick="openTab('object_list_settings_tabs', this,'object_list_settings_tab')">Настройки</button>
-                    <button class="tab-button" onclick="openTab('object_list_settings_tabs', this,'object_list_template')">Шаблоны</button>
+                    <button class="tab-button" onclick="openTab('object_list_settings_tabs', this,'object_list_template')">Фильтры</button>
                 </div>
                 <div id="object_list_settings_tabs_content" class="popup-tabs-content">
                     <div id="object_list_settings_tab" class="tab-content active"></div>
                     <div id="object_list_template" class="tab-content">
-                        <form name="choose_template_form">
+                        <!-- <form name="choose_template_form">
                             <table class="table-form">
                                 <tbody>
                                     <tr>
@@ -286,7 +286,7 @@
                                 <button id="change_template_btn" class="button-primary" style="margin-top: 10px" onclick="applyTemplateObjectList()">Применить</button>
                                 <button id="clear_template_btn" class="button-primary" style="margin-top: 10px" onclick="clearTemplateObjectList()" disabled>Сбросить</button>
                             </div>
-                        </form>
+                        </form> -->
                     </div>
                 </div>
             </div>
@@ -864,44 +864,13 @@
         </div>
         <div class="popup-content">
             <div class="tabs" id="profile_tabs">
-                <button class="tab-button active" onclick="openTab('profile_tabs', this, 'profile_basic_data')">Основные данные</button>
-                <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_settings')">Настройки</button>
+                <!-- <button class="tab-button active" onclick="openTab('profile_tabs', this, 'profile_basic_data')">Основные данные</button> -->
+                <button class="tab-button active" onclick="openTab('profile_tabs', this, 'profile_settings')">Настройки</button>
             </div>
             <div id="profile_tabs_area">
                 <div class="popup-background-with-tabs">
                     <div id="profile_tabs_content" class="tabs-content">
-                        <div id="profile_basic_data" class="tab-content grid active"></div>
-                        <div id="profile_settings" class="tab-content grid">
-                            <!-- <div>
-                                <h3>Цветовая схема</h3>
-                                <div id="color_theme_setting">
-                                    <div>
-                                        <label class="checkbox-container">
-                                            По умолчанию
-                                            <input id="default_theme_checkbox" class="checkbox" type="checkbox" checked onclick="chooseDefaultTheme()">
-                                            <span class="checkmark"></span>
-                                        </label>
-                                        <div id="color_palette_default" class="color-palette">
-                                            <div class="palette-color-1"></div>
-                                            <div class="palette-color-2"></div>
-                                            <div class="palette-color-3"></div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="checkbox-container">
-                                            Ночной режим
-                                            <input id="dark_theme_checkbox" class="checkbox" type="checkbox" onclick="chooseDarkTheme()">
-                                            <span class="checkmark"></span>
-                                        </label>
-                                        <div id="color_palette_dark" class="color-palette">
-                                            <div class="palette-color-1"></div>
-                                            <div class="palette-color-2"></div>
-                                            <div class="palette-color-3"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> -->
-                        </div>
+                        <div id="profile_settings" class="tab-content grid active"></div>
                     </div>
                 </div>
             </div>
