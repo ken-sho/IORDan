@@ -1441,7 +1441,8 @@ div {
 .block-main-header-with-icon>.header-icon i:hover,
 #object_list_settings_right i:hover,
 .block-table i:hover,
-.objects-group-user-delete i:hover {
+.objects-group-user-delete i:hover,
+.file-block .material-icons:hover {
     color: var(--element-color);
     transition: .15s;
 }
@@ -3141,7 +3142,7 @@ textarea {
     border-radius: 5px;
 }
 
-#file_download_progress_bar {
+.file-download-progress-bar {
     position: absolute;
     top: 0;
     left: 0;
@@ -3350,4 +3351,37 @@ textarea {
 
 .popup-window-tab-block:not(:first-child) {
     margin-top: 20px;
+}
+
+.file-block {
+    padding: 5px; 
+    background-color: #F4F6F8; 
+    border-radius: 5px; 
+    margin-bottom: 5px;
+}
+
+.file-block .file-name {
+    width: 80%;
+    color: var(--third-color);
+}
+
+.file-block .file-operation {
+    width: 20%;
+    text-align: center;
+}
+
+.file-block .file-type {
+    font-size: 14px;
+    color: #263238;
+    font-weight: bold;
+}
+
+.file-block .file-creation {
+    font-size: 14px;
+    color: #263238;
+}
+
+.file-block .material-icons {
+    color: #323232;
+    margin: 0px 2px;
 }

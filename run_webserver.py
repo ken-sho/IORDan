@@ -195,18 +195,16 @@ class ReportHandler(BaseHandler):
             multi = ''
         conn = db_conn.db_connect('web_receivables')
         cur = conn.cursor()
-        if rtype == 'certificate' and multi=='':
-            q_sql = "select report.sprav"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"')"
+        if rtype == 'certificate' and multi=='' and rnum=='16':
+            q_sql = "select report.sprav"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"','0','"+ hdate +"')"
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
                 self.write(res)
             encoded = base64.b64encode(q_sql.encode()).decode()
             logg_web.add_log(asid,encoded,'Выполнение справки')
-        elif rtype == 'certificate' and multi=='' and rnum==16:
-            dateb = self.get_argument('dateb')
-            datee = self.get_argument('datee')
-            q_sql = "select report.rep"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"','"+ hdate +"')"
+        elif rtype == 'certificate' and multi=='':
+            q_sql = "select report.sprav"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"')"
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
@@ -292,25 +290,52 @@ class UploadHandler(tornado.web.RequestHandler):
         autor = tornado.escape.native_str(self.get_secure_cookie("user"))
         file1 = self.request.files['file'][0]
         original_fname = file1['filename']
+        try:
+            accid = self.get_argument('accid')
+        except:
+            accid = ''
+        try:
+            vtype = self.get_argument('type')
+        except:
+            vtype = ''
         #fexist = os.path.exists("www/upload/" + autor + "/" + original_fname)
-        fexist = os.path.exists("/opt/IORDan/upload/" + original_fname)
-        if fexist==True:
-           for cnt in range (1,1000):
-               final_filename = "Копия_"+str(cnt)+"-"+original_fname
-               #fexist = os.path.exists("upload/" + autor + "/" + final_filename)
-               fexist = os.path.exists("/opt/IORDan/upload/" + final_filename)
-               if fexist==True:
-                  cnt =+1
-               else:
-                  break
+        fexist = os.path.exists("upload/" + original_fname)
+        if accid=='':
+            if fexist==True:
+                for cnt in range (1,1000):
+                    final_filename = "Копия_"+str(cnt)+"-"+original_fname
+                    #fexist = os.path.exists("upload/" + autor + "/" + final_filename)
+                    fexist = os.path.exists("upload/" + final_filename)
+                    if fexist==True:
+                        cnt =+1
+                    else:
+                        break
+            else:
+                final_filename = original_fname
+                #output_file = open("upload/" + autor + "/" + final_filename, 'wb')
+                output_file = open("upload/" + final_filename, 'wb')
+                output_file.write(file1['body'])
+                output_file.close()
+                self.write('success')
         else:
-           final_filename = original_fname
-        #output_file = open("upload/" + autor + "/" + final_filename, 'wb')
-        output_file = open("/opt/IORDan/upload/" + final_filename, 'wb')
-        output_file.write(file1['body'])
-        output_file.close()
-        self.write('success')
-        #logg_web.add_log(asid,'','Загрузка файла на портал',final_filename)
+            fid=''
+            res=''
+            dexist = os.path.exists("/opt/IORDan/privat_file/" + accid)
+            if dexist!=True:
+              os.mkdir("/opt/IORDan/privat_file/" + accid)
+            conn = db_conn.db_connect('web_receivables')
+            cur = conn.cursor()
+            cur.callproc('loader.add_privat_file',[asid,original_fname,accid,vtype])
+            for row in cur:
+                fid=(row[0])
+                res=(row[1])
+            output_file = open("/opt/IORDan/privat_file/"+accid+'/'+ fid, 'wb')
+            output_file.write(file1['body'])
+            output_file.close()
+            conn.commit()
+            cur.close()
+            conn.close()
+            self.write(res)
 
 class OpFileHandler(tornado.web.RequestHandler):
     def post(self):
