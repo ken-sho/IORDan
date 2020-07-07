@@ -329,7 +329,7 @@ class UploadHandler(tornado.web.RequestHandler):
             for row in cur:
                 fid=(row[0])
                 res=(row[1])
-            output_file = open("/opt/IORDan/privat_file/"+accid+'/'+ fid, 'wb')
+            output_file = open("privat_file/"+accid+'/'+ fid, 'wb')
             output_file.write(file1['body'])
             output_file.close()
             conn.commit()
