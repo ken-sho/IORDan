@@ -478,6 +478,7 @@ application = tornado.web.Application([
     (r"/icon/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/material-design-icons'}),
     (r"/images/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/frontend/images'}),
     (r"/download/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/download'}),
+    (r"/privat_file/(.*)", tornado.web.StaticFileHandler, {'path': 'privat_file'}),
 ], **settings)
 
 if __name__ == "__main__":
