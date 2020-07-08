@@ -1235,12 +1235,19 @@ function initializeObjectFiles() {
                 const files = filesInput.prop('files');
                 const parentNode = uploadFormBlock.find('.block-content');
                 const filesInfoNode = numberUploadedFilesDiv.find('span');
+                let count = 0;
                 const callback = (data) => {
                     const fileObj = JSON.parse(data);
                     initializeFilesList([fileObj]);
                     uploadedFilesRepository[fileObj.name].remove();
+                    count++;
+                    if (count == files.length) {
+                        filesInput.val('');
+                    }
+                    
                 };
                 uploadFiles(files, fileTypesObj, parentNode, filesInfoNode, callback);
+
             }
             else {
                 showPopupNotification('alert', 'Укажите типы для всех загружаемых файлов!');
@@ -1282,7 +1289,19 @@ function initializeObjectFiles() {
                             $('<span>', { text: `Загрузил: ${file.author} ${file.creation_time}` })
                         )
                     )
-                ).prependTo(filesListBlock.find('.block-content'));
+                );
+
+                console.log(files.length)
+
+                if (files.length == 1) {
+                    fileDiv.hide();
+                    fileDiv.prependTo(filesListBlock.find('.block-content'));
+                    fileDiv.fadeIn(400);
+
+                }
+                else {
+                    fileDiv.prependTo(filesListBlock.find('.block-content'));
+                }
             }
         }
 
@@ -2452,14 +2471,14 @@ function addReport() {
 
     if (ownType == 'one') {
         fioInput = $('#report_fast_access_fio');
-        validateinputsArray.push(fioInput);
+        // validateinputsArray.push(fioInput);
         fioValue = fioInput.val();
     }
     else if (ownType == 'together') {
         let fioArray = [];
         $('#report_fast_access_owners_list tr input[name="fio"]').each(function() {
             fioArray.push($(this).val());
-            validateinputsArray.push($(this));
+            // validateinputsArray.push($(this));
         });
         fioValue = fioArray;
     }
@@ -2470,8 +2489,8 @@ function addReport() {
             let part = $(this).find('input[name="part"]').val();
             let elemArray = `${fio} доля ${part}`;
             fioPartArray.push(elemArray);
-            validateinputsArray.push($(this).find('input[name="fio"]'));
-            validateinputsArray.push($(this).find('input[name="part"]'));
+            // validateinputsArray.push($(this).find('input[name="fio"]'));
+            // validateinputsArray.push($(this).find('input[name="part"]'));
         });
         fioValue = fioPartArray;
     }
@@ -3518,13 +3537,18 @@ function uploadFiles(files, fileTypes, parentNode, filesInfoNode, callback) {
 
         function uploadFile(index) {
             let formdata = new FormData();
-            formdata.append("file", files[index]);
+            formdata.append('file', files[index]);
+
+            console.log(files)
+            console.log(files[index]);
+            
+            console.log(fileTypes, files[index].name, fileTypes[files[index].name])
 
             if (!isEmpty(fileTypes)) {
-                formdata.append("type", fileTypes[files[index].name]);
+                formdata.append('type', fileTypes[files[index].name]);
                 formdata.append('accid', CURRENT_OBJECT_DATA.accid);
             }
-
+            
             console.log(formdata)
             
             $.ajax({
@@ -3549,15 +3573,16 @@ function uploadFiles(files, fileTypes, parentNode, filesInfoNode, callback) {
                 success: (fileData) => {
                     console.log(fileData);
 
-                    if (callback) {
-                        callback(fileData);
-                    }
                     
-                    if(index !== files.length - 1) {
+                    if (index !== files.length - 1) {
                         uploadFile(index + 1);
                     }
                     else {
                         filesInfoNode.text(`Файлов загружено: ${uploadedFilesNum}/${files.length}`);
+                    }
+
+                    if (callback) {
+                        callback(fileData);
                     }
                 }
             });
@@ -3566,7 +3591,7 @@ function uploadFiles(files, fileTypes, parentNode, filesInfoNode, callback) {
         uploadFile(0);
     }
     else {
-        filesInfoNode.fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+        filesInfoNode.text('Выбрано файлов: 0').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
     }
 }
 

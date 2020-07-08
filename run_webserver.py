@@ -285,6 +285,7 @@ class FilelistHandler(BaseHandler):
 
 
 class UploadHandler(tornado.web.RequestHandler):
+class UploadHandler(tornado.web.RequestHandler):
     def post(self):
         asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
         autor = tornado.escape.native_str(self.get_secure_cookie("user"))
@@ -299,13 +300,13 @@ class UploadHandler(tornado.web.RequestHandler):
         except:
             vtype = ''
         #fexist = os.path.exists("www/upload/" + autor + "/" + original_fname)
-        fexist = os.path.exists("upload/" + original_fname)
+        fexist = os.path.exists("/opt/IORDan/upload/" + original_fname)
         if accid=='':
             if fexist==True:
                 for cnt in range (1,1000):
                     final_filename = "Копия_"+str(cnt)+"-"+original_fname
                     #fexist = os.path.exists("upload/" + autor + "/" + final_filename)
-                    fexist = os.path.exists("upload/" + final_filename)
+                    fexist = os.path.exists("/opt/IORDan/upload/" + final_filename)
                     if fexist==True:
                         cnt =+1
                     else:
@@ -313,7 +314,7 @@ class UploadHandler(tornado.web.RequestHandler):
             else:
                 final_filename = original_fname
                 #output_file = open("upload/" + autor + "/" + final_filename, 'wb')
-                output_file = open("upload/" + final_filename, 'wb')
+                output_file = open("/opt/IORDan/upload/" + final_filename, 'wb')
                 output_file.write(file1['body'])
                 output_file.close()
                 self.write('success')
@@ -329,7 +330,7 @@ class UploadHandler(tornado.web.RequestHandler):
             for row in cur:
                 fid=(row[0])
                 res=(row[1])
-            output_file = open("privat_file/"+accid+'/'+ fid, 'wb')
+            output_file = open("/opt/IORDan/privat_file/"+accid+'/'+ fid, 'wb')
             output_file.write(file1['body'])
             output_file.close()
             conn.commit()
