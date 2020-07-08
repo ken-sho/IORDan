@@ -285,7 +285,6 @@ class FilelistHandler(BaseHandler):
 
 
 class UploadHandler(tornado.web.RequestHandler):
-class UploadHandler(tornado.web.RequestHandler):
     def post(self):
         asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
         autor = tornado.escape.native_str(self.get_secure_cookie("user"))
