@@ -18,6 +18,8 @@ import modules.adm_base_fnk as adm_base_fnk
 import modules.login_db as login_db
 import modules.loadxls as loadxls
 import modules.unloadxls as unloadxls
+import modules.loadxml as loadxml
+
 
 class chck_sid(tornado.web.RequestHandler):
     def post(self):
@@ -332,6 +334,9 @@ class UploadHandler(tornado.web.RequestHandler):
             output_file = open("/opt/IORDan/privat_file/"+accid+'/'+ fid, 'wb')
             output_file.write(file1['body'])
             output_file.close()
+            f_ext = os.path.splitext(original_fname)[1] 
+            if f_ext.lower() == '.xml' and vtype=='rosreester':
+                loadxml.read_file("/opt/IORDan/privat_file/"+accid+'/'+ fid,accid)
             conn.commit()
             cur.close()
             conn.close()
