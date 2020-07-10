@@ -1155,7 +1155,7 @@ function initializeObjectFiles() {
     
     const popupId = 'popup_object_files';
 
-    const uploadedFilesRepository = {};
+    // const uploadedFilesRepository = {};
     
     if (!$('div').is(`#${popupId}`)) {
         $('<i>', {class: 'material-icons', title: 'Файлы', text: 'folder_open'}).on('click', () => {
@@ -1397,8 +1397,8 @@ function changeObjectReputation(elem) {
 function refreshObjectData(callback) {
     $.ajax({
         type: "POST",
-        url: "/base_func",
-        data: encodeURI(`val_param=adr_info&val_param1=${CURRENT_OBJECT_DATA.accid}`),
+        url: "/base_func?fnk_name=adr_info",
+        data: JSON.stringify({accid: CURRENT_OBJECT_DATA.accid}),
         success: function (data) {
             OBJECT_DATA = JSON.parse(data);
             for (const func of callback) {
