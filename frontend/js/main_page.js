@@ -1152,162 +1152,168 @@ function getObjectData() {
 }
 
 function initializeObjectFiles() {
-    
+
     const popupId = 'popup_object_files';
 
-    // const uploadedFilesRepository = {};
-    
-    if (!$('div').is(`#${popupId}`)) {
-        $('<i>', {class: 'material-icons', title: 'Файлы', text: 'folder_open'}).on('click', () => {
+    $(`#${popupId}, #obj_files_icon`).remove();
+
+    const uploadedFilesRepository = {};
+
+    const filesIcon = $('<div>', {class: 'icon-with-count'}).append(
+        $('<i>', { id: 'obj_files_icon', class: 'material-icons', title: 'Файлы', text: 'folder_open' }).on('click', () => {
             openPopupWindow(popupId);
-        }).appendTo('#obj_ls_info .header-manipulation');
+        })
+    ).appendTo('#obj_ls_info .header-manipulation');
+        
+    if (!isEmpty(OBJECT_DATA.files)) {
+        const counterIcons = $('<div>', { class: 'icon-count', text: OBJECT_DATA.files.length, title: 'Файлы' }).appendTo(filesIcon);
+        addEventListenersToCounterIcons(counterIcons);
+    }
 
-        const popupLayout = createPopupLayout('Файлы', popupId);
-        popupLayout.appendTo('#popup_background');
+    const popupLayout = createPopupLayout('Файлы', popupId);
+    popupLayout.appendTo('#popup_background');
 
-        const popupContent = $(popupLayout).find('.popup-content');
+    const popupContent = $(popupLayout).find('.popup-content');
 
-        const filesDownloadDiv = $('<div>', {id: 'object_files_upload'});
-        const uploadFormBlock = createContentBlock('Загрузка', {'width': '100%', 'height': '120px'}).appendTo(filesDownloadDiv);
-        const numberUploadedFilesDiv = $('<div>', {style: 'height: 50%'}).append(
-            $('<span>', {text: 'Выбрано файлов: 0', style: 'display: flex; align-items: center; height: 100%'})
-        ).appendTo(uploadFormBlock.find('.block-content'));
-        uploadFormBlock.find('.block-content').css({'position': 'relative'});
+    const filesDownloadDiv = $('<div>', { id: 'object_files_upload' });
+    const uploadFormBlock = createContentBlock('Загрузка', { 'width': '100%', 'height': '120px' }).appendTo(filesDownloadDiv);
+    const numberUploadedFilesDiv = $('<div>', { style: 'height: 50%' }).append(
+        $('<span>', { text: 'Выбрано файлов: 0', style: 'display: flex; align-items: center; height: 100%' })
+    ).appendTo(uploadFormBlock.find('.block-content'));
+    uploadFormBlock.find('.block-content').css({ 'position': 'relative' });
 
-        const chooseFilesButton = $('<button>', { class: 'button-primary', style: 'margin-right: 5px' }).append(
-            $('<label>', { for: 'object_files_input', text: 'Выбрать файлы' })
-        );
+    const chooseFilesButton = $('<button>', { class: 'button-primary', style: 'margin-right: 5px' }).append(
+        $('<label>', { for: 'object_files_input', text: 'Выбрать файлы' })
+    );
 
-        const filesInput = $('<input>', {id: 'object_files_input', type: 'file', style: 'display: none', multiple: 'true'});
-        filesInput.on('change', () => {
-            const files = filesInput.prop('files');
-            numberUploadedFilesDiv.find('span').text(`Выбрано файлов: ${files.length}`);
-            uploadFilesListBlockContent.empty();
-            if (files.length > 0) {
-                for (const file of files) {
-                    const fileDiv = $('<div>', { class: 'file-block' }).append(
-                        $('<div>', { style: 'padding-bottom: 5px' }).append(
-                            $('<span>', { text: file.name, style: 'color: var(--third-color)' })
-                        ),
-                        $('<div>').append(
-                            $('<select>', { class: 'input-main', file_name: file.name })
-                        )
-                    ).appendTo(uploadFilesListBlockContent);
-
-                    uploadedFilesRepository[file.name] = fileDiv;
-
-                    
-                    const fileTypesSelect = fileDiv.find('select');
-                    $('<option>', { text: 'Выбрать тип файла', disabled: 'true', selected: 'true' }).appendTo(fileTypesSelect);
-                    for (const type of OBJECT_DATA.upload_file_types) {
-                        $('<option>', {text: type.name, value: type.value}).appendTo(fileTypesSelect);
-                    }
-                }
-            }
-            else {
-                $('<span>', { class: 'text-center-small', text: 'Выберите файлы для загрузки' }).appendTo(uploadFilesListBlockContent);
-            }
-        });
-
-        const uploadFilesButton = $('<button>', { class: 'button-secondary', text: 'Загрузить' });
-        uploadFilesButton.on('click', () => {
-            const fileTypesObj = {};
-
-            for (const select of uploadFilesListBlockContent.find('select')) {
-                const fileName = $(select).attr('file_name');
-                let fileType = $(select).val();
-
-                fileTypesObj[fileName] = fileType;
-            }
-
-            let typesCorrect = true;
-
-            for (const elem in fileTypesObj) {
-                const type = fileTypesObj[elem];
-                console.log(type)
-                if (type == null || type == '') {
-                    typesCorrect = false;
-                    break;
-                }
-            }
-
-            if (typesCorrect) {
-                const files = filesInput.prop('files');
-                const parentNode = uploadFormBlock.find('.block-content');
-                const filesInfoNode = numberUploadedFilesDiv.find('span');
-                let count = 0;
-                const callback = (data) => {
-                    const fileObj = JSON.parse(data);
-                    initializeFilesList([fileObj]);
-                    uploadedFilesRepository[fileObj.name].remove();
-                    count++;
-                    if (count == files.length) {
-                        filesInput.val('');
-                    }
-                    
-                };
-                uploadFiles(files, fileTypesObj, parentNode, filesInfoNode, callback);
-
-            }
-            else {
-                showPopupNotification('alert', 'Укажите типы для всех загружаемых файлов!');
-            };
-        });
-
-        const navigateButtonsDiv = $('<div>', {style: 'height: 50%'}).append(chooseFilesButton, filesInput, uploadFilesButton);
-        navigateButtonsDiv.appendTo(uploadFormBlock.find('.block-content'));
-
-        const uploadFilesListBlock = createContentBlock('Список загружаемых файлов', { 'width': '100%', 'height': 'calc(100% - 130px)', 'margin-top': '10px' }).appendTo(filesDownloadDiv);
-        const uploadFilesListBlockContent = $(uploadFilesListBlock).find('.block-content');
-        $('<span>', { class: 'text-center-small', text: 'Выберите файлы для загрузки' }).appendTo(uploadFilesListBlockContent);
-        filesDownloadDiv.appendTo(popupContent);
-
-        const filesList = $('<div>', {id: 'object_files_list'});
-        const filesListBlock = createContentBlock('Список файлов', {'width': '100%', 'height': '100%'}).appendTo(filesList);
-        filesList.appendTo(popupContent);
-
-        function initializeFilesList(files) {
+    const filesInput = $('<input>', { id: 'object_files_input', type: 'file', style: 'display: none', multiple: 'true' });
+    filesInput.on('change', () => {
+        const files = filesInput.prop('files');
+        numberUploadedFilesDiv.find('span').text(`Выбрано файлов: ${files.length}`);
+        uploadFilesListBlockContent.empty();
+        if (files.length > 0) {
             for (const file of files) {
                 const fileDiv = $('<div>', { class: 'file-block' }).append(
-                    $('<div>', {style: 'display: flex; align-items: center'}).append(
-                        $('<div>', { class: 'file-type' }).append(
-                            $('<span>', { text: `${file.type}` })
-                        )
+                    $('<div>', { style: 'padding-bottom: 5px' }).append(
+                        $('<span>', { text: file.name, style: 'color: var(--third-color)' })
                     ),
-                    $('<div>', {style: 'display: flex; align-items: center; margin: 5px 0px'}).append(
-                        $('<div>', { class: 'file-name' }).append(
-                            $('<span>', { text: file.name })
-                        ),
-                        $('<div>', { class: 'file-operation' }).append(
-                            $('<i>', {class: 'material-icons', text: 'remove_red_eye', title: 'Открыть'}),
-                            $('<i>', {class: 'material-icons', text: 'save', title: 'Скачать' })
-
-                        )
-                    ),
-                    $('<div>', {style: 'display: flex; align-items: center'}).append(
-                        $('<div>', { class: 'file-creation' }).append(
-                            $('<span>', { text: `Загрузил: ${file.author} ${file.creation_time}` })
-                        )
+                    $('<div>').append(
+                        $('<select>', { class: 'input-main', file_name: file.name })
                     )
-                );
+                ).appendTo(uploadFilesListBlockContent);
 
-                console.log(files.length)
+                uploadedFilesRepository[file.name] = fileDiv;
 
-                if (files.length == 1) {
-                    fileDiv.hide();
-                    fileDiv.prependTo(filesListBlock.find('.block-content'));
-                    fileDiv.fadeIn(400);
 
-                }
-                else {
-                    fileDiv.prependTo(filesListBlock.find('.block-content'));
+                const fileTypesSelect = fileDiv.find('select');
+                $('<option>', { text: 'Выбрать тип файла', disabled: 'true', selected: 'true' }).appendTo(fileTypesSelect);
+                for (const type of OBJECT_DATA.upload_file_types) {
+                    $('<option>', { text: type.name, value: type.value }).appendTo(fileTypesSelect);
                 }
             }
         }
+        else {
+            $('<span>', { class: 'text-center-small', text: 'Выберите файлы для загрузки' }).appendTo(uploadFilesListBlockContent);
+        }
+    });
 
-        initializeFilesList(OBJECT_DATA.files);
+    const uploadFilesButton = $('<button>', { class: 'button-secondary', text: 'Загрузить' });
+    uploadFilesButton.on('click', () => {
+        const fileTypesObj = {};
+
+        for (const select of uploadFilesListBlockContent.find('select')) {
+            const fileName = $(select).attr('file_name');
+            let fileType = $(select).val();
+
+            fileTypesObj[fileName] = fileType;
+        }
+
+        let typesCorrect = true;
+
+        for (const elem in fileTypesObj) {
+            const type = fileTypesObj[elem];
+            console.log(type)
+            if (type == null || type == '') {
+                typesCorrect = false;
+                break;
+            }
+        }
+
+        if (typesCorrect) {
+            const files = filesInput.prop('files');
+            const parentNode = uploadFormBlock.find('.block-content');
+            const filesInfoNode = numberUploadedFilesDiv.find('span');
+            let count = 0;
+            const callback = (data) => {
+                const fileObj = JSON.parse(data);
+                initializeFilesList([fileObj]);
+                uploadedFilesRepository[fileObj.name].remove();
+                count++;
+                if (count == files.length) {
+                    filesInput.val('');
+                }
+
+            };
+            uploadFiles(files, fileTypesObj, parentNode, filesInfoNode, callback);
+
+        }
+        else {
+            showPopupNotification('alert', 'Укажите типы для всех загружаемых файлов!');
+        };
+    });
+
+    const navigateButtonsDiv = $('<div>', { style: 'height: 50%' }).append(chooseFilesButton, filesInput, uploadFilesButton);
+    navigateButtonsDiv.appendTo(uploadFormBlock.find('.block-content'));
+
+    const uploadFilesListBlock = createContentBlock('Список загружаемых файлов', { 'width': '100%', 'height': 'calc(100% - 130px)', 'margin-top': '10px' }).appendTo(filesDownloadDiv);
+    const uploadFilesListBlockContent = $(uploadFilesListBlock).find('.block-content');
+    $('<span>', { class: 'text-center-small', text: 'Выберите файлы для загрузки' }).appendTo(uploadFilesListBlockContent);
+    filesDownloadDiv.appendTo(popupContent);
+
+    const filesList = $('<div>', { id: 'object_files_list' });
+    const filesListBlock = createContentBlock('Список файлов', { 'width': '100%', 'height': '100%' }).appendTo(filesList);
+    filesList.appendTo(popupContent);
+
+    function initializeFilesList(files) {
+        for (const file of files) {
+            const fileDiv = $('<div>', { class: 'file-block' }).append(
+                $('<div>', { style: 'display: flex; align-items: center' }).append(
+                    $('<div>', { class: 'file-type' }).append(
+                        $('<span>', { text: `${file.type}` })
+                    )
+                ),
+                $('<div>', { style: 'display: flex; align-items: center; margin: 5px 0px' }).append(
+                    $('<div>', { class: 'file-name' }).append(
+                        $('<span>', { text: file.name })
+                    ),
+                    $('<div>', { class: 'file-operation' }).append(
+                        $('<i>', { class: 'material-icons', text: 'remove_red_eye', title: 'Открыть' }),
+                        $('<i>', { class: 'material-icons', text: 'save', title: 'Скачать' })
+
+                    )
+                ),
+                $('<div>', { style: 'display: flex; align-items: center' }).append(
+                    $('<div>', { class: 'file-creation' }).append(
+                        $('<span>', { text: `Загрузил: ${file.author} ${file.creation_time}` })
+                    )
+                )
+            );
+
+            console.log(files.length)
+
+            if (files.length == 1) {
+                fileDiv.hide();
+                fileDiv.prependTo(filesListBlock.find('.block-content'));
+                fileDiv.fadeIn(400);
+
+            }
+            else {
+                fileDiv.prependTo(filesListBlock.find('.block-content'));
+            }
+        }
     }
 
+    initializeFilesList(OBJECT_DATA.files);
 }
 
 function initializeObjectReputation() {
