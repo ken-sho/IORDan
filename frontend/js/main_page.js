@@ -1253,6 +1253,13 @@ function initializeObjectFiles() {
                     filesInput.val('');
                 }
 
+                if (filesIcon.find('.icon-count').length == 0) {
+                    const counterIcons = $('<div>', { class: 'icon-count', text: '1', title: 'Файлы' }).appendTo(filesIcon);
+                }
+                else {
+                    const numberOfFiles = filesIcon.find('.icon-count').text();
+                    filesIcon.find('.icon-count').text(parseInt(numberOfFiles) + 1);
+                }
             };
             uploadFiles(files, fileTypesObj, parentNode, filesInfoNode, callback);
 
@@ -1287,8 +1294,27 @@ function initializeObjectFiles() {
                         $('<span>', { text: file.name })
                     ),
                     $('<div>', { class: 'file-operation' }).append(
-                        $('<i>', { class: 'material-icons', text: 'remove_red_eye', title: 'Открыть' }),
-                        $('<i>', { class: 'material-icons', text: 'save', title: 'Скачать' })
+                        $('<i>', { class: 'material-icons', text: 'remove_red_eye', title: 'Открыть', disabled: 'true' }),
+                        $('<i>', { class: 'material-icons', text: 'save', title: 'Скачать' }).on('click', function() {
+                            showPopupNotification('notification', 'Загрузка файла начнется автоматически!');
+                            $.ajax({
+                                type: 'GET',
+                                url: file.path,
+                                xhrFields: {
+                                    responseType: 'blob'
+                                },
+                                success: (data) => {
+                                    var a = document.createElement('a');
+                                    var url = window.URL.createObjectURL(data);
+                                    a.href = url;
+                                    a.download = file.name;
+                                    document.body.append(a);
+                                    a.click();
+                                    a.remove();
+                                    window.URL.revokeObjectURL(url);
+                                }
+                            });
+                        })
 
                     )
                 ),
@@ -5409,7 +5435,8 @@ function convertContentToExcel(content, fileName) {
         data: content,
         contentType: 'application/json',
         success: function(data) {
-            window.location = data;
+            console.log(data);
+            // window.location = data;
         }
     });
 }
