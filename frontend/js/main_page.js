@@ -1193,23 +1193,42 @@ function initializeObjectFiles() {
         uploadFilesListBlockContent.empty();
         if (files.length > 0) {
             for (const file of files) {
-                const fileDiv = $('<div>', { class: 'file-block' }).append(
-                    $('<div>', { style: 'padding-bottom: 5px' }).append(
-                        $('<span>', { text: file.name, style: 'color: var(--third-color)' })
-                    ),
-                    $('<div>').append(
-                        $('<select>', { class: 'input-main', file_name: file.name })
-                    )
-                ).appendTo(uploadFilesListBlockContent);
+                const fileNameDiv = $('<div>', { style: 'padding-bottom: 5px' }).append(
+                    $('<span>', { text: file.name, style: 'color: var(--third-color)' })
+                );
+                const fileTypeDiv = $('<div>').append(
+                    $('<select>', { class: 'input-main', file_name: file.name })
+                )
+                const fileDiv = $('<div>', { class: 'file-block' }).append(fileNameDiv, fileTypeDiv);
 
+                fileDiv.appendTo(uploadFilesListBlockContent);
+                
                 uploadedFilesRepository[file.name] = fileDiv;
+                
+                const fileTypesSelect = fileTypeDiv.find('select');
 
-
-                const fileTypesSelect = fileDiv.find('select');
                 $('<option>', { text: 'Выбрать тип файла', disabled: 'true', selected: 'true' }).appendTo(fileTypesSelect);
                 for (const type of OBJECT_DATA.upload_file_types) {
                     $('<option>', { text: type.name, value: type.value }).appendTo(fileTypesSelect);
                 }
+
+                if (file.type == 'text/xml') {
+                    fileTypesSelect.val('rosreester');
+
+                    for (const option of fileTypesSelect.find('option')) {
+                        if ($(option).val() !== 'rosreester') {
+                            $(option).attr('disabled', true);
+                        }
+                    }
+                }
+                else {
+                    for (const option of fileTypesSelect.find('option')) {
+                        if ($(option).val() == 'rosreester') {
+                            $(option).attr('disabled', true);
+                        }
+                    }
+                }
+
             }
         }
         else {
@@ -1294,8 +1313,23 @@ function initializeObjectFiles() {
                         $('<span>', { text: file.name })
                     ),
                     $('<div>', { class: 'file-operation' }).append(
-                        $('<i>', { class: 'material-icons', text: 'remove_red_eye', title: 'Открыть', disabled: 'true' }),
-                        $('<i>', { class: 'material-icons', text: 'save', title: 'Скачать' }).on('click', function() {
+                        $('<i>', { class: 'material-icons', text: 'remove_red_eye', title: 'Открыть'}).on('click', () => {
+                            $.ajax({
+                                type: 'GET',
+                                url: file.path,
+                                xhrFields: {
+                                    responseType: 'blob'
+                                },
+                                success: (data) => {
+                                    blob = data.slice(0, data.size, "image/jpeg")
+                                    const url = window.URL.createObjectURL(blob);
+                                    console.log(url)
+                                    window.open(url, '_blank');
+                                    window.URL.revokeObjectURL(url);
+                                }
+                            });
+                        }),
+                        $('<i>', { class: 'material-icons', text: 'save', title: 'Скачать' }).on('click', () => {
                             showPopupNotification('notification', 'Загрузка файла начнется автоматически!');
                             $.ajax({
                                 type: 'GET',
@@ -5436,7 +5470,7 @@ function convertContentToExcel(content, fileName) {
         contentType: 'application/json',
         success: function(data) {
             console.log(data);
-            // window.location = data;
+            window.location = data;
         }
     });
 }
