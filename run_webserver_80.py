@@ -255,7 +255,7 @@ class ReportHandler(BaseHandler):
         adate = str(((self.request.body).decode('UTF8')))
         conn = db_conn.db_connect('web_receivables')
         cur = conn.cursor()
-        cur.callproc('report.proxy_srv',[asid,orgid,adate,'post'])
+        cur.callproc('report.proxy_srv',[asid,orgid,adate])
         print(adate)
         for row in cur:
             res=(row[0])
