@@ -249,6 +249,21 @@ class ReportHandler(BaseHandler):
         cur.close()
         conn.close()
 
+    def post(self):
+        asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
+        orgid = str(self.get_cookie('companyId'))
+        adate = str(((self.request.body).decode('UTF8')))
+        conn = db_conn.db_connect('web_receivables')
+        cur = conn.cursor()
+        cur.callproc('report.proxy_srv',[asid,orgid,adate,'post'])
+        print(adate)
+        for row in cur:
+            res=(row[0])
+            self.write(res)
+        conn.commit()
+        cur.close()
+        conn.close()
+
 class WebRequestHandler(BaseHandler):
     def get(self):
         if not self.current_user:

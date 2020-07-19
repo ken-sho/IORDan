@@ -1321,7 +1321,7 @@ function initializeObjectFiles() {
                                     responseType: 'blob'
                                 },
                                 success: (data) => {
-                                    blob = data.slice(0, data.size, "image/jpeg")
+                                    blob = data.slice(0, data.size, "image/jpeg");
                                     const url = window.URL.createObjectURL(blob);
                                     console.log(url)
                                     window.open(url, '_blank');
@@ -1517,6 +1517,75 @@ function clickDropdownMenu() {
                     }
                 });
             }
+            else if (repType == 'package') {
+                const windowId = `popup_ownership_periods_${reportId}`;
+                
+                if (!$('div').is(`#${windowId}`)) {
+                    const popup = createPopupLayout(repName, windowId);
+                    popup.css({'width': '70%'});
+                    popup.appendTo('#popup_background');
+                }
+
+                const popupContent = $(`#${windowId}`).find('.popup-content');
+                popupContent.empty();
+                openPopupWindow(windowId);
+                const reportData = {number: repNum, type : repType, accid : accid, human_id : humanId};
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/report',
+                    data: JSON.stringify({operation: "check", report_data: reportData}),
+                    success: (data) => {
+                        console.log(data);
+                        if (data !== 'error') {
+                            const ownershipPeriodsRepository = [];
+
+                            const table = $('<table>', { class: 'table-form' });
+
+                            for (const period of JSON.parse(data)) {
+                                const tr = $('<tr>');
+                                const tdName = $('<td>', { text: period.name, style: 'font-weight: bold' });
+                                const tdStartDate = $('<td>', { text: 'Дата начала', style: 'text-align: center; font-weight: bold' });
+                                const tdStartDateInput = $('<td>').append(
+                                    $('<input>', { class: 'input-main', type: 'date', value: RemakeDateFormatToInput(period.start_date) })
+                                );
+                                const tdEndDate = $('<td>', { text: 'Дата конца', style: 'text-align: center; font-weight: bold' });
+                                const tdEndDateInput = $('<td>').append(
+                                    $('<input>', { class: 'input-main', type: 'date', value: RemakeDateFormatToInput(period.end_date) })
+                                );
+
+                                ownershipPeriodsRepository.push({ name: period.name, start_date: tdStartDateInput.find('input'), end_date: tdEndDateInput.find('input') });
+
+                                tr.append(tdName, tdStartDate, tdStartDateInput, tdEndDate, tdEndDateInput);
+                                tr.appendTo(table);
+                            }
+
+                            const button = $('<div>', { class: 'form-submit-btn' }).append(
+                                $('<button>', { class: 'button-primary', text: 'Выполнить' }).on('click', () => {
+                                    const ownershipPeriodsData = [];
+
+                                    for (const period of ownershipPeriodsRepository) {
+                                        ownershipPeriodsData.push({ name: period.name, start_date: RemakeDateFormatFromInput(period.start_date.val()), end_date: RemakeDateFormatFromInput(period.end_date.val()) });
+                                    }
+
+                                    const data = { operation: 'get_report', report_data: reportData, ownership_periods: ownershipPeriodsData };
+
+                                    const callback = (data) => {
+                                        initializeReportNewWindow(data, repName, personName);
+                                    }
+
+                                    getReportContent(data, callback);
+                                })
+                            );
+
+                            popupContent.append(table, button);
+                        }
+                        else {
+                            $('<div>', {class: 'notification', text: 'Нет данных'}).appendTo(popupContent);
+                        }
+                    }
+                });
+            }
             else {
                 // createContentLoader('#popup_report .popup-content');
                 // openPopupWindow('popup_report');
@@ -1531,6 +1600,20 @@ function clickDropdownMenu() {
                 });
             }
         });
+    });
+}
+
+function getReportContent(data, callback) {
+    $.ajax({
+        type: 'POST',
+        url: '/report',
+        data: JSON.stringify(data),
+        success: (data) => {
+            console.log(data);
+            if (callback) {
+                callback(data);
+            }
+        }
     });
 }
 
@@ -3594,7 +3677,6 @@ function DatepickerSetCurrentDate(inputId) {
 
 function uploadFiles(files, fileTypes, parentNode, filesInfoNode, callback) {
     event.preventDefault();
-    console.log(parentNode)
 
     if (files.length > 0) {
         const progressBarDiv = $('<div>', {class: 'file-download-progress-bar'}).prependTo(parentNode);
