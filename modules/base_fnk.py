@@ -31,12 +31,12 @@ import modules.logg_web as logg_web
 #chg_passwd
 #chg_user_attr
 #ree_reestrs
-#ree_recodrs
+#get_registry
 #addchg_ree_recodrs
 #house_groups
 #house_groups_list
 #add_usr_hsgrlst
-#chgthead_reereestrs
+#registry_settings
 #chg_history_setting
 #chg_reputation
 #ree_regular_create
@@ -179,8 +179,8 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
-    elif val_param=='ree_recodrs':
-        q_sql = "select main.ree_recodrs('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"')"
+    elif fnk_name=='get_registry':
+        q_sql = "select main.ree_recodrs('"+ asid +"','"+ orgid +"','"+ adate +"')"
         print(q_sql)
         cur.execute(q_sql)
         for row in cur:
@@ -215,8 +215,8 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
-    elif val_param=='chgthead_reereestrs':
-        q_sql = "select main.chgthead_reereestrs('"+ asid +"','"+ val_param1 +"','"+ adate +"')"
+    elif fnk_name=='registry_settings':
+        q_sql = "select main.chgthead_reereestrs('"+ asid +"','"+ orgid +"','"+ adate +"')"
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
