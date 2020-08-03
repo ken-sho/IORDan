@@ -286,12 +286,12 @@ function getUserData(callback) {
             }
         });
 
-        if (USER_DATA.org_list.length == 1) {
-            const companyName = USER_DATA.org_list[0].name;
-            const companyId = USER_DATA.org_list[0].id;
+        // if (USER_DATA.org_list.length == 1) {
+        //     const companyName = USER_DATA.org_list[0].name;
+        //     const companyId = USER_DATA.org_list[0].id;
 
-            chooseCompany('', companyName, companyId);
-        }
+        //     chooseCompany('', companyName, companyId);
+        // }
 
         if (!isEmpty(callback)) {
             for (const func of callback) {
@@ -716,6 +716,10 @@ function createCompanyDropdownMenu() {
             $(this).addClass('active');
         })
         $('<a>', {text: companyName}).appendTo(li);
+
+        if (USER_DATA.org_list.length == 1) {
+            chooseCompany(li, companyName, companyId);
+        }
     }
 }
 
