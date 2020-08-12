@@ -781,7 +781,7 @@ function openPopupWindowLayer2(id) {
 
 function closePopupWindow(popupId) {
     $(`#${popupId}, #popup_background`).fadeOut(200);
-    $('#popup_report .popup-content').empty();
+    $('#popup_report .content').empty();
     $('.main-menu li').removeClass('active');
     $('#home_page').addClass('active');
 
@@ -792,13 +792,13 @@ function closePopupWindow(popupId) {
 
 function closePopupWindowLayer2(popupId) {
     $(`#${popupId}, #popup_background_layer2`).fadeOut(200);
-    $('#popup_report .popup-content').empty();
+    $('#popup_report .content').empty();
 }
 
 function closePopupWindowWithConfirm(popupId) {
     if (confirm(`Все внесенные изменения будут потеряны. Вы уверены, что хотите закрыть окно?`)) {
         $(`#${popupId}, #popup_background`).fadeOut(200);
-        $('#popup_report .popup-content').empty();
+        $('#popup_report .content').empty();
     }
 }
 
@@ -933,11 +933,11 @@ function createObjectsTree(objectsList) {
             setPrintNotation(reportId);
 
             const createLoader = (registry, callback) => {
-                createContentLoader('#popup_report .popup-content');
+                createContentLoader('#popup_report .content');
                 openPopupWindow('popup_report');
                 $.get(`/report?multi=true&rnum=${repNum}&rtype=${repType}&accid=${accids}&humanid=&createRegistry=${registry}`, function (data) {
-                    $('#popup_report .popup-name-fullscreen').text('');
-                    $('#popup_report .popup-content').html(data);
+                    $('#popup_report .name').text('');
+                    $('#popup_report .content').html(data);
                     callback();
                 });
             };
@@ -1052,27 +1052,30 @@ function initializeObjectsTreeFilters() {
     const selectedFilters = [];
     $('#object_list_template').empty();
 
-    const filtersListDiv = $('<div>', {class: 'popup-window-tab-block', style: 'padding: 0px 5px;'});
-    for (const filter of filters) {
-        const input = $('<input>', {type: 'checkbox', class: 'checkbox'}).on('change', () => {
-            const isSelected = input.prop('checked');
-            if (isSelected) {
-                selectedFilters.push(filter.value)
-            }
-            else {
-                selectedFilters.pop(filter.value);
-            }
-        });
-        const span = $('<span>', {class: 'checkmark'});
-        const label = $('<label>', {class: 'checkbox-container', text: filter.name, style: 'font-size: 16px'}).append(input, span);
-        const div = $('<div>').append(label);
-        div.appendTo(filtersListDiv);
+    const filtersListDiv = $('<div>', {class: 'border-block-default', style: 'padding: 0px 5px;'});
+    if (filters !== null) {
+        for (const filter of filters) {
+            const input = $('<input>', { type: 'checkbox', class: 'checkbox' }).on('change', () => {
+                const isSelected = input.prop('checked');
+                if (isSelected) {
+                    selectedFilters.push(filter.value)
+                }
+                else {
+                    selectedFilters.pop(filter.value);
+                }
+            });
+            const span = $('<span>', { class: 'checkmark' });
+            const label = $('<label>', { class: 'checkbox-container', text: filter.name, style: 'font-size: 16px' }).append(input, span);
+            const div = $('<div>').append(label);
+            div.appendTo(filtersListDiv);
+        }
+
+        filtersListDiv.appendTo('#object_list_template');
+
     }
 
-    filtersListDiv.appendTo('#object_list_template');
-
     const inputStyle = 'width: 60px; text-align: center; margin: 0px 5px';
-    const filterSumDiv = $('<div>', {class: 'popup-window-tab-block', style: 'padding: 5px;'});
+    const filterSumDiv = $('<div>', {class: 'border-block-default', style: 'padding: 5px; margin-top: 20px'});
     const fromInput = $('<input>', {type: 'text', class: 'input-main', style: inputStyle});
     const toInput = $('<input>', {type: 'text', class: 'input-main', style: inputStyle});
     filterSumDiv.append('Сумма от', fromInput, 'до', toInput, 'руб.');
@@ -1128,6 +1131,8 @@ function getObjectData() {
 
             initializeObjectFiles();
 
+            initializeOfficeAdministration();
+
             initializeObjectReputation();
 
             getObjectAgreementsData();
@@ -1161,8 +1166,8 @@ function initializeObjectFiles() {
 
     const uploadedFilesRepository = {};
 
-    const filesIcon = $('<div>', {class: 'icon-with-count'}).append(
-        $('<i>', { id: 'obj_files_icon', class: 'material-icons', title: 'Файлы', text: 'folder_open' }).on('click', () => {
+    const filesIcon = $('<div>', {id: 'obj_files_icon', class: 'icon-with-count'}).append(
+        $('<i>', {class: 'material-icons', title: 'Файлы', text: 'folder_open' }).on('click', () => {
             openPopupWindow(popupId);
         })
     ).appendTo('#obj_ls_info .header-manipulation');
@@ -1462,6 +1467,59 @@ function changeObjectReputation(elem) {
     });
 }
 
+function initializeOfficeAdministration() {
+    const popupId = 'popup_office_administration';
+    $(`#${popupId}, #office_administration_icon`).remove();
+    const popupLayout = createPopupFullscreenLayout(`Делопроизводство: ${CURRENT_OBJECT_DATA.adress} - ${CURRENT_OBJECT_DATA.apartNum}`, popupId, {'display' : 'flex', 'justify-content' : 'space-around'});
+    popupLayout.appendTo('#popup_background');
+    const icon = $('<div>', {id: 'office_administration_icon', class: 'icon-with-count'}).append(
+        $('<i>', {class: 'material-icons', title: 'Делопроизводство', text: 'description' }).on('click', () => {
+            openPopupWindow(popupId);
+        })
+    ).appendTo('#obj_ls_info .header-manipulation');
+        
+    // if (!isEmpty(OBJECT_DATA.files)) {
+    //     const counterIcons = $('<div>', { class: 'icon-count', text: OBJECT_DATA.files.length, title: 'Файлы' }).appendTo(icon);
+    //     addEventListenersToCounterIcons(counterIcons);
+    // }
+
+    const blockContent = popupLayout.find('.content');
+
+    $('<div>', {class: 'main-list'}).append(
+        $('<ul>').append(
+            $('<li>').append(
+                $('<a>').append(
+                    $('<span>', {text: 'Соглашения о рассрочке'})
+                )
+            ),
+            $('<li>').append(
+                $('<a>').append(
+                    $('<span>', {text: 'Судебное производство'})
+                )
+            ),
+            $('<li>').append(
+                $('<a>').append(
+                    $('<span>', {text: 'Исполнительное производство'})
+                )
+            )
+        )
+    ).appendTo(blockContent);
+    $('<div>', {class: 'main-content'}).append(
+        $('<div>', {class: 'block'}).append(
+            $('<div>', {class: 'block-header-with-manipulation'}),
+            $('<div>', {class: 'block-content no-padding'}).append(
+                $('<span>', {class: 'text-center-small', text: 'Выберите реестр из списка'})
+            )
+        )
+    ).appendTo(blockContent);
+
+    // const blocksStyle = { 'width': 'calc(100% / 3 - 5px)'};
+    // const installmentAgreementsBlock = createContentBlock('Соглашения о рассрочке', blocksStyle);
+    // const judicialProceedingsBlock = createContentBlock('Судебное производство', blocksStyle);
+    // const enforcementProceedingsBlock = createContentBlock('Исполнительное производство', blocksStyle);
+    // blockContent.append(installmentAgreementsBlock, judicialProceedingsBlock, enforcementProceedingsBlock);
+}
+
 function refreshObjectData(callback) {
     $.ajax({
         type: "POST",
@@ -1530,8 +1588,12 @@ function clickDropdownMenu() {
 
                 const popupContent = $(`#${windowId}`).find('.popup-content');
                 popupContent.empty();
+                const loaderDiv = $('<div>', {style: 'height: 150px'});
+                popupContent.append(loaderDiv);
+                createContentLoader(loaderDiv);
                 openPopupWindow(windowId);
                 const reportData = {number: repNum, type : repType, accid : accid, human_id : humanId};
+
 
                 $.ajax({
                     type: 'POST',
@@ -1542,23 +1604,32 @@ function clickDropdownMenu() {
                         if (data !== 'error') {
                             const ownershipPeriodsRepository = [];
 
-                            const table = $('<table>', { class: 'table-form' });
+                            const table = $('<table>', { class: 'table-form border-block-default' });
 
                             for (const period of JSON.parse(data)) {
-                                const tr = $('<tr>');
+                                const tr = $('<tr>', {class: 'border-bottom', style: 'height: 50px'});
+                                const tdCheckBox = $('<td>').append(
+                                    $('<input>', {type: 'checkbox', checked: 'checked'})
+                                )
                                 const tdName = $('<td>', { text: period.name, style: 'font-weight: bold' });
-                                const tdStartDate = $('<td>', { text: 'Дата начала', style: 'text-align: center; font-weight: bold' });
+                                const tdStartDate = $('<td>', { text: 'Дата начала', style: 'text-align: center' });
                                 const tdStartDateInput = $('<td>').append(
                                     $('<input>', { class: 'input-main', type: 'date', value: RemakeDateFormatToInput(period.start_date) })
                                 );
-                                const tdEndDate = $('<td>', { text: 'Дата конца', style: 'text-align: center; font-weight: bold' });
+                                const tdEndDate = $('<td>', { text: 'Дата конца', style: 'text-align: center' });
                                 const tdEndDateInput = $('<td>').append(
                                     $('<input>', { class: 'input-main', type: 'date', value: RemakeDateFormatToInput(period.end_date) })
                                 );
 
-                                ownershipPeriodsRepository.push({ name: period.name, start_date: tdStartDateInput.find('input'), end_date: tdEndDateInput.find('input') });
+                                tr.on('click', function(e) {
+                                    if (e.target.nodeName == 'TD') {
+                                        tdCheckBox.find('input').trigger('click');
+                                    }
+                                })
 
-                                tr.append(tdName, tdStartDate, tdStartDateInput, tdEndDate, tdEndDateInput);
+                                ownershipPeriodsRepository.push({isSelected: tdCheckBox.find('input'), name: period.name, start_date: tdStartDateInput.find('input'), end_date: tdEndDateInput.find('input') });
+
+                                tr.append(tdCheckBox, tdName, tdStartDate, tdStartDateInput, tdEndDate, tdEndDateInput);
                                 tr.appendTo(table);
                             }
 
@@ -1567,19 +1638,28 @@ function clickDropdownMenu() {
                                     const ownershipPeriodsData = [];
 
                                     for (const period of ownershipPeriodsRepository) {
-                                        ownershipPeriodsData.push({ name: period.name, start_date: RemakeDateFormatFromInput(period.start_date.val()), end_date: RemakeDateFormatFromInput(period.end_date.val()) });
+                                        if (period.isSelected.prop('checked')) {
+                                            ownershipPeriodsData.push({ name: period.name, start_date: RemakeDateFormatFromInput(period.start_date.val()), end_date: RemakeDateFormatFromInput(period.end_date.val()) });
+                                        }
                                     }
 
                                     const data = { operation: 'get_report', report_data: reportData, ownership_periods: ownershipPeriodsData };
 
-                                    const callback = (data) => {
-                                        initializeReportNewWindow(data, repName, personName);
+                                    if (!isEmpty(ownershipPeriodsData)) {
+                                        const callback = (data) => {
+                                            initializeReportNewWindow(data, repName, personName);
+                                        }
+    
+                                        getReportContent(data, callback);
+                                    }
+                                    else {
+                                        showPopupNotification('alert', 'Выберите хотя бы один период!')
                                     }
 
-                                    getReportContent(data, callback);
                                 })
                             );
 
+                            popupContent.empty();
                             popupContent.append(table, button);
                         }
                         else {
@@ -2075,7 +2155,7 @@ function sendReportRange(repName, repNum, repType, accid, humanId, startDate, en
 
 function printReport() {
     var printWindow = window.open('', 'PRINT');
-    let printingContent = document.querySelector('#popup_report .popup-content').innerHTML;
+    let printingContent = document.querySelector('#popup_report .content').innerHTML;
     printWindow.document.write('<html><head><link href="/css/style_main_page.css" rel="stylesheet" type="text/css"><script src="/js/jquery-3.4.1.min.js"></script><script src="/js/print_report_page.js"></script>');
     printWindow.document.write('</head><body id="report_print">');
     printWindow.document.write(printingContent);
@@ -2087,7 +2167,7 @@ function printReport() {
 
 function printObjectsGroup() {
     var printWindow = window.open('', 'PRINT');
-    let printingContent = document.querySelector('#popup_objects_group .popup-content').innerHTML;
+    let printingContent = document.querySelector('#popup_objects_group .content').innerHTML;
     printWindow.document.write('<html><head><link href="/css/style_main_page.css" rel="stylesheet" type="text/css"><script src="/js/jquery-3.4.1.min.js"></script><script src="/js/print_objects_group_page.js"></script>');
     printWindow.document.write('</head><body id="report_print">');
     printWindow.document.write(printingContent);
@@ -2098,7 +2178,7 @@ function printObjectsGroup() {
 
 function printDocument() {
     var printWindow = window.open('', 'PRINT');
-    let printingContent = document.querySelector('#popup_company_document .popup-content').innerHTML;
+    let printingContent = document.querySelector('#popup_company_document .content').innerHTML;
     printWindow.document.write('<html><head><link href="/css/style_main_page.css" rel="stylesheet" type="text/css"><script src="/js/jquery-3.4.1.min.js"></script><script src="/js/print_objects_group_page.js"></script>');
     printWindow.document.write('</head><body id="report_print">');
     printWindow.document.write(printingContent);
@@ -2242,7 +2322,7 @@ function showTextCenter(parentDiv, text) {
 
 function createButtonToExport(callback) {
     if (!$('button').is('#export_button')) {
-        $('<button>', {id: 'export_button', text: 'Экспорт в XLSX'}).prependTo($('.popup-report-operation'));
+        $('<button>', {id: 'export_button', text: 'Экспорт в XLSX'}).prependTo($('.header-operation'));
     }
     callback();
 }
@@ -2664,7 +2744,7 @@ function addReport() {
         let encodeURIstring = encodeURI(`/report?multi=${fioValue}&rtype=${repType}&rnum=0&accid=${lsValue}&humanid=&dateb=${startDate}&datee=${endDate}`);
         $.get(encodeURIstring, function (data) {
             $('#popup_report .popup-name-fullscreen').text(repName);
-            $('#popup_report .popup-content').html(data);
+            $('#popup_report .content').html(data);
             openPopupWindow('popup_report');
         });
     }
@@ -3595,13 +3675,13 @@ function initializeProcessedFileTemplate(fileId, companyId, templateNum) {
 }
 
 function initializationPerformedFile(fileId, fileName) {
-    $('#popup_performed_file_template .popup-content').empty();
-    $('#popup_performed_file_template .popup-name').text(fileName);
+    $('#popup_performed_file_template .content').empty();
+    $('#popup_performed_file_template .name').text(fileName);
     $('#popup_performed_file_template, #popup_background').fadeIn(200);
-    createContentLoader('#popup_performed_file_template .popup-content');
+    createContentLoader('#popup_performed_file_template .content');
 
     $.post(`/base_func?val_param=document_rec&val_param1=${fileId}`, function (data) {
-        $('#popup_performed_file_template .popup-content').html(data);
+        $('#popup_performed_file_template .content').html(data);
     });
 }
 
@@ -4451,13 +4531,13 @@ function createRegistrySettingsPopup() {
     });
     
     function showObjectsGroup(name, objectsList) {
-        const popupContent = $('#popup_objects_group .popup-content');
+        const popupContent = $('#popup_objects_group .content');
         popupContent.empty();
-        $('#popup_objects_group .popup-name').html(`Группа объектов "${name}"`);
+        $('#popup_objects_group .name').html(`Группа объектов "${name}"`);
         openPopupWindow('popup_objects_group');
         createContentLoader(popupContent);
 
-        const content = $('<div>');
+        const content = $('<div>', {style: 'width: 100%'});
         
         $('<p>', {align: 'center', text: name, style: 'font-weight:bold'}).appendTo(content);
 
@@ -5133,6 +5213,9 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
 
             return tbody;
         }
+        else {
+            return '';
+        }
 
     }
 
@@ -5178,7 +5261,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
         // }
         if (documentType == 'print_registry') {
             $('<i>', {id: 'registry_printed_document_icon', class: 'material-icons', title: 'Напечатанный документ', text: 'event_note'}).on('click', () => {
-                createContentLoader('#popup_report .popup-content');
+                createContentLoader('#popup_report .content');
                 openPopupWindow('popup_report');
 
                 let dataObj={id: registryId}
@@ -5188,7 +5271,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                     data: JSON.stringify(dataObj),
                     contentType: 'application/json',
                     success: function(data) {
-                        $('#popup_report .popup-content').html(data);
+                        $('#popup_report .content').html(data);
                     }
                 });
             }).appendTo(headerManipulation);
@@ -5779,17 +5862,17 @@ function getCompanyDocument(funcName, documentName, parameters) {
     }
     
     function performAjax(funcName, documentName, parametersData) {
-        $('#popup_company_document .popup-content').empty();
-        $('#popup_company_document .popup-name').html(documentName);
+        $('#popup_company_document .content').empty();
+        $('#popup_company_document .name').html(documentName);
         openPopupWindow('popup_company_document');
-        createContentLoader('#popup_company_document .popup-content');
+        createContentLoader('#popup_company_document .content');
         $.ajax({
             type: 'POST',
             url: encodeURI(`/report_srv?attr=${funcName}`),
             data: JSON.stringify(parametersData),
             success: function(data) {
                 console.log(data)
-                $('#popup_company_document .popup-content').html(data);
+                $('#popup_company_document .content').html(data);
                 // data.appendTo('#popup_company_document .popup-content')
     
                 $('#document_convert_to_excel_btn').off('click');
@@ -5810,6 +5893,22 @@ function createPopupLayout(name, id) {
             )
         ),
         $('<div>', { class: 'popup-content' })
+    );
+
+    return popup;
+}
+
+function createPopupFullscreenLayout(name, id, contentStyle) {
+    const popup = $('<div>', {id: id, class: 'popup-fullscreen'}).append(
+        $('<div>', {class: 'background'}).append(
+            $('<div>', {class: 'header'}).append(
+                $('<div>', {class: 'name', text: name}),
+                $('<div>', {class: 'header-operation'}).append(
+                    $('<i>', {class: 'material-icons', title: 'Закрыть', text: 'close'}).on('click', () => {closePopupWindow(id)})
+                )
+            ),
+            $('<div>', {class: 'content'}).css(contentStyle)
+        )
     );
 
     return popup;
