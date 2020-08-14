@@ -1601,12 +1601,13 @@ function clickDropdownMenu() {
                     data: JSON.stringify({operation: "check", report_data: reportData}),
                     success: (data) => {
                         console.log(data);
-                        if (data !== 'error') {
+                        const periodsData = JSON.parse(data);
+                        if (data !== 'error' && !isEmpty(periodsData)) {
                             const ownershipPeriodsRepository = [];
 
                             const table = $('<table>', { class: 'table-form border-block-default' });
 
-                            for (const period of JSON.parse(data)) {
+                            for (const period of periodsData) {
                                 const tr = $('<tr>', {class: 'border-bottom', style: 'height: 50px'});
                                 const tdCheckBox = $('<td>').append(
                                     $('<input>', {type: 'checkbox', checked: 'checked'})
@@ -1663,7 +1664,8 @@ function clickDropdownMenu() {
                             popupContent.append(table, button);
                         }
                         else {
-                            $('<div>', {class: 'notification', text: 'Нет данных'}).appendTo(popupContent);
+                            popupContent.empty();
+                            $('<div>', {class: 'notification', text: 'Нет данных из Росреестра'}).appendTo(popupContent);
                         }
                     }
                 });
