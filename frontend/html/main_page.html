@@ -346,14 +346,14 @@
         </div>
 
         <div id="popup_object_history_settings" class="popup-fullscreen">
-            <div class="popup-background">
-                <div class="popup-header-fullscreen">
-                    <div class="popup-name">Настройки таблицы истории</div>
-                    <div class="popup-report-operation">
+            <div class="background">
+                <div class="header">
+                    <div class="name">Настройки таблицы истории</div>
+                    <div class="header-operation">
                         <i class="material-icons" title="Закрыть" onclick="closePopupWindow('popup_object_history_settings')">close</i>
                     </div>
                 </div>
-                <div class="popup-content">
+                <div class="content">
                     <div id="history_settings_content"></div>
                     <div class="content-center">
                         <button id="save_history_settings_btn" class="button-primary">Сохранить</button>
@@ -367,7 +367,7 @@
                 <div class="popup-name">Добавить договор</div>
                 <div class="popup-close" onclick="closePopupWindow('popup_add_agreement')"><i class="material-icons">close</i></div>
             </div>
-            <div class="popup-content">
+            <div class="content">
                 <form name="add_agreement">
                     <table class="table-form">
                         <tbody>
@@ -729,52 +729,50 @@
         </div>
 
         <div id="popup_report" class="popup-fullscreen">
-            <div class="popup-background">
-                <div class="popup-header-fullscreen">
-                    <div class="popup-name">Справка</div>
-                    <div class="popup-report-operation">
+            <div class="background">
+                <div class="header">
+                    <div class="name">Справка</div>
+                    <div class="header-operation">
                         <button class="button-primary" onclick="printReport()">Печать</button>
                         <i class="material-icons" title="Закрыть" onclick="closePopupWindow('popup_report')">close</i>
                     </div>
                 </div>
-                <div class="popup-content">
-                </div>
+                <div class="content"></div>
             </div>
         </div>
 
         <div id="popup_objects_group" class="popup-fullscreen">
-            <div class="popup-background">
-                <div class="popup-header-fullscreen">
-                    <div class="popup-name"></div>
-                    <div class="popup-report-operation">
+            <div class="background">
+                <div class="header">
+                    <div class="name"></div>
+                    <div class="header-operation">
                         <button class="button-primary" onclick="printObjectsGroup()">Печать</button>
                         <i class="material-icons" title="Закрыть" onclick="closePopupWindow('popup_objects_group')">close</i>
                     </div>
                 </div>
-                <div class="popup-content">
-                </div>
+                <div class="content"></div>
             </div>
         </div>
 
         <div id="popup_company_document" class="popup-fullscreen">
-            <div class="popup-background">
-                <div class="popup-header-fullscreen">
-                    <div class="popup-name"></div>
-                    <div class="popup-report-operation">
+            <div class="background">
+                <div class="header">
+                    <div class="name"></div>
+                    <div class="header-operation">
                         <button id="document_convert_to_excel_btn" class="excel-button" onclick="">Excel</button>
                         <button class="button-primary"  onclick="printDocument()">Печать</button>
                         <i class="material-icons" title="Закрыть" onclick="closePopupWindow('popup_objects_group')">close</i>
                     </div>
                 </div>
-                <div class="popup-content"></div>
+                <div class="content"></div>
             </div>
         </div>
 
         <div id="popup_processed_file_template" class="popup-fullscreen">
-            <div class="popup-background">
-                <div class="popup-header-fullscreen">
-                    <div class="popup-name"></div>
-                    <div class="popup-report-operation">
+            <div class="background">
+                <div class="header">
+                    <div class="name"></div>
+                    <div class="header-operation">
                         <i class="material-icons" title="Закрыть" onclick="closePopupWindowWithConfirm('popup_processed_file_template')">close</i>
                     </div>
                 </div>
@@ -792,14 +790,14 @@
         </div>
 
         <div id="popup_performed_file_template" class="popup-fullscreen">
-            <div class="popup-background">
-                <div class="popup-header-fullscreen">
-                    <div class="popup-name"></div>
-                    <div class="popup-report-operation">
+            <div class="background">
+                <div class="header">
+                    <div class="name"></div>
+                    <div class="header-operation">
                         <i class="material-icons" title="Закрыть" onclick="closePopupWindow('popup_performed_file_template')">close</i>
                     </div>
                 </div>
-                <div class="popup-content"></div>
+                <div class="content"></div>
             </div>
         </div>
 
@@ -874,7 +872,7 @@
                 <button class="tab-button active" onclick="openTab('profile_tabs', this, 'profile_settings')">Настройки</button>
             </div>
             <div id="profile_tabs_area">
-                <div class="popup-background-with-tabs">
+                <div class="background">
                     <div id="profile_tabs_content" class="tabs-content">
                         <div id="profile_settings" class="tab-content flex active"></div>
                     </div>
@@ -907,7 +905,7 @@
                     <button class="tab-button" onclick="openTab('control_tabs', this,'control_object_groups')">Группы объектов</button>
 
                 </div>
-                <div class="popup-background-with-tabs">
+                <div class="background">
                     <div id="control_tabs_content" class="tabs-content">
                         <div id="control_reports" class="tab-content active">
                             <div id="reports_list">
