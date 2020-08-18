@@ -187,3 +187,14 @@ button {
     /* background-color: #D9E0E3; */
     border: 1px solid gray;
 }
+
+.report-content table {
+    width: 100%;
+    border-collapse: collapse;
+    page-break-after: always;
+}
+
+.report-content table td,
+.report-content table th {
+    border: 1px solid gray;
+}

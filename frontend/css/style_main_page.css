@@ -1970,6 +1970,16 @@ td.add-template-adress {
     text-align: justify;
 }
 
+.report-content table {
+    border-collapse: collapse; 
+    width: 100%; 
+}
+
+.report-content table th,
+.report-content table td {
+    border: 1px solid black;
+}
+
 .report-content.break-afrer {
     page-break-after: always;
 }
