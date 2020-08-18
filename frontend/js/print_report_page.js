@@ -9,7 +9,7 @@ $(document).ready(function () {
         $('#report_print').html(`<table id="printing_content"><tbody><tr><td>${$('#report_print').html()}</td></tr></tbody>${tableFooter}</table>`);
     }
 
-    // window.print();
-    // setTimeout(function () { window.close(); }, 10);
+    window.print();
+    setTimeout(function () { window.close(); }, 10);
 
 });
