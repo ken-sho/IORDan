@@ -1049,33 +1049,34 @@ function createObjectsTree(objectsList) {
 
 function initializeObjectsTreeFilters() {
     const filters = OBJECTS_TREE_DATA.filters;
+    console.log(filters)
     const selectedFilters = [];
     $('#object_list_template').empty();
 
-    const filtersListDiv = $('<div>', {class: 'border-block-default', style: 'padding: 0px 5px;'});
     if (filters !== null) {
-        for (const filter of filters) {
-            const input = $('<input>', { type: 'checkbox', class: 'checkbox' }).on('change', () => {
-                const isSelected = input.prop('checked');
-                if (isSelected) {
-                    selectedFilters.push(filter.value)
-                }
-                else {
-                    selectedFilters.pop(filter.value);
-                }
-            });
-            const span = $('<span>', { class: 'checkmark' });
-            const label = $('<label>', { class: 'checkbox-container', text: filter.name, style: 'font-size: 16px' }).append(input, span);
-            const div = $('<div>').append(label);
-            div.appendTo(filtersListDiv);
+        for (const filterBlock of filters) {
+            const filtersListDiv = $('<div>', { class: 'border-block-default' });
+            for (const filter of filterBlock) {
+                const input = $('<input>', { type: 'checkbox', class: 'checkbox' }).on('change', () => {
+                    const isSelected = input.prop('checked');
+                    if (isSelected) {
+                        selectedFilters.push(filter.value)
+                    }
+                    else {
+                        selectedFilters.pop(filter.value);
+                    }
+                });
+                const span = $('<span>', { class: 'checkmark' });
+                const label = $('<label>', { class: 'checkbox-container', text: filter.name, style: 'font-size: 16px' }).append(input, span);
+                const div = $('<div>').append(label);
+                div.appendTo(filtersListDiv);
+            }
+            filtersListDiv.appendTo('#object_list_template');
         }
-
-        filtersListDiv.appendTo('#object_list_template');
-
     }
 
     const inputStyle = 'width: 60px; text-align: center; margin: 0px 5px';
-    const filterSumDiv = $('<div>', {class: 'border-block-default', style: 'padding: 5px; margin-top: 20px'});
+    const filterSumDiv = $('<div>', {class: 'border-block-default'});
     const fromInput = $('<input>', {type: 'text', class: 'input-main', style: inputStyle});
     const toInput = $('<input>', {type: 'text', class: 'input-main', style: inputStyle});
     filterSumDiv.append('Сумма от', fromInput, 'до', toInput, 'руб.');
@@ -1470,7 +1471,7 @@ function changeObjectReputation(elem) {
 function initializeOfficeAdministration() {
     const popupId = 'popup_office_administration';
     $(`#${popupId}, #office_administration_icon`).remove();
-    const popupLayout = createPopupFullscreenLayout(`Делопроизводство: ${CURRENT_OBJECT_DATA.adress} - ${CURRENT_OBJECT_DATA.apartNum}`, popupId, {'display' : 'flex', 'justify-content' : 'space-around'});
+    const popupLayout = createPopupFullscreenLayout(`Делопроизводство: ${CURRENT_OBJECT_DATA.adress}`, popupId, {'display' : 'flex', 'justify-content' : 'space-around'});
     popupLayout.appendTo('#popup_background');
     const icon = $('<div>', {id: 'office_administration_icon', class: 'icon-with-count'}).append(
         $('<i>', {class: 'material-icons', title: 'Делопроизводство', text: 'description' }).on('click', () => {
@@ -1485,39 +1486,89 @@ function initializeOfficeAdministration() {
 
     const blockContent = popupLayout.find('.content');
 
-    $('<div>', {class: 'main-list'}).append(
-        $('<ul>').append(
-            $('<li>').append(
-                $('<a>').append(
-                    $('<span>', {text: 'Соглашения о рассрочке'})
-                )
-            ),
-            $('<li>').append(
-                $('<a>').append(
-                    $('<span>', {text: 'Судебное производство'})
-                )
-            ),
-            $('<li>').append(
-                $('<a>').append(
-                    $('<span>', {text: 'Исполнительное производство'})
-                )
+    const registryUl = $('<ul>').append(
+        $('<li>').append(
+            $('<a>').append(
+                $('<span>', { text: 'Соглашения о рассрочке' })
             )
-        )
+        ).on('click', function () { showRegistryTable(this, 'enforcement_proceedings') }),
+        $('<li>').append(
+            $('<a>').append(
+                $('<span>', { text: 'Судебное производство' })
+            )
+        ).on('click', function () { showRegistryTable(this, 'installment_agreements') }),
+        $('<li>').append(
+            $('<a>').append(
+                $('<span>', { text: 'Исполнительное производство' })
+            )
+        ).on('click', function () { showRegistryTable(this, 'judicial_proceedings') })
+    )
+
+    $('<div>', {class: 'main-list'}).append(
+        registryUl
     ).appendTo(blockContent);
-    $('<div>', {class: 'main-content'}).append(
+
+    const registryNode = $('<div>', {class: 'main-content'}).append(
         $('<div>', {class: 'block'}).append(
-            $('<div>', {class: 'block-header-with-manipulation'}),
+            $('<div>', {class: 'block-header-with-manipulation'}).append(
+                $('<div>', {class: 'header-manipulation'})
+            ),
             $('<div>', {class: 'block-content no-padding'}).append(
                 $('<span>', {class: 'text-center-small', text: 'Выберите реестр из списка'})
             )
         )
     ).appendTo(blockContent);
 
-    // const blocksStyle = { 'width': 'calc(100% / 3 - 5px)'};
-    // const installmentAgreementsBlock = createContentBlock('Соглашения о рассрочке', blocksStyle);
-    // const judicialProceedingsBlock = createContentBlock('Судебное производство', blocksStyle);
-    // const enforcementProceedingsBlock = createContentBlock('Исполнительное производство', blocksStyle);
-    // blockContent.append(installmentAgreementsBlock, judicialProceedingsBlock, enforcementProceedingsBlock);
+    function showRegistryTable(liElem, registryName) {
+        const addEntryPopupId = 'popup_office_administration_add_registry';
+        $('#popup_office_administration_add_registry').remove();
+        registryUl.find('li').removeClass('active');
+        $(liElem).addClass('active');
+
+        const addEntryPopup = createPopupLayoutLayer2('Добавить запись в реестр', addEntryPopupId).appendTo('#popup_background_layer2');
+        addEntryPopup.css({'max-width': '99%'})
+        const addEntryTable = createAddRegistryEntryTable(OBJECT_DATA.office_administration[registryName].thead);
+        const addEntryBtn = $('<div>', { class: 'form-submit-btn' }).append(
+            $('<button>', { class: 'button-primary', text: 'Добавить' }).on('click', () => {
+                const validateinputsArray = [];
+                const dataObj = {};
+                const inputsCollection = addEntryTable.find('input');
+
+                for (const input of inputsCollection) {
+                    const inputName = $(input).prop('name');
+                    validateinputsArray.push($(input))
+
+                    dataObj[inputName] = $(input).val();
+                }
+
+                if (validateFormInputs(validateinputsArray)) {
+                    console.log(dataObj)
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/base_func?fnk_name=office_administration_add_entry",
+                        data: JSON.stringify({accid: CURRENT_OBJECT_DATA.accid, data: dataObj}),
+                        success: function (data) {
+                            console.log(data);
+                        }
+                    });
+                }
+            })
+        );
+
+        addEntryPopup.find('.popup-content').append(addEntryTable, addEntryBtn)
+
+        if (!$('#office_administration_add_registry').length) {
+            const addRegistryBtn = $('<button>', {id: 'office_administration_add_registry', class: 'button-primary', title: 'Добавить запись в реестр', text: 'Добавить запись'}).on('click', () => {
+                openPopupWindowLayer2(addEntryPopupId);
+            }).appendTo(registryNode.find('.header-manipulation'));
+        }
+
+
+        const table = createRegistryTable(OBJECT_DATA.office_administration[registryName]);
+
+        registryNode.find('.block-content').html(table);
+    }
 }
 
 function refreshObjectData(callback) {
@@ -2614,10 +2665,10 @@ function editObjectInfo() {
 
 function addNewContact() {
     event.preventDefault();
-    let accid = CURRENT_OBJECT_DATA.accid;
+    const accid = CURRENT_OBJECT_DATA.accid;
     let contactName, humanId;
-    let number = $('#add_contact_phone_number').val();
-    let contactType = $('#add_contact_phone_type').val();
+    const number = $('#add_contact_phone_number').val();
+    const contactType = $('#add_contact_phone_type').val();
 
     if ($('input[name="contact"]:checked').val() == 'no') {
         contactName = $('#add_contact_select').val();
@@ -2657,6 +2708,7 @@ function addNewContact() {
         $.post(encodeURIstring, function (data) {
             if (data == 'success') {
                 refreshObjectData([getObjectContactsData]);
+                $('#add_contact_phone_number, #add_contact_name').val('');
                 showPopupNotification('notification', 'Контакт успешно добавлен!')
             }
         });
@@ -2889,135 +2941,140 @@ function getObjectHistoryData(callback) {
 }
 
 function createObjectHistoryTable(data) {
-    const table = $('<table>', { id: 'history_table', class: 'main-table' }).append(
-        $('<thead>').append(
-            $('<tr>')
-        ),
-        $('<tbody>')
-    );
+    if (data !== null) {
+        const table = $('<table>', { id: 'history_table', class: 'main-table' }).append(
+            $('<thead>').append(
+                $('<tr>')
+            ),
+            $('<tbody>')
+        );
 
-    for (const th of data.header) {
-        const isEditable = (th.editable == 'true');
-        const isHidden = (th.hidden == 'true');
-        
-        const thElem = $('<th>', {text: th.name});
-        
-        if (isEditable) {
-            $('<i>', {class: 'material-icons th-icon', text: 'edit', title: 'Редактируемый столбец'}).appendTo(thElem);
-        }
+        for (const th of data.header) {
+            const isEditable = (th.editable == 'true');
+            const isHidden = (th.hidden == 'true');
 
-        thElem.appendTo(table.find('thead tr'));
+            const thElem = $('<th>', { text: th.name });
 
-        if(isHidden) {
-            thElem.hide();
-        }
-    }
-
-    for (const row of data.body) {
-        const tr = $('<tr>');
-        $('<td>', {text: row.name}).appendTo(tr);
-        for (const elem in row.data) {
-            const isHidden = (row.hidden == 'true');
-            
-            if (isHidden) {
-                tr.hide();
+            if (isEditable) {
+                $('<i>', { class: 'material-icons th-icon', text: 'edit', title: 'Редактируемый столбец' }).appendTo(thElem);
             }
-            else {
-                const isEditable = (data.header[Number(elem) + 1].editable == 'true');
 
-                const tdElem = $('<td>');
+            thElem.appendTo(table.find('thead tr'));
 
-                if (isEditable) {
-                    tdElem.css({'padding':'0'});
-                    const input = $('<input>', {type: 'text', service: row.name}).appendTo(tdElem);
-                    input.val(row.data[elem]);
-                    
-                    input.keypress((event) => {
-                        if (event.code == 'Enter') {
-                            sendHistoryTableServicePayment(row.name, input.val(), CURRENT_OBJECT_DATA.accid);
-                        }
-                    });
+            if (isHidden) {
+                thElem.hide();
+            }
+        }
+
+        for (const row of data.body) {
+            const tr = $('<tr>');
+            $('<td>', { text: row.name }).appendTo(tr);
+            for (const elem in row.data) {
+                const isHidden = (row.hidden == 'true');
+
+                if (isHidden) {
+                    tr.hide();
                 }
                 else {
-                    tdElem.text(row.data[elem]);
-                }
-                tdElem.appendTo(tr);
-                
-                const isHidden = (data.header[Number(elem) + 1].hidden == 'true');
-                
-                if (isHidden) {
-                    tdElem.hide();
+                    const isEditable = (data.header[Number(elem) + 1].editable == 'true');
+
+                    const tdElem = $('<td>');
+
+                    if (isEditable) {
+                        tdElem.css({ 'padding': '0' });
+                        const input = $('<input>', { type: 'text', service: row.name }).appendTo(tdElem);
+                        input.val(row.data[elem]);
+
+                        input.keypress((event) => {
+                            if (event.code == 'Enter') {
+                                sendHistoryTableServicePayment(row.name, input.val(), CURRENT_OBJECT_DATA.accid);
+                            }
+                        });
+                    }
+                    else {
+                        tdElem.text(row.data[elem]);
+                    }
+                    tdElem.appendTo(tr);
+
+                    const isHidden = (data.header[Number(elem) + 1].hidden == 'true');
+
+                    if (isHidden) {
+                        tdElem.hide();
+                    }
                 }
             }
+
+            tr.appendTo(table);
         }
 
-        tr.appendTo(table);
-    }
+        const footerTr = $('<tr>', { class: 'tr-bold' });
+        $('<td>', { text: data.footer.name }).appendTo(footerTr);
 
-    const footerTr = $('<tr>', {class: 'tr-bold'});
-    $('<td>', {text: data.footer.name}).appendTo(footerTr);
+        for (const elem in data.footer.data) {
+            const isEditable = (data.header[Number(elem) + 1].editable == 'true');
 
-    for (const elem in data.footer.data) {
-        const isEditable = (data.header[Number(elem) + 1].editable == 'true');
+            const tdElem = $('<td>');
 
-        const tdElem = $('<td>');
+            if (isEditable) {
+                tdElem.css({ 'padding': '0' });
+                const input = $('<input>', { type: 'text', service: data.footer.name }).appendTo(tdElem);
+                input.val(data.footer.data[elem]);
 
-        if (isEditable) {
-            tdElem.css({'padding':'0'});
-            const input = $('<input>', {type: 'text', service: data.footer.name}).appendTo(tdElem);
-            input.val(data.footer.data[elem]);
+                input.keypress((event) => {
+                    if (event.key == 'Enter') {
+                        sendHistoryTableServicePayment(data.footer.name, input.val(), CURRENT_OBJECT_DATA.accid);
 
-            input.keypress((event) => {
-                if (event.key == 'Enter') {
-                    sendHistoryTableServicePayment(data.footer.name, input.val(), CURRENT_OBJECT_DATA.accid);
+                    }
+                });
+            }
+            else {
+                tdElem.text(data.footer.data[elem]);
+            }
+            tdElem.appendTo(footerTr);
 
+            const isHidden = (data.header[Number(elem) + 1].hidden == 'true');
+
+            if (isHidden) {
+                tdElem.hide();
+            }
+
+            footerTr.appendTo(table);
+        }
+
+
+        $('#obj_main_table').html(table);
+        if ($('#history_calendar').is(':hidden')) $('#history_calendar').show();
+
+        function sendHistoryTableServicePayment(service, value, accid) {
+            const objectData = { accid: accid, service: service, value: value, date: getCalendarValue('main_calendar') };
+            console.log(objectData)
+            $.ajax({
+                type: 'POST',
+                url: '/base_func?fnk_name=chg_history_foropl',
+                data: JSON.stringify(objectData),
+                success: (data) => {
+                    getObjectHistoryData([refreshHistoryTableServicePayments])
                 }
             });
         }
-        else {
-            tdElem.text(data.footer.data[elem]);
-        }
-        tdElem.appendTo(footerTr);
 
-        const isHidden = (data.header[Number(elem) + 1].hidden == 'true');
-
-        if (isHidden) {
-            tdElem.hide();
-        }
-
-        footerTr.appendTo(table);
-    }
-
-
-    $('#obj_main_table').html(table);
-    if ($('#history_calendar').is(':hidden')) $('#history_calendar').show();
-
-    function sendHistoryTableServicePayment(service, value, accid) {
-        const objectData = {accid: accid, service: service, value: value, date: getCalendarValue('main_calendar')};
-        console.log(objectData)
-        $.ajax({
-            type: 'POST',
-            url: '/base_func?fnk_name=chg_history_foropl',
-            data: JSON.stringify(objectData),
-            success: (data) => {
-                getObjectHistoryData([refreshHistoryTableServicePayments])
+        function refreshHistoryTableServicePayments(tableData) {
+            let tdIndex;
+            for (const th in tableData.header) {
+                if (tableData.header[th].name == 'К оплате') tdIndex = th;
             }
-        });
+            console.log(tdIndex);
+
+            for (const elem of tableData.body) {
+                console.log(elem.data[tdIndex - 1]);
+                $(`#history_table input[service='${elem.name}']`).val(elem.data[tdIndex - 1]);
+            }
+
+            $(`#history_table input[service='${tableData.footer.name}']`).val(tableData.footer.data[tdIndex - 1]);
+        }
     }
-
-    function refreshHistoryTableServicePayments(tableData) {
-        let tdIndex;
-        for (const th in tableData.header) {
-            if (tableData.header[th].name == 'К оплате') tdIndex = th;
-        }
-        console.log(tdIndex);
-
-        for (const elem of tableData.body) {
-            console.log(elem.data[tdIndex - 1]);
-            $(`#history_table input[service='${elem.name}']`).val(elem.data[tdIndex - 1]);
-        }
-
-        $(`#history_table input[service='${tableData.footer.name}']`).val(tableData.footer.data[tdIndex - 1]);
+    else {
+        showTextCenter('obj_main_table', 'Нет данных');
     }
 }
 
@@ -3980,6 +4037,8 @@ function mainSearchKeyup(inputId, menuId) {
                         $('#obj_agreements_btn, #obj_owners_btn').prop('disabled', false);
 
                         CURRENT_OBJECT_DATA.accid = accid;
+                        // CURRENT_OBJECT_DATA.apartNum = $(this).text();
+                        CURRENT_OBJECT_DATA.adress = adress;
                         getObjectData();
                         $('#obj_adress').text(adress);
                         if ($('#obj_info .header-manipulation').is(':hidden')) {
@@ -4685,7 +4744,9 @@ function getRegistryList(callback) {
                         'discounts': 'Скидки',
                         'print_registry': 'Реестр массовой печати',
                         'pay_storno': 'Возврат',
-                        'debit_act': 'Акт списания'
+                        'debit_act': 'Акт списания',
+                        'm26archive': '26 макета',
+                        'm83archive': '83 макета'
                     };
 
                     const type = registryTypes[registry.doc_type];
@@ -4895,38 +4956,83 @@ function initializeRegistrySettings(registryId, theadData, rowsPerPage, document
 }
 
 function initializeAccountHistorySettings(tableData) {
-    console.log(tableData)
-    let changedSettingsObj = {};
-
     $('#history_settings_content').empty();
-    const divColumn = $('<div>');
-    $('<h3>', {text: 'Отображение столбцов', style: 'text-align: center'}).appendTo(divColumn);
-    const tableColumn = $('<table>', {id: 'history_column_settings_table', class: 'table-form table-settings'});
+    if (tableData !== null) {
+        let changedSettingsObj = {};
 
-    $('<tr>').append(
-        $('<th>', {text: 'Столбец'}),
-        $('<th>', {text: 'Отображение'})
-    ).appendTo(tableColumn);
+        const divColumn = $('<div>');
+        $('<h3>', { text: 'Отображение столбцов', style: 'text-align: center' }).appendTo(divColumn);
+        const tableColumn = $('<table>', { id: 'history_column_settings_table', class: 'table-form table-settings' });
 
-    for (const elem of tableData.header) {
-        const isHidden = (elem.hidden == 'true');
-        const tr = $('<tr>');
-        $('<td>', {text: elem.name}).appendTo(tr);
-        const td = $('<td>').appendTo(tr);
-        if (elem.name !== 'Услуга') {
+        $('<tr>').append(
+            $('<th>', { text: 'Столбец' }),
+            $('<th>', { text: 'Отображение' })
+        ).appendTo(tableColumn);
+
+        for (const elem of tableData.header) {
+            const isHidden = (elem.hidden == 'true');
+            const tr = $('<tr>');
+            $('<td>', { text: elem.name }).appendTo(tr);
+            const td = $('<td>').appendTo(tr);
+            if (elem.name !== 'Услуга') {
+                const div = $('<div>', { style: 'width: max-content; margin: auto' }).appendTo(td);
+                const labelOn = $('<label>', { class: 'checkbox-container', text: 'Вкл.', style: 'float: left; margin-right: 10px; display: block; text-align: center' }).appendTo(div);
+                const inputOn = $('<input>', { class: 'checkbox', type: 'checkbox', value: 'on', setting_type: 'column', setting_name: elem.name }).appendTo(labelOn);
+                $('<span>', { class: 'checkmark' }).appendTo(labelOn);
+
+                addSettingChangeToObj(changedSettingsObj, inputOn, `column_${elem.name}`, isHidden);
+
+                const labelOff = $('<label>', { class: 'checkbox-container', text: 'Выкл.', style: 'float: left; margin-right: 10px; display: block; text-align: center' }).appendTo(div);
+                const inputOff = $('<input>', { class: 'checkbox', type: 'checkbox', value: 'off', setting_type: 'column', setting_name: elem.name }).appendTo(labelOff);
+                $('<span>', { class: 'checkmark' }).appendTo(labelOff);
+
+                addSettingChangeToObj(changedSettingsObj, inputOff, `column_${elem.name}`, isHidden);
+
+
+                if (isHidden) {
+                    inputOff.prop('checked', true);
+                }
+                else {
+                    inputOn.prop('checked', true);
+                }
+
+                addEventOnOffToggle(inputOn, inputOff);
+            }
+
+            tr.appendTo(tableColumn);
+        }
+
+        tableColumn.appendTo(divColumn);
+
+        divColumn.appendTo('#history_settings_content');
+
+        const divService = $('<div>');
+        $('<h3>', { text: 'Отображение услуг', style: 'text-align: center' }).appendTo(divService);
+        const tableService = $('<table>', { id: 'history_service_settings_table', class: 'table-form table-settings' });
+
+        $('<tr>').append(
+            $('<th>', { text: 'Услуга' }),
+            $('<th>', { text: 'Отображение' })
+        ).appendTo(tableService);
+
+        for (const elem of tableData.body) {
+            const isHidden = (elem.hidden == 'true');
+            const tr = $('<tr>');
+            $('<td>', { text: elem.name }).appendTo(tr);
+            const td = $('<td>').appendTo(tr);
             const div = $('<div>', { style: 'width: max-content; margin: auto' }).appendTo(td);
             const labelOn = $('<label>', { class: 'checkbox-container', text: 'Вкл.', style: 'float: left; margin-right: 10px; display: block; text-align: center' }).appendTo(div);
-            const inputOn = $('<input>', { class: 'checkbox', type: 'checkbox', value: 'on', setting_type: 'column', setting_name: elem.name }).appendTo(labelOn);
+            const inputOn = $('<input>', { class: 'checkbox', type: 'checkbox', value: 'on', setting_type: 'service', setting_name: elem.name }).appendTo(labelOn);
             $('<span>', { class: 'checkmark' }).appendTo(labelOn);
 
-            addSettingChangeToObj(changedSettingsObj, inputOn, `column_${elem.name}`, isHidden);
+            addSettingChangeToObj(changedSettingsObj, inputOn, `service_${elem.name}`, elem.hidden);
+
 
             const labelOff = $('<label>', { class: 'checkbox-container', text: 'Выкл.', style: 'float: left; margin-right: 10px; display: block; text-align: center' }).appendTo(div);
-            const inputOff = $('<input>', { class: 'checkbox', type: 'checkbox', value: 'off', setting_type: 'column', setting_name: elem.name }).appendTo(labelOff);
+            const inputOff = $('<input>', { class: 'checkbox', type: 'checkbox', value: 'off', setting_type: 'service', setting_name: elem.name }).appendTo(labelOff);
             $('<span>', { class: 'checkmark' }).appendTo(labelOff);
 
-            addSettingChangeToObj(changedSettingsObj, inputOff, `column_${elem.name}`, isHidden);
-
+            addSettingChangeToObj(changedSettingsObj, inputOff, `service_${elem.name}`, isHidden);
 
             if (isHidden) {
                 inputOff.prop('checked', true);
@@ -4936,69 +5042,25 @@ function initializeAccountHistorySettings(tableData) {
             }
 
             addEventOnOffToggle(inputOn, inputOff);
+
+            tr.appendTo(tableService);
         }
 
-        tr.appendTo(tableColumn);
+        tableService.appendTo(divService);
+
+        divService.appendTo('#history_settings_content');
+
+        $('#save_history_settings_btn').off('click');
+        $('#save_history_settings_btn').on('click', function () {
+            let changedSettingsArr = [];
+
+            for (const setting in changedSettingsObj) {
+                changedSettingsArr.push(changedSettingsObj[setting]);
+            }
+
+            sendAccountHistorySettings(changedSettingsArr);
+        });
     }
-
-    tableColumn.appendTo(divColumn);
-
-    divColumn.appendTo('#history_settings_content');
-
-    const divService = $('<div>');
-    $('<h3>', {text: 'Отображение услуг', style: 'text-align: center'}).appendTo(divService);
-    const tableService = $('<table>', {id: 'history_service_settings_table', class: 'table-form table-settings'});
-
-    $('<tr>').append(
-        $('<th>', {text: 'Услуга'}),
-        $('<th>', {text: 'Отображение'})
-    ).appendTo(tableService);
-
-    for (const elem of tableData.body) {
-        const isHidden = (elem.hidden == 'true');
-        const tr = $('<tr>');
-        $('<td>', {text: elem.name}).appendTo(tr);
-        const td = $('<td>').appendTo(tr);
-        const div = $('<div>', {style: 'width: max-content; margin: auto'}).appendTo(td);
-        const labelOn = $('<label>', {class: 'checkbox-container', text: 'Вкл.', style: 'float: left; margin-right: 10px; display: block; text-align: center'}).appendTo(div);
-        const inputOn = $('<input>', {class: 'checkbox', type: 'checkbox', value: 'on', setting_type: 'service', setting_name: elem.name}).appendTo(labelOn);
-        $('<span>', {class: 'checkmark'}).appendTo(labelOn);
-
-        addSettingChangeToObj(changedSettingsObj, inputOn, `service_${elem.name}`, elem.hidden);
-
-
-        const labelOff = $('<label>', {class: 'checkbox-container', text: 'Выкл.', style: 'float: left; margin-right: 10px; display: block; text-align: center'}).appendTo(div);
-        const inputOff = $('<input>', {class: 'checkbox', type: 'checkbox',  value: 'off', setting_type: 'service', setting_name: elem.name}).appendTo(labelOff);
-        $('<span>', {class: 'checkmark'}).appendTo(labelOff);
-
-        addSettingChangeToObj(changedSettingsObj, inputOff, `service_${elem.name}`, isHidden);
-
-        if (isHidden) {
-            inputOff.prop('checked', true);
-        }
-        else {
-            inputOn.prop('checked', true);
-        }
-
-        addEventOnOffToggle(inputOn, inputOff);
-
-        tr.appendTo(tableService);
-    }
-
-    tableService.appendTo(divService);
-
-    divService.appendTo('#history_settings_content');
-
-    $('#save_history_settings_btn').off('click');
-    $('#save_history_settings_btn').on('click', function() {
-        let changedSettingsArr = [];
-
-        for (const setting in changedSettingsObj) {
-            changedSettingsArr.push(changedSettingsObj[setting]);
-        }
-
-        sendAccountHistorySettings(changedSettingsArr);
-    });
 }
 
 function addEventOnOffToggle(inputOn, inputOff) {
@@ -5057,7 +5119,7 @@ function getRegistryData(registryId, registryName, registryType, documentType) {
 }
 
 function displayRegistry(data, registryId, registryName, registryType, documentType) {
-    const {thead, tbody, tfooter, blocked, rows_per_page} = data
+    const {thead, tbody, tfooter, blocked, rows_per_page} = data;
 
     const registryIsBlocked = (blocked == 'true');
 
@@ -5338,6 +5400,118 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
 
         convertContentToExcel(convertibleContent.html(), fileName);
     });
+}
+
+function createRegistryTable(data) {
+    const {thead, tbody, tfooter, blocked, rows_per_page} = data;
+
+    const table = $('<table>', {class: 'main-table'}).append(
+        $('<thead>').append(
+            $('<tr>')
+        ),
+        $('<tbody>')
+    );
+
+    for (const th of thead) {
+        const thElem = $('<th>', {text: th.name}).appendTo(table.find('thead tr'));
+    }
+
+    console.log(tbody)
+
+    if (!isEmpty(tbody)) {
+
+        for (const entry of tbody) {
+            const tr = $('<tr>');
+
+            for (const index in entry.data) {
+                const td = $('<td>', { text: entry.data[index] }).appendTo(tr);
+
+                const isHidden = (thead[index].hidden == 'true');
+
+                if (isHidden) {
+                    td.css({ 'display': 'none' });
+                }
+            }
+
+            tr.appendTo(table.find('tbody'));
+        }
+
+    }
+
+    if (!isEmpty(tfooter)) {
+        for (const row of tfooter) {
+            const tr = $('<tr>');
+            for (const index in row) {
+                const tdElem = $('<td>', { class: 'table-tfoot-td', text: row[index] }).appendTo(tr);
+
+                const isHidden = (thead[index].hidden == 'true');
+
+                if (isHidden) {
+                    tdElem.css({ 'display': 'none' });
+                }
+            }
+
+            tr.appendTo(table.find('tbody'));
+        }
+    }
+
+    return table;
+}
+
+function createAddRegistryEntryTable(data) {
+    const table = $('<table>', { id: 'add_registry_entry_table', class: 'main-table' }).append(
+        $('<tr>'),
+        $('<tr>'),
+        $('<tr>'),
+        $('<tr>'),
+        $('<tr>'),
+        $('<tr>')
+    );
+
+    const firstRowElems = ['ЛС', 'Месяц', 'Год', 'Номер платёжки', 'Дата платёжки', 'Примечание'];
+
+    for (const th of data) {
+        const thElem = $('<th>', {text: th.name}).appendTo(table.find('thead tr'));
+
+        const isHidden = (th.hidden == 'true');
+
+        if(isHidden) {
+            thElem.css({'display': 'none'});
+        }
+        else {
+            if (inObject(th.name, firstRowElems)) {
+                if (th.name == 'Примечание') {
+                    $('<td>', {text: th.name, colspan: data.length - 4, class: 'td-bold'}).appendTo(table.find('tr:nth-child(1)'));
+                    $('<td>', {colspan: data.length - 4}).append(
+                        $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
+                    ).appendTo(table.find('tr:nth-child(2)'));
+                }
+                else {
+                    $('<td>', {text: th.name, class: 'td-bold'}).appendTo(table.find('tr:nth-child(1)'));
+                    $('<td>').append(
+                        $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
+                    ).appendTo(table.find('tr:nth-child(2)'));
+                }
+            }
+            else if (th.name == 'Итого') {
+                $('<td>', {text: `Итого`, colspan: data.length, class: 'td-bold'}).appendTo(table.find('tr:nth-child(5)'));
+                $('<td>', {colspan: data.length}).append(
+                    $('<input>', {id: 'add_entry_total_sum', type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
+                ).appendTo(table.find('tr:nth-child(6)'));
+            }
+            else {
+                if (th.name !== 'Автор' && th.name !== 'Адрес') {
+                    $('<td>', {text: th.name, class: 'td-bold'}).appendTo(table.find('tr:nth-child(3)'));
+                    $('<td>').append(
+                        $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
+                    ).appendTo(table.find('tr:nth-child(4)'));
+                }
+            }
+        }
+
+    }
+
+    return table;
 }
 
 function openAddRegistryEntryPopup(registryId, registryName, registryType, documentType) {
@@ -5892,6 +6066,20 @@ function createPopupLayout(name, id) {
             $('<div>', { class: 'popup-name', text: name }),
             $('<div>', { class: 'popup-close' }).append(
                 $('<i>', { class: 'material-icons', title: 'Закрыть', text: 'close'}).on('click', () => {closePopupWindow(id)})
+            )
+        ),
+        $('<div>', { class: 'popup-content' })
+    );
+
+    return popup;
+}
+
+function createPopupLayoutLayer2(name, id) {
+    const popup = $('<div>', { id: id, class: 'popup-window-layer2' }).append(
+        $('<div>', { class: 'popup-header' }).append(
+            $('<div>', { class: 'popup-name', text: name }),
+            $('<div>', { class: 'popup-close' }).append(
+                $('<i>', { class: 'material-icons', title: 'Закрыть', text: 'close'}).on('click', () => {closePopupWindowLayer2(id)})
             )
         ),
         $('<div>', { class: 'popup-content' })

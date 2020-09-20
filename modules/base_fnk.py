@@ -69,7 +69,8 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         for row in cur:
             res=(row[0])
     elif fnk_name=='adr_info':
-        q_sql = "select main.adr_info('','"+ adate +"')"
+        q_sql = "select main.adr_info('"+ asid +"','"+ orgid +"','"+ adate +"')"
+        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])

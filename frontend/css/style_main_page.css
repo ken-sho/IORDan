@@ -494,8 +494,7 @@ nav ul, nav li {
     padding-bottom: 10px;
     width: 100%;
     box-sizing: border-box;
-    height: 100%;
-    max-height: calc(100% - 35px);
+    height: calc(100% - 35px);
     overflow: auto;
 }
 
@@ -1565,6 +1564,8 @@ div {
     background: #F4F6F8;
     border-radius: 0px 5px 5px 5px;
     padding: 20px;
+    height: calc(100% - 50px);
+    overflow: auto;
 }
 
 .tab-button {
@@ -1621,6 +1622,14 @@ div {
     position: absolute;
     background: var(--element-color);
     border-radius: 5px 5px 0px 0px;
+}
+
+.popup-tabs-content > .tab-content {
+    display: none;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    max-height: calc(100vh - 260px);
 }
 
 .tab-content {
@@ -3448,6 +3457,12 @@ textarea {
 .border-block-default {
     border-radius: 5px;
     border: 1px solid lightgray;
+    padding: 3px 5px;
+    margin-top: 20px;
+}
+
+.border-block-default:first-child {
+    margin-top: 0;
 }
 
 tr:not(:last-child).border-bottom td {
