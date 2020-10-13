@@ -43,6 +43,7 @@ import modules.logg_web as logg_web
 #ree_print_registry_content
 #chg_history_foropl
 #get_last_pay_date
+#office_administration_add_entry
 
 def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10):
     conn = db_conn.db_connect('web_receivables')
@@ -265,7 +266,13 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
-
+        logg_web.add_log(asid,encoded,'Разбивка оплаты')
+    elif fnk_name=='office_administration_add_entry':
+        q_sql = "select main.office_administration_add_entry('"+ asid +"','"+ orgid +"','"+ adate +"')"
+        print(q_sql)
+        cur.execute(q_sql)
+        for row in cur:
+            res=(row[0])
         
     conn.commit()
     cur.close()

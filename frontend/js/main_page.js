@@ -1526,7 +1526,7 @@ function initializeOfficeAdministration() {
         $(liElem).addClass('active');
 
         const addEntryPopup = createPopupLayoutLayer2('Добавить запись в реестр', addEntryPopupId).appendTo('#popup_background_layer2');
-        addEntryPopup.css({'max-width': '99%'})
+        addEntryPopup.css({'max-width': '99%', 'min-width': '70%'})
         const addEntryTable = createAddRegistryEntryTable(OBJECT_DATA.office_administration[registryName].thead);
         const addEntryBtn = $('<div>', { class: 'form-submit-btn' }).append(
             $('<button>', { class: 'button-primary', text: 'Добавить' }).on('click', () => {
@@ -1568,8 +1568,10 @@ function initializeOfficeAdministration() {
         const table = createRegistryTable(OBJECT_DATA.office_administration[registryName]);
 
         registryNode.find('.block-content').html(table);
+
     }
 }
+
 
 function refreshObjectData(callback) {
     $.ajax({
@@ -1699,7 +1701,7 @@ function clickDropdownMenu() {
 
                                     if (!isEmpty(ownershipPeriodsData)) {
                                         const callback = (data) => {
-                                            initializeReportNewWindow(data, repName, personName);
+                                            initializeReportNewWindow(data, repName, reportId, personName);
                                         }
     
                                         getReportContent(data, callback);
@@ -1731,7 +1733,7 @@ function clickDropdownMenu() {
                         $('#popup_report table').addClass('export-table-border');
                         // createButtonToExport(createFileToExport);
                     }
-                    initializeReportNewWindow(data, repName, personName);
+                    initializeReportNewWindow(data, repName, reportId, personName);
                 });
             }
         });
@@ -1752,12 +1754,14 @@ function getReportContent(data, callback) {
     });
 }
 
-function initializeReportNewWindow(reportContent, reportName, personName) {
+function initializeReportNewWindow(reportContent, reportName, reportId, personName) {
     const theme = localStorage.getItem('color_theme');
+    const reportsList = getCurrentCompanyReportsArray();
+    const toExcel = reportsList[reportId].to_excel;
     const objectAdress = `${CURRENT_OBJECT_DATA.adress} - ${CURRENT_OBJECT_DATA.apartNum}`;
     var printWindow = window.open('');
-    printWindow.document.write(`<html theme=${theme}><head><title>${objectAdress}, ${personName}, ${reportName}</title><link href="/css/style_report_page.css" rel="stylesheet" type="text/css"><link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"><script src="/js/jquery-3.4.1.min.js"></script><script src="/js/report_page.js"></script>`);
-    printWindow.document.write(`</head><body id="report_print"><div id="header"><div id="report_name"><p><i class="material-icons">home</i>${objectAdress}</p><p><i class="material-icons">person</i>${personName}</p><p><i class="material-icons">event_note</i>${reportName}</p></div><div id="navigation"><select id="font_size_select" title="Размер шрифта. Изменение размера текста."><option>10</option><option>11</option><option selected>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option></select><button id="excel_btn">Excel</button><button id="print_btn">Печать</button><button id="exit_btn" title="Закрыть"><i class="material-icons">close</i></button></div></div><div id="content"><div id="report_content">`);
+    printWindow.document.write(`<html theme=${theme} to_excel=${toExcel} adress="${objectAdress}" person_name="${personName}" report_name="${reportName}"><head><title>${objectAdress}, ${personName}, ${reportName}</title><link href="/css/style_report_page.css" rel="stylesheet" type="text/css"><link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"><script src="/js/jquery-3.4.1.min.js"></script><script src="/js/report_page.js"></script>`);
+    printWindow.document.write(`</head><body id="report_print"><div id="header"><div id="navigation"><select id="font_size_select" title="Размер шрифта. Изменение размера текста."><option>10</option><option>11</option><option selected>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option></select><button id="print_btn">Печать</button><button id="exit_btn" title="Закрыть"><i class="material-icons">close</i></button></div></div><div id="content"><div id="report_content">`);
     printWindow.document.write(reportContent);
     printWindow.document.write('</div></div></body></html>');
 
@@ -2197,11 +2201,10 @@ function formPopupNotFullscreen(header, content) {
 }
 
 function sendReportRange(repName, repNum, repType, accid, humanId, startDate, endDate, personName) {
-    // createContentLoader('#popup_report .popup-content');
-    // openPopupWindow('popup_report');
+    const reportId = `${repType}_${repNum}`;
 
     $.get(`/report?rnum=${repNum}&rtype=${repType}&accid=${accid}&humanid=${humanId}&dateb=${startDate}&datee=${endDate}`, function (data) {
-        initializeReportNewWindow(data, repName, personName);
+        initializeReportNewWindow(data, repName, reportId, personName);
         closePopupWindow('popup_report');
     });
 }
@@ -3960,7 +3963,6 @@ function keyupSearch(inputId, menuId, searchBtnId) {
 }
 
 function searchInputValue(input, valueType) {
-    // const input = $(`#${inputId}`);
     const valueLength = input.val().length;
     
     if (valueLength >= 3) {
@@ -3968,8 +3970,8 @@ function searchInputValue(input, valueType) {
 
         input.siblings().remove();
 
-        const divList = $('<div>', {class: 'popup-search-list'}).append(
-            $('<ul>', {class: 'popup-search-list-ul'})
+        const divList = $('<div>', {class: 'input-options-popup'}).append(
+            $('<ul>', {class: 'input-options-list'})
         );
 
         encodeURIstring = encodeURI(`/base_func?val_param=fast_find&val_param1=${searchValue}&val_param2=${getCookie('companyId')}`);
@@ -4001,6 +4003,24 @@ function searchInputValue(input, valueType) {
     }
     else {
         input.siblings().remove();
+    }
+}
+
+function InputListOfOptions(input, optionsList) {
+    input.siblings().remove();
+    if (!isEmpty(optionsList)) {
+        const list = $('<ul>', {class: 'input-options-list'});
+        const optionsPopup = $('<div>', {class: 'input-options-popup'});
+        optionsPopup.append(list)
+
+        for (const option of optionsList) {
+            $('<li>', {text: option}).appendTo(list).on('click', function() {
+                input.val(option)
+                input.siblings().remove();
+            });
+        }
+        input.after(optionsPopup);
+        optionsPopup.show()
     }
 }
 
@@ -5471,40 +5491,57 @@ function createAddRegistryEntryTable(data) {
     const firstRowElems = ['ЛС', 'Месяц', 'Год', 'Номер платёжки', 'Дата платёжки', 'Примечание'];
 
     for (const th of data) {
-        const thElem = $('<th>', {text: th.name}).appendTo(table.find('thead tr'));
+        if (th.name !== 'ЛС') {
+            const thElem = $('<th>', { text: th.name }).appendTo(table.find('thead tr'));
 
-        const isHidden = (th.hidden == 'true');
+            const isHidden = (th.hidden == 'true');
 
-        if(isHidden) {
-            thElem.css({'display': 'none'});
-        }
-        else {
-            if (inObject(th.name, firstRowElems)) {
-                if (th.name == 'Примечание') {
-                    $('<td>', {text: th.name, colspan: data.length - 4, class: 'td-bold'}).appendTo(table.find('tr:nth-child(1)'));
-                    $('<td>', {colspan: data.length - 4}).append(
-                        $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
-                    ).appendTo(table.find('tr:nth-child(2)'));
-                }
-                else {
-                    $('<td>', {text: th.name, class: 'td-bold'}).appendTo(table.find('tr:nth-child(1)'));
-                    $('<td>').append(
-                        $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
-                    ).appendTo(table.find('tr:nth-child(2)'));
-                }
-            }
-            else if (th.name == 'Итого') {
-                $('<td>', {text: `Итого`, colspan: data.length, class: 'td-bold'}).appendTo(table.find('tr:nth-child(5)'));
-                $('<td>', {colspan: data.length}).append(
-                    $('<input>', {id: 'add_entry_total_sum', type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
-                ).appendTo(table.find('tr:nth-child(6)'));
+            if (isHidden) {
+                thElem.css({ 'display': 'none' });
             }
             else {
-                if (th.name !== 'Автор' && th.name !== 'Адрес') {
-                    $('<td>', {text: th.name, class: 'td-bold'}).appendTo(table.find('tr:nth-child(3)'));
-                    $('<td>').append(
-                        $('<input>', {type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
-                    ).appendTo(table.find('tr:nth-child(4)'));
+                if (inObject(th.name, firstRowElems)) {
+                    if (th.name == 'Примечание') {
+                        $('<td>', { text: th.name, colspan: data.length - 4, class: 'td-bold' }).appendTo(table.find('tr:nth-child(3)'));
+                        $('<td>', { colspan: data.length - 4 }).append(
+                            $('<input>', { type: 'text', class: 'table-td-input', name: th.name, value_type: th.type })
+                        ).appendTo(table.find('tr:nth-child(4)'));
+                    }
+                    else {
+                        $('<td>', { text: th.name, class: 'td-bold' }).appendTo(table.find('tr:nth-child(3)'));
+                        $('<td>').append(
+                            $('<input>', { type: 'text', class: 'table-td-input', name: th.name, value_type: th.type })
+                        ).appendTo(table.find('tr:nth-child(4)'));
+                    }
+                }
+                else if (th.name == 'Итого') {
+                    $('<td>', { text: `Итого`, colspan: data.length, class: 'td-bold' }).appendTo(table.find('tr:nth-child(5)'));
+                    $('<td>', { colspan: data.length }).append(
+                        $('<input>', { id: 'add_entry_total_sum', type: 'text', class: 'table-td-input', name: th.name, value_type: th.type })
+                    ).appendTo(table.find('tr:nth-child(6)'));
+                }
+                else {
+                    if (th.name !== 'Автор' && th.name !== 'Адрес') {
+                        $('<td>', { text: th.name, class: 'td-bold' }).appendTo(table.find('tr:nth-child(1)'));
+                        const input = $('<input>', { type: 'text', class: 'table-td-input', name: th.name, value_type: th.type })
+                        if (th.name == 'Должник') {
+                            const registrationsList = OBJECT_DATA.registrations
+                            const optionsList = []
+
+                            for (const registration in registrationsList) {
+                                optionsList.push(registration.split('&')[0])
+                            }
+                            input.on('click', function() {
+                                InputListOfOptions($(this), optionsList)
+                            })
+                            input.on('keyup', function() {
+                                $(this).siblings().remove();
+                            })
+                        }
+                        $('<td>').append(
+                            input
+                        ).appendTo(table.find('tr:nth-child(2)'));
+                    }
                 }
             }
         }

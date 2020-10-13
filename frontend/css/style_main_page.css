@@ -2617,7 +2617,7 @@ textarea {
     z-index: 1;
 }
 
-.popup-search-list {
+.input-options-popup {
     max-height: 250px;
     position: absolute;
     background-color: #FFFFFF;
@@ -2630,7 +2630,7 @@ textarea {
     z-index: 1;
 }
 
-.obj-search-ul, .popup-search-list-ul  {
+.obj-search-ul, .input-options-list  {
     list-style-type: none;
     font-size: 16px;
     margin: 0;
@@ -2640,13 +2640,13 @@ textarea {
 
 .obj-search-ul li,
 #ardess_template_search_menu ul li,
-.popup-search-list-ul li {
+.input-options-list li {
     padding: 5px 16px;
     cursor: pointer;
 }
 
 .obj-search-ul li:hover,
-.popup-search-list-ul li:hover {
+.input-options-list li:hover {
     background: #F4F6F8;
 }
 

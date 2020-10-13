@@ -10,6 +10,21 @@
          url(/icon/iconfont/MaterialIcons-Regular.ttf) format('truetype');
 }
 
+@keyframes spin_notification {
+    25% {transform:rotate(40deg);} 
+    75% {transform:rotate(-40deg);}
+}
+
+@-webkit-keyframes spin_notification {
+    25% {transform:rotate(40deg);} 
+    75% {transform:rotate(-40deg);}
+}
+
+@keyframes spin_notification {
+    25% {transform:rotate(40deg);} 
+    75% {transform:rotate(-40deg);}
+}
+
 :root {
     --first-color: #002F6C;
     --second-color: #19437A;
@@ -168,9 +183,13 @@ button {
     color: #0088db;
 }
 
-#excel_btn {
+.excel-btn {
     background-color: #1D6F42;
-    display: none;
+    color: white;
+}
+
+.excel-btn:hover {
+    background-color: #195d37;
 }
 
 .report-table, .template-table {
@@ -197,4 +216,69 @@ button {
 .report-content table td,
 .report-content table th {
     border: 1px solid gray;
+}
+
+.popup-notification {
+    width: 350px;
+    height: 55px;
+    position: fixed;
+    right: -365px;
+    bottom: 0;
+    margin: 12px;
+    border-radius: 5px;
+    box-shadow: 0px 2px 16px #E6E6EA;
+    background-color: #FFFFFF;
+    z-index: 100;
+    border: 1px solid #D9E0E3;
+}
+
+.popup-notification > .icon {
+    float: left;
+    width: 40px;
+    height: 100%;
+    background: var(--third-color);
+    text-align: center;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-notification > .icon.alert {
+    background-color: orangered;
+}
+
+.popup-notification > .icon i {
+    font-size: 26px !important;
+    text-align: center;
+    color: white;
+    cursor: default;
+
+    -webkit-animation:spin_notification 2s linear infinite;
+    -moz-animation:spin_notification 2s linear infinite;
+    animation:spin_notification 1.5s linear infinite;
+    animation-delay: 5s;
+}
+
+.popup-notification > .content {
+    width: 273px;
+    height: 100%;
+    float: left;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    box-sizing: border-box;
+    font-size: 14px;
+    color: #263238;
+}
+
+.popup-notification > .notification-close {
+    height: 100%;
+    width: 35px;
+    float: left;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    box-sizing: border-box;
 }
