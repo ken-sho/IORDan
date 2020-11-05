@@ -18,7 +18,7 @@ def read_file (fname,vaccid):
             #q_sql = "select main.add_str3('"+ line +"','"+ fname +"')"
             #cur.execute(q_sql)
         if len(ifile)>10:
-            q_sql = "select main.add_str4('"+ ifile +"','"+ fname +"','"+ vaccid +"')"
+            q_sql = "select loader.xml_upload('"+ ifile +"','"+ fname +"','"+ vaccid +"')"
             cur.execute(q_sql)
         conn.commit()
         cur.close()

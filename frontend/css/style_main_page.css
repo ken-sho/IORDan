@@ -556,10 +556,6 @@ nav ul, nav li {
     border-radius: 0;
 }
 
-#popup_add_edit_registry_entry {
-    width: 99%;
-}
-
 #popup_add_edit_registry_entry .popup-content{
     padding-left: 5px;
     padding-right: 5px;
@@ -3467,4 +3463,28 @@ textarea {
 
 tr:not(:last-child).border-bottom td {
     border-bottom: 1px solid lightgray;
+}
+
+#adress_options_ui {
+    list-style-type: none;
+    padding: 0;
+    margin: 0px;
+}
+
+#adress_options_ui li {
+    padding: 5px;
+    cursor: pointer;
+}
+
+#adress_options_ui li:hover {
+    background-color: var(--element-color);
+    color: white;
+}
+
+#adress_options_ui li:not(:last-child) {
+    border-bottom: 1px solid lightgray;
+}
+
+.input-border-bold {
+    border: 2px solid var(--element-color) !important;
 }

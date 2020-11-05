@@ -11,6 +11,7 @@ import base64
 import time
 import modules.db_conn as db_conn
 import modules.logg_web as logg_web
+import modules.tracert as tracert
 
 #objects_tree_filters
 #account_history
@@ -189,7 +190,7 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
             res=(row[0])
     elif val_param=='addchg_ree_recodrs':
         q_sql = "select main.addchg_ree_recodrs('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"','"+ val_param3 +"','"+ val_param4 +"','"+ val_param5 +"','"+ val_param6 +"','"+ val_param7 +"','"+ val_param8 +"','"+ val_param9 +"','"+ val_param10 +"')"
-        print(q_sql)
+        tracert.tprint('addchg_ree_recodrs',q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
