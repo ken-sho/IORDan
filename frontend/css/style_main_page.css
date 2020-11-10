@@ -1275,7 +1275,7 @@ div {
 
 #rep_range_table {
     width: 100%;
-    font-size: 2vh;
+    font-size: 1.4rem;
 }
 
 #rep_range_table td:nth-child(1) {
@@ -1288,7 +1288,7 @@ div {
 
 #rep_range_table input {
     width: 100%;
-    font-size: 2vh;
+    font-size: 1.4rem;
 }
 
 .urep {

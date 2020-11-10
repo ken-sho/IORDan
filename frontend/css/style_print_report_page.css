@@ -21,6 +21,8 @@ table {
 }
 
 .report-content table th,
-.report-content table td {
+.report-content table td,
+.report-table th,
+.report-table td  {
     border: 1px solid black;
 }
