@@ -1763,6 +1763,7 @@ function initializeReportNewWindow(reportContent, reportName, reportId, personNa
     const theme = localStorage.getItem('color_theme');
     const reportsList = getCurrentCompanyReportsArray();
     const toExcel = reportsList[reportId].to_excel;
+    console.log(reportsList, toExcel)
     const objectAdress = `${CURRENT_OBJECT_DATA.adress} - ${CURRENT_OBJECT_DATA.apartNum}`;
     var printWindow = window.open('');
     printWindow.document.write(`<html theme=${theme} to_excel=${toExcel} adress="${objectAdress}" person_name="${personName}" report_name="${reportName}"><head><title>${objectAdress}, ${personName}, ${reportName}</title><link href="/css/style_report_page.css" rel="stylesheet" type="text/css"><link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"><script src="/js/jquery-3.4.1.min.js"></script><script src="/js/report_page.js"></script>`);
