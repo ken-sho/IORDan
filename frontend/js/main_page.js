@@ -5646,27 +5646,40 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                 if (entry.status == 'active') {
                     if (!registryIsBlocked) {
                         if (documentType !== 'print_registry') {
-                            const editEntryIcon = $('<i>', { class: 'material-icons', text: 'edit', title: 'Изменить' }).appendTo(tdOperation);
-                            editEntryIcon.on('click', function () {
-                                openEditRegistryEntryPopup(registryId, entry.id, entryData, registryName, registryType, documentType);
-                            });
-                            editEntryIcon.css("display", "none");
-                                              
-                            const delEntryIcon = $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить' }).on('click', function () {
-                                deleteRegistryEntry(registryId, entry.id, registryName, registryType, documentType)
-                            });
-                            delEntryIcon.appendTo(tdOperation);
-                            delEntryIcon.css("display", "none");
 
-                            filesIcon = $('<i>', {id: 'obj_files_registry_icon', class: 'material-icons material_counts', title: 'Файлы', text: 'folder_open' });
-                            filesIcon.on('click', () => {   
-                                openPopupWindow('popup_object_files_registry');
-                            });
-                            filesIcon.attr("idRegStr", entry.id);
-                            filesIcon.attr('count', '0');
-                            filesIcon.appendTo(tdOperation);
-                            filesIcon.css("display", "none");
+                            for (const th of thead) {
+                                if(th.type_action){
+                                    if(th.type_action.includes("edit") && th.name == "Действие"){
+                                        const editEntryIcon = $('<i>', { class: 'material-icons', text: 'edit', title: 'Изменить' }).appendTo(tdOperation);
+                                        editEntryIcon.on('click', function () {
+                                            openEditRegistryEntryPopup(registryId, entry.id, entryData, registryName, registryType, documentType);
+                                        });
+                                        editEntryIcon.css("display", "inline-flex");
+                                    }
 
+                            
+                                    if(th.type_action.includes("delete") && th.name == "Действие"){
+                                        
+                                        const delEntryIcon = $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить' }).on('click', function () {
+                                            deleteRegistryEntry(registryId, entry.id, registryName, registryType, documentType)
+                                        });
+                                        delEntryIcon.appendTo(tdOperation);
+                                        delEntryIcon.css("display", "inline-flex");
+                                    }
+                                    if(th.type_action.includes("addfile") && th.name == "Действие"){
+                                        filesIcon = $('<i>', {id: 'obj_files_registry_icon', class: 'material-icons material_counts', title: 'Файлы', text: 'folder_open' });
+                                        filesIcon.on('click', () => {   
+                                            openPopupWindow('popup_object_files_registry');
+                                        });
+                                        filesIcon.attr("idRegStr", entry.id);
+                                        filesIcon.attr('count', '0');
+                                        filesIcon.appendTo(tdOperation);
+                                        filesIcon.css("display", "inline-flex");
+                                        initializeObjectFilesRegistry();
+
+                                    }
+                                }
+                            }
                         $(tbody).each(function(index, element){
                             if(element.files && !isEmpty(element.files)){
                                 console.log("сработало условие без пустой строки");
@@ -5676,25 +5689,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                                     }
                                 });   
                             }
-                        });
-
-                            initializeObjectFilesRegistry();
-
-                            for (const th of thead) {
-                                if(th.type_action){
-                                    if(th.type_action.includes("edit") && th.name == "Действие"){
-                                        editEntryIcon.css("display", "inline-flex");
-                                    }
-                            
-                                    if(th.type_action.includes("addfile") && th.name == "Действие"){
-                                        filesIcon.css("display", "inline-flex");
-                                    }
-                            
-                                    if(th.type_action.includes("delete") && th.name == "Действие"){
-                                        delEntryIcon.css("display", "inline-flex");
-                                    }
-                                }
-                            }
+                        });                           
                         }
                         
                     }
