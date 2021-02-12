@@ -1011,7 +1011,7 @@
                                             <div id="files_upload_buttons">
                                                 <button id="select_files" class="button-primary"><label for="files_upload_input">Выбрать
                                                         файлы</label></button>
-                                                <button id="files_upload_btn" class="button-secondary" onclick="uploadFiles($('#files_upload_input').prop('files'), {}, $('#control_files_upload .block-content'), $('#number_of_uploaded_files'), getControlFilesList)">Загрузить</button>
+                                                <button id="files_upload_btn" class="button-secondary" onclick="uploadFiles($('#files_upload_input').prop('files'), {}, $('#control_files_upload .block-content'), $('#number_of_uploaded_files'), CURRENT_OBJECT_DATA.accid,getControlFilesList)">Загрузить</button>
                                                 <form name="files_upload">
                                                     <input id="files_upload_input" type="file" name="files" multiple>
                                                 </form>
