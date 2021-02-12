@@ -185,7 +185,6 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
             res=(row[0])
     elif fnk_name=='get_registry':
         q_sql = "select main.ree_recodrs('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])

@@ -516,6 +516,10 @@ nav ul, nav li {
     padding-top: 10px;
 }
 
+#add_registry_entry_btn{
+    position: absolute;
+    margin-bottom: 20px;
+}
 /* .form-submit-btn .button-primary {
     margin-top: 15px;
 } */
@@ -559,6 +563,9 @@ nav ul, nav li {
 #popup_add_edit_registry_entry .popup-content{
     padding-left: 5px;
     padding-right: 5px;
+    position: relative;
+    max-height: 600px;
+    padding-bottom: 50px;
 }
 
 /* .popup-fullscreen-name {
@@ -682,9 +689,10 @@ button {
     background-color: #195d37;
 }
 
-.button-primary:hover,
+.button-primary:hover, .button-primary label:hover, 
 .input-datepicker .ui-priority-primary:hover {
     background-color: var(--element-hover-color);
+    cursor: pointer;
 }
 
 .button-primary:active,
@@ -1060,6 +1068,7 @@ div {
 
 .main-table {
     width: 100%;
+    bottom: 0;
     box-sizing: border-box;
     border-collapse: collapse;
     text-align: center;
@@ -1072,6 +1081,7 @@ div {
     color: #263238;
 }
 
+
 /* .main-table th:first-child, .main-table td:first-child {
     border-left: 0;
 }
@@ -1079,6 +1089,15 @@ div {
 .main-table th:last-child, .main-table td:last-child {
     border-right: 0;
 } */
+
+
+#add_container{
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 500px;
+    border: 1px solid lightgray;
+}
 
 .main-table th {
     position: sticky;
@@ -3368,12 +3387,12 @@ textarea {
     align-items: center;
 }
 
-#popup_object_files {
+#popup_object_files, #popup_object_files_registry{
     width: 70%;
     height: 85%;
 }
 
-#object_files_upload {
+#object_files_upload, #object_files_upload_registry {
     float: left;
     width: 45%;
     /* border-right: 1px solid #D9E0E3; */

@@ -5,8 +5,14 @@ var OBJECT_DATA;
 var DROPDOWN_NUM = 1; 
 var CURRENT_OBJECT_DATA = {};
 var OBJECTS_TREE_DATA;
+var filesIcon;
+var IdRegStr;
+var IDAccid;
+var registryData;
+var filesRegistry;
+var TRIGGER_FOR_OBJ_UPLOADS = true;
 
-$(document).ready(function() {
+$(document).ready(function() {  
     sessionStorage.setItem('printMode', 'off');
     getProjectTaskList("web_deb");
     getNewsList();
@@ -21,6 +27,9 @@ $(document).ready(function() {
         }
         else {
             $('#popup_background, .popup-window').fadeOut(200);
+            if($(e.target).find('.file-block')){
+                 $('.file-block').remove();
+            }
         }
     });
 
@@ -74,7 +83,7 @@ $(document).ready(function() {
         changeMonth: true,
         changeYear: true,
         showButtonPanel: true,
-        yearRange: '2005:2020',
+        yearRange: '2005:2021',
         beforeShow: function(input, inst) {
             $('#ui-datepicker-div').addClass('input-datepicker');
         },
@@ -127,11 +136,11 @@ $(document).ready(function() {
         }
     });
 
-    const currentCompany = getCookie('companyId');
-    if (currentCompany == undefined) {
-        $('#main_search_input').attr('disabled', true);
-        $('#main_search_input').val('Выберите компанию');
-        $('#main_menu li[title="КОМПАНИИ"]').addClass('blinking');
+    const currentCompany = getCookie('companyId'); // смотрим есть ли в куках companyId
+    if (currentCompany == undefined) { // если нет companyId, то
+        $('#main_search_input').attr('disabled', true);// Поисковик не работает
+        $('#main_search_input').val('Выберите компанию'); // предлагает выбрать компанию
+        $('#main_menu li[title="КОМПАНИИ"]').addClass('blinking');//  добавляет классы не активности
         $('.li-change-events').addClass('li-disabled');
     }
 
@@ -695,11 +704,12 @@ function createContentBlock(name, styles) {
     return block;
 }
 
-function showCurrentCompany() {
-    const currentCompany = localStorage['currentCompany'];
-    if (currentCompany) {
-        $('#main_menu_company_name').text(currentCompany);
-        $('#popup_control .popup-fullscreen-name').text('Управление ' + currentCompany);
+
+function showCurrentCompany() { // показать текущую компанию. 
+    const currentCompany = localStorage['currentCompany']; // получить значение текущей компании
+    if (currentCompany) { // если значение true сделать следующее
+        $('#main_menu_company_name').text(currentCompany); //изменить текст в названии компании
+        $('#popup_control .popup-fullscreen-name').text('Управление ' + currentCompany); // и в шапке в управлении
     }
 }
 
@@ -784,6 +794,9 @@ function closePopupWindow(popupId) {
     $('#popup_report .content').empty();
     $('.main-menu li').removeClass('active');
     $('#home_page').addClass('active');
+    if($(popupId).find('.file-block')){
+        $('.file-block').remove();
+    }
 
     // if (popupId !== 'popup_add_task' && popupId !== 'popup_process_control_file' && popupId !== 'popup_not_fullscreen' && popupId != 'popup_objects_group_users' && popupId != 'popup_objects_group' && popupId !== 'popup_add_edit_registry_entry' && popupId !== 'popup_processed_file_template' && popupId !== 'popup_performed_file_template' && popupId !== 'popup_report' && popupId !== 'popup_create_object_group')  {
     //     openHomePage();
@@ -1113,7 +1126,8 @@ function initializeObjectsTreeFilters() {
         });
     }  
 }
-
+// получение данных  с сервера
+// начало начал так сказать
 function getObjectData() {
     $('#obj_ls_info .icon-count').remove();
     $('#agreements_owners_content, #obj_main_table, #add_agreement_owner_select, #obj_additional_info .block-content').empty();
@@ -1129,6 +1143,8 @@ function getObjectData() {
             
             OBJECT_DATA = JSON.parse(data);
             console.log(OBJECT_DATA)
+
+            // initializeObjectFilesRegistry();
 
             initializeObjectFiles();
 
@@ -1158,26 +1174,227 @@ function getObjectData() {
         }
     });
 }
+// конструкторы для функции работы с файлами
+function createFilesIcon(popupId, iconId, name){
+    const filesIconTem = $('<div>', {id: iconId, class: 'icon-with-count'}).append(
+        $('<i>', {class: 'material-icons', title: 'Файлы', text: 'folder_open' }).on('click', () => {
+            openPopupWindow(popupId);
+        })
+    )
+    filesIconTem.attr("names", name);
 
+    ;
+    return filesIconTem;
+}
+
+function CreateNumberUploadedFilesDiv(uploadFormBlock){
+    const numberUploadedFilesDivTemp = $('<div>', { style: 'height: 50%' }).append(
+        $('<span>', { text: 'Выбрано файлов: 0', style: 'display: flex; align-items: center; height: 100%' })
+    ).appendTo(uploadFormBlock.find('.block-content'));
+    return numberUploadedFilesDivTemp;
+}
+
+function CreateChooseFilesButton(forName){
+    const chooseFilesButtonTem = $('<button>', { class: 'button-primary', style: 'margin-right: 5px' }).append(
+        $('<label>', { for: forName, text: 'Выбрать файлы' })
+    );
+    return chooseFilesButtonTem;
+}
+
+function ChangefilesInput(event){
+    const files = event.data.name1.prop('files');
+    console.log(files);
+    console.log(files[0]);   
+    event.data.name2.find('span').text(`Выбрано файлов: ${files.length}`);
+    event.data.name3.empty();
+    if (files.length > 0) {
+        for (const file of files) {
+            const fileNameDiv = $('<div>', { style: 'padding-bottom: 5px' }).append(
+                $('<span>', { text: file.name, style: 'color: var(--third-color)' })
+            );
+            const fileTypeDiv = $('<div>').append(
+                $('<select>', { class: 'input-main', file_name: file.name })
+            )
+            const fileDiv = $('<div>', { class: 'file-block' }).append(fileNameDiv, fileTypeDiv);
+
+            fileDiv.appendTo(event.data.name3);
+            
+            event.data.name4[file.name] = fileDiv;
+            
+            const fileTypesSelect = fileTypeDiv.find('select');
+
+            $('<option>', { text: 'Выбрать тип файла', disabled: 'true', selected: 'true' }).appendTo(fileTypesSelect);
+            for (const type of OBJECT_DATA.upload_file_types) {
+                $('<option>', { text: type.name, value: type.value }).appendTo(fileTypesSelect);
+            }
+
+            if (file.type == 'text/xml') {
+                fileTypesSelect.val('rosreester');
+
+                for (const option of fileTypesSelect.find('option')) {
+                    if ($(option).val() !== 'rosreester') {
+                        $(option).attr('disabled', true);
+                    }
+                }
+            }
+            else {
+                for (const option of fileTypesSelect.find('option')) {
+                    if ($(option).val() == 'rosreester') {
+                        $(option).attr('disabled', true);
+                    }
+                }
+            }
+
+        }
+    }
+    else {
+        $('<span>', { class: 'text-center-small', text: 'Выберите файлы для загрузки' }).appendTo(event.data.name3);
+    }
+}
+
+function ClickUploadFilesButton(event){
+    const fileTypesObj = {};
+
+    for (const select of event.data.name1.find('select')) {
+        const fileName = $(select).attr('file_name'); // находим селект и его имя
+        let fileType = $(select).val();// получаем значение селекта пример справка об отсутствии долга 
+
+        fileTypesObj[fileName] = fileType; // забили в объект имя: тип
+    }
+
+    let typesCorrect = true;
+
+    for (const elem in fileTypesObj) { // перебираем  забитый объект
+        const type = fileTypesObj[elem]; // тип файла
+        console.log(type)
+        if (type == null || type == '') {
+            typesCorrect = false;
+            break;
+        }
+    }
+
+    if (typesCorrect) { // если файл присутствует то
+        const files = event.data.name2.prop('files'); // берем файлы или объект файлов
+        console.log(files);
+        console.log(files[0]);  
+        const parentNode = event.data.name5.find('.block-content'); // загрузка
+        const filesInfoNode = event.data.name6.find('span'); // сколько выбрано фалов
+        let count = 0;
+        const callback = (data) => {
+            const fileObj = JSON.parse(data);
+            console.log(fileObj);
+            event.data.name4([fileObj], event.data.name8);
+            event.data.name7[fileObj.name].remove();
+            count++;
+            if (count == files.length) {
+                event.data.name2.val('');
+            }
+
+            if (event.data.name3.find('.icon-count').length == 0) {
+                const counterIcons = $('<div>', { class: 'icon-count', text: '1', title: 'Файлы' }).appendTo(event.data.name3);
+            }
+            else {
+                const numberOfFiles = event.data.name3.find('.icon-count').text();
+                event.data.name3.find('.icon-count').text(parseInt(numberOfFiles) + 1);
+            }
+        };
+        uploadFiles(files, fileTypesObj, parentNode, filesInfoNode, event.data.name9, callback);
+
+    }
+    else {
+        showPopupNotification('alert', 'Укажите типы для всех загружаемых файлов!');
+    };
+}
+
+// функция загрузки правого окна файлов
+function initializeFilesList(files, filesListBlock) {
+    for (const file of files) {
+        const fileDiv = $('<div>', { class: 'file-block' }).append(
+            $('<div>', { style: 'display: flex; align-items: center' }).append(
+                $('<div>', { class: 'file-type' }).append(
+                    $('<span>', { text: `${file.type}` })
+                )
+            ),
+            $('<div>', { style: 'display: flex; align-items: center; margin: 5px 0px' }).append(
+                $('<div>', { class: 'file-name' }).append(
+                    $('<span>', { text: file.name })
+                ),
+                $('<div>', { class: 'file-operation' }).append(
+                    $('<i>', { class: 'material-icons', text: 'remove_red_eye', title: 'Открыть'}).on('click', () => {
+                        $.ajax({
+                            type: 'GET',
+                            url: file.path,
+                            xhrFields: {
+                                responseType: 'blob'
+                            },
+                            success: (data) => {
+                                blob = data.slice(0, data.size, "image/jpeg");
+                                const url = window.URL.createObjectURL(blob);
+                                console.log(url)
+                                window.open(url, '_blank');
+                                window.URL.revokeObjectURL(url);
+                            }
+                        });
+                    }),
+                    $('<i>', { class: 'material-icons', text: 'save', title: 'Скачать' }).on('click', () => {
+                        showPopupNotification('notification', 'Загрузка файла начнется автоматически!');
+                        $.ajax({
+                            type: 'GET',
+                            url: file.path,
+                            xhrFields: {
+                                responseType: 'blob'
+                            },
+                            success: (data) => {
+                                var a = document.createElement('a');
+                                var url = window.URL.createObjectURL(data);
+                                a.href = url;
+                                a.download = file.name;
+                                document.body.append(a);
+                                a.click();
+                                a.remove();
+                                window.URL.revokeObjectURL(url);
+                            }
+                        });
+                    })
+
+                )
+            ),
+            $('<div>', { style: 'display: flex; align-items: center' }).append(
+                $('<div>', { class: 'file-creation' }).append(
+                    $('<span>', { text: `Загрузил: ${file.author} ${file.creation_time}` })
+                )
+            )
+        );
+
+        console.log(files.length)
+
+        if (files.length == 1) {
+            fileDiv.hide();
+            fileDiv.prependTo(filesListBlock.find('.block-content'));
+            fileDiv.fadeIn(400);
+
+        }
+        else {
+            fileDiv.prependTo(filesListBlock.find('.block-content'));
+        }
+    }
+}
+/// работа с файлами отдельных адресов
 function initializeObjectFiles() {
 
     const popupId = 'popup_object_files';
-
     $(`#${popupId}, #obj_files_icon`).remove();
 
     const uploadedFilesRepository = {};
 
-    const filesIcon = $('<div>', {id: 'obj_files_icon', class: 'icon-with-count'}).append(
-        $('<i>', {class: 'material-icons', title: 'Файлы', text: 'folder_open' }).on('click', () => {
-            openPopupWindow(popupId);
-        })
-    ).appendTo('#obj_ls_info .header-manipulation');
+    const filesIcon = createFilesIcon(popupId,'obj_files_icon');
+    
+    filesIcon.appendTo('#obj_ls_info .header-manipulation');
         
     if (!isEmpty(OBJECT_DATA.files)) {
         const counterIcons = $('<div>', { class: 'icon-count', text: OBJECT_DATA.files.length, title: 'Файлы' }).appendTo(filesIcon);
         addEventListenersToCounterIcons(counterIcons);
     }
-
     const popupLayout = createPopupLayout('Файлы', popupId);
     popupLayout.appendTo('#popup_background');
 
@@ -1185,16 +1402,77 @@ function initializeObjectFiles() {
 
     const filesDownloadDiv = $('<div>', { id: 'object_files_upload' });
     const uploadFormBlock = createContentBlock('Загрузка', { 'width': '100%', 'height': '120px' }).appendTo(filesDownloadDiv);
+    const numberUploadedFilesDiv = CreateNumberUploadedFilesDiv(uploadFormBlock);
+    uploadFormBlock.find('.block-content').css({ 'position': 'relative' });
+
+    const chooseFilesButton = CreateChooseFilesButton('object_files_input');
+    const filesInput = $('<input>', { id: 'object_files_input', type: 'file', style: 'display: none', multiple: 'true' });    
+// кнопка загрузить
+    const uploadFilesButton = $('<button>', { class: 'button-secondary', text: 'Загрузить' });  
+    const navigateButtonsDiv = $('<div>', { style: 'height: 50%' }).append(chooseFilesButton, filesInput, uploadFilesButton);
+    navigateButtonsDiv.appendTo(uploadFormBlock.find('.block-content'));
+
+    const uploadFilesListBlock = createContentBlock('Список загружаемых файлов', { 'width': '100%', 'height': 'calc(100% - 130px)', 'margin-top': '10px' }).appendTo(filesDownloadDiv);
+    const uploadFilesListBlockContent = $(uploadFilesListBlock).find('.block-content');
+    $('<span>', { class: 'text-center-small', text: 'Выберите файлы для загрузки' }).appendTo(uploadFilesListBlockContent);
+    filesDownloadDiv.appendTo(popupContent);
+
+    const filesList = $('<div>', { id: 'object_files_list' });
+    const filesListBlock = createContentBlock('Список файлов', { 'width': '100%', 'height': '100%' }).appendTo(filesList);
+    filesList.appendTo(popupContent);
+// кнопка загрузить функция
+    uploadFilesButton.on('click',{name1: uploadFilesListBlockContent, name2: filesInput, name3: filesIcon, name4: initializeFilesList, name5: uploadFormBlock, name6: numberUploadedFilesDiv, name7: uploadedFilesRepository, name8: filesListBlock, name9: CURRENT_OBJECT_DATA.accid}, ClickUploadFilesButton);
+// кнопка выбрать файлы
+    filesInput.on('change',{name1: filesInput, name2: numberUploadedFilesDiv, name3: uploadFilesListBlockContent, name4: uploadedFilesRepository}, ChangefilesInput);
+    
+    initializeFilesList(OBJECT_DATA.files, filesListBlock);
+}
+// работа с файлами отдельных строк реестров
+function initializeObjectFilesRegistry() {
+
+    const popupId = 'popup_object_files_registry';
+    $(`#${popupId}, #obj_files_registry_icon`).remove();
+
+    const uploadedFilesRepository = {};
+
+    filesIcon.on('click', function (e) {
+        IdRegStr = e.currentTarget.attributes.idRegStr.value;        
+        TRIGGER_FOR_OBJ_UPLOADS = true;
+        $(registryData.tbody).each(function(index, element){
+            if(element.id == IdRegStr){
+                filesRegistry = element.files;                 
+            }
+        });     
+        IDAccid = $.ajax({
+            async: false,
+            url: `/web_request?query=recid@${IdRegStr}`,
+            type: 'get'
+        }).responseText;
+        return IDAccid;
+    });   
+    
+    // if (!isEmpty(OBJECT_DATA.files)) {
+    //     const counterIcons = $('<div>', { class: 'icon-count', text: OBJECT_DATA.files.length, title: 'Файлы' }).appendTo(filesIcon);
+    //     addEventListenersToCounterIcons(counterIcons);
+    // }
+
+    const popupLayout = createPopupLayout('Файлы', popupId);
+    popupLayout.appendTo('#popup_background');
+
+    const popupContent = $(popupLayout).find('.popup-content');
+    
+    const filesDownloadDiv = $('<div>', { id: 'object_files_upload_registry' });
+    const uploadFormBlock = createContentBlock('Загрузка', { 'width': '100%', 'height': '120px' }).appendTo(filesDownloadDiv);
     const numberUploadedFilesDiv = $('<div>', { style: 'height: 50%' }).append(
         $('<span>', { text: 'Выбрано файлов: 0', style: 'display: flex; align-items: center; height: 100%' })
     ).appendTo(uploadFormBlock.find('.block-content'));
     uploadFormBlock.find('.block-content').css({ 'position': 'relative' });
 
     const chooseFilesButton = $('<button>', { class: 'button-primary', style: 'margin-right: 5px' }).append(
-        $('<label>', { for: 'object_files_input', text: 'Выбрать файлы' })
+        $('<label>', { for: 'object_files_reg_input', text: 'Выбрать файлы' })
     );
 
-    const filesInput = $('<input>', { id: 'object_files_input', type: 'file', style: 'display: none', multiple: 'true' });
+    const filesInput = $('<input>', { id: 'object_files_reg_input', type: 'file', style: 'display: none', multiple: 'true' });
     filesInput.on('change', () => {
         const files = filesInput.prop('files');
         numberUploadedFilesDiv.find('span').text(`Выбрано файлов: ${files.length}`);
@@ -1216,7 +1494,7 @@ function initializeObjectFiles() {
                 const fileTypesSelect = fileTypeDiv.find('select');
 
                 $('<option>', { text: 'Выбрать тип файла', disabled: 'true', selected: 'true' }).appendTo(fileTypesSelect);
-                for (const type of OBJECT_DATA.upload_file_types) {
+                for (const type of registryData.upload_file_types) {
                     $('<option>', { text: type.name, value: type.value }).appendTo(fileTypesSelect);
                 }
 
@@ -1243,9 +1521,25 @@ function initializeObjectFiles() {
             $('<span>', { class: 'text-center-small', text: 'Выберите файлы для загрузки' }).appendTo(uploadFilesListBlockContent);
         }
     });
+    const uploadFilesButtons = $('<i>', { class: 'material-icons', title: "обновить", text: 'sync' });
+    
+    uploadFilesButtons.css("padding-left", "14px");
+    uploadFilesButtons.css("padding-right", "14px");
+    uploadFilesButtons.css("position","absolute");
+    uploadFilesButtons.css("top","43px");
 
+        uploadFilesButtons.on('click', (e) => {
+            if(TRIGGER_FOR_OBJ_UPLOADS){
+                if(filesRegistry){
+                    initializeFilesList(filesRegistry);
+                    TRIGGER_FOR_OBJ_UPLOADS = false;
+                }
+                
+            }            
+        });
+        // **************
     const uploadFilesButton = $('<button>', { class: 'button-secondary', text: 'Загрузить' });
-    uploadFilesButton.on('click', () => {
+    uploadFilesButton.on('click', (e) => {
         const fileTypesObj = {};
 
         for (const select of uploadFilesListBlockContent.find('select')) {
@@ -1274,21 +1568,23 @@ function initializeObjectFiles() {
             const callback = (data) => {
                 const fileObj = JSON.parse(data);
                 initializeFilesList([fileObj]);
+                console.log(JSON.parse(data));
                 uploadedFilesRepository[fileObj.name].remove();
                 count++;
                 if (count == files.length) {
                     filesInput.val('');
                 }
-
-                if (filesIcon.find('.icon-count').length == 0) {
-                    const counterIcons = $('<div>', { class: 'icon-count', text: '1', title: 'Файлы' }).appendTo(filesIcon);
-                }
-                else {
-                    const numberOfFiles = filesIcon.find('.icon-count').text();
-                    filesIcon.find('.icon-count').text(parseInt(numberOfFiles) + 1);
-                }
+                console.log(this.filesIcon.attr("idregstr"));
+                console.log(IdRegStr);
+                   $(".material_counts").each(function(index, elem){            
+                    if($(elem).attr("idregstr") == IdRegStr){
+                        $(elem).text("folder");
+                    }
+                });
+                
+                
             };
-            uploadFiles(files, fileTypesObj, parentNode, filesInfoNode, callback);
+            uploadFiles(files, fileTypesObj, parentNode, filesInfoNode, IDAccid, IdRegStr, callback);
 
         }
         else {
@@ -1296,7 +1592,7 @@ function initializeObjectFiles() {
         };
     });
 
-    const navigateButtonsDiv = $('<div>', { style: 'height: 50%' }).append(chooseFilesButton, filesInput, uploadFilesButton);
+    const navigateButtonsDiv = $('<div>', { style: 'height: 50%' }).append(chooseFilesButton, filesInput, uploadFilesButton, uploadFilesButtons);
     navigateButtonsDiv.appendTo(uploadFormBlock.find('.block-content'));
 
     const uploadFilesListBlock = createContentBlock('Список загружаемых файлов', { 'width': '100%', 'height': 'calc(100% - 130px)', 'margin-top': '10px' }).appendTo(filesDownloadDiv);
@@ -1367,7 +1663,6 @@ function initializeObjectFiles() {
                 )
             );
 
-            console.log(files.length)
 
             if (files.length == 1) {
                 fileDiv.hide();
@@ -1377,11 +1672,10 @@ function initializeObjectFiles() {
             }
             else {
                 fileDiv.prependTo(filesListBlock.find('.block-content'));
+                
             }
         }
     }
-
-    initializeFilesList(OBJECT_DATA.files);
 }
 
 function initializeObjectReputation() {
@@ -1432,6 +1726,10 @@ function initializeObjectReputation() {
     changeReputationContent.appendTo('body');
 
     $('<i>', {id: 'object_reputation_indicator', class: 'material-icons', title: `${iconTitle}. Нажмите, чтобы изменить`, text: reputationIcon, style: `color:${iconColor}`, 'data-jq-dropdown' : '#jq-dropdown-change-object-reputation'}).appendTo('#obj_ls_info .header-manipulation');
+
+    if(filesDownloadDiv){
+             setTimeout(initializeFilesList(filesRegistry), 5000); 
+        }
 }
 
 function changeObjectReputation(elem) {
@@ -1625,7 +1923,7 @@ function clickDropdownMenu() {
                     changeMonth: true,
                     changeYear: true,
                     showButtonPanel: true,
-                    yearRange: '2005:2020',
+                    yearRange: '2005:2021',
                     beforeShow: function(input, inst) {
                         $('#ui-datepicker-div').addClass('input-datepicker');
                     },
@@ -2284,7 +2582,7 @@ function openTab(tabsId, elem, tabId) {
     $(`#${tabsId}_content .tab-content`).removeClass('active');
     $(`#${tabId}`).addClass('active');
 }
-
+// каким-то образом получает куки.
 function setCookie(name, value, options) {
     options = options || {};
 
@@ -2313,8 +2611,9 @@ function setCookie(name, value, options) {
 
     document.cookie = updatedCookie;
 }
-
-function getCookie(name) {
+// Функция getCookie возвращает cookie с именем name, если есть, если нет, то undefined
+// 1. как работает функция?
+function getCookie(name) { 
     let matches = document.cookie.match(new RegExp(
         "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
     ));
@@ -3869,8 +4168,8 @@ function DatepickerSetCurrentDate(inputId) {
         $(`#${inputId}`).datepicker("setDate", new Date(debtDateYear, debtDateMonth - 1));
     }
 }
-
-function uploadFiles(files, fileTypes, parentNode, filesInfoNode, callback) {
+// загрузка файлов
+function uploadFiles(files, fileTypes, parentNode, filesInfoNode, accid, reccid, callback) {
     event.preventDefault();
 
     if (files.length > 0) {
@@ -3882,14 +4181,11 @@ function uploadFiles(files, fileTypes, parentNode, filesInfoNode, callback) {
             let formdata = new FormData();
             formdata.append('file', files[index]);
 
-            console.log(files)
-            console.log(files[index]);
-            
-            console.log(fileTypes, files[index].name, fileTypes[files[index].name])
+            console.log(reccid)
 
             if (!isEmpty(fileTypes)) {
                 formdata.append('type', fileTypes[files[index].name]);
-                formdata.append('accid', CURRENT_OBJECT_DATA.accid);
+                formdata.append('accid', `${accid}@${reccid}`);
             }
             
             console.log(formdata)
@@ -4956,6 +5252,7 @@ function initializeRegistrySettings(registryId, theadData, rowsPerPage, document
                 $('<span>', {text: number})
             )
         ).appendTo(numberElementsBlockContent);
+    
     }
 
     $('<div>', {style: 'margin: 5px'}).append(
@@ -5162,10 +5459,12 @@ function addSettingChangeToObj(obj, elem, objKey, hiddenCurrentState) {
         console.log(obj);
     });
 }
-
+// получить данные рееестра
 function getRegistryData(registryId, registryName, registryType, documentType) {
     $('#registry_print_icon').off('click');
-    $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon, #registy_convert_to_excel_btn, #no_registries_div, #registry_printed_document_icon, #add_registry_entry_table').remove();
+    $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon, #registy_convert_to_excel_btn, #no_registries_div, #registry_printed_document_icon, #add_registry_entry_table', '#add_container').remove();
+    $("#add_container").remove();
+
     $('#registry_settings_content .block-content').empty();
     createContentLoader('#registry_settings_content .block-content');
     
@@ -5175,8 +5474,8 @@ function getRegistryData(registryId, registryName, registryType, documentType) {
         url: '/base_func?fnk_name=get_registry',
         data: JSON.stringify(dataObj),
         success: (data) => {
-            console.log(data)
-            const registryData = JSON.parse(data);
+            console.log(`Не парсийный${data}`);
+            registryData = JSON.parse(data);
             console.log(registryData);
             displayRegistry(registryData, registryId, registryName, registryType, documentType);
         }
@@ -5184,7 +5483,7 @@ function getRegistryData(registryId, registryName, registryType, documentType) {
 }
 
 function displayRegistry(data, registryId, registryName, registryType, documentType) {
-    const {thead, tbody, tfooter, blocked, rows_per_page} = data;
+    const {thead, tbody, tfooter, blocked, rows_per_page, upload_file_types} = data; // data.thead, data,tbody ...
 
     const registryIsBlocked = (blocked == 'true');
 
@@ -5226,18 +5525,28 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                 const tdValue = $('<td>').append(
                     $('<input>', { type: 'text', class: 'table-td-input', name: th.name, value_type: th.type, editable: th.editable})
                 );
-
+                tdValue.each(function(index, element){
+                    $(element).on('keypress', function(e){
+                        if(e.which == 13){
+                            if(e.currentTarget == e.currentTarget.parentElement.parentElement.lastChild.lastChild) {
+                                    addRegistryEntry(registryId, registryName, registryType, documentType);
+                            } else {
+                            let nextInput = e.currentTarget.parentElement.nextElementSibling.lastChild.firstChild;
+                            nextInput.focus();
+                            }
+                        }
+                    });
+                }); 
+                
                 tr.append(tdName, tdValue);
                 addEntryTable.append(tr);
 
             }
         }
-
         theadData.push({ name: th.name, editable: th.editable });
     }
 
     const paginationDiv = $('#registry_pagination');
-
     
     if (rows_per_page == 'all') {
         $('#registry_settings_content').removeClass('pagination');
@@ -5262,7 +5571,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
             pageRange: 5,
             // showPageNumbers: true,
             callback: function(tbody, pagination) {
-                const html = contentTemplating(tbody);
+                const html = contentTemplating(tbody); 
                 table.find('tbody').remove();
                 table.append(html);
             }
@@ -5270,10 +5579,11 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
     }
 
     function contentTemplating(data) {
+        
 
         if (!isEmpty(data)) {
 
-            let tbody = $('<tbody>');
+            let tbodyDiv = $('<tbody>');
 
             for (const entry of data) {
                 const tr = $('<tr>');
@@ -5281,19 +5591,43 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                 let editEntryData = theadData.slice();
                 
                 for (const index in entry.data) {
-                    const td = $('<td>', { text: entry.data[index] }).appendTo(tr);
-                    editEntryData[index].value = entry.data[index];
-                    
-                    const isHidden = (thead[index].hidden == 'true');
-                    
-                    if (isHidden) {
-                        td.css({ 'display': 'none' });
+                    if(index == "files"){
+
+                    } else {
+                        const td = $('<td>', { text: entry.data[index] }).appendTo(tr);
+                        editEntryData[index].value = entry.data[index];
+                        
+                        const isHidden = (thead[index].hidden == 'true');
+                        
+                        if (isHidden) {
+                            td.css({ 'display': 'none' });
+                        }
+    
+                        if(entry.rec_clr){
+                            if(localStorage.getItem('color_theme') =='dark'){
+                                td.css("background-color", "#d1e1e8");
+                            } else if(localStorage.getItem('color_theme') =='default'){
+                                td.css("background-color", "#b3d5e3");
+                            }
+                        } 
                     }
+                    
                 }
                 
                 const tdOperation = $('<td>');
+                $(tdOperation).css("min-width", "85px");
+                tdOperation.css("display", "none");
                 tdOperation.appendTo(tr);
+                if(entry.rec_clr){
+                    if(localStorage.getItem('color_theme') =='dark'){
+                        tdOperation.css("background-color", "#d1e1e8");
+                    } else if(localStorage.getItem('color_theme') =='default'){
+                        tdOperation.css("background-color", "#b3d5e3");
+                    }
+                    
+                }
                 
+
                 let entryData = {};
                 for (const elem of editEntryData) {
                     entryData[elem.name] = elem.value;
@@ -5302,6 +5636,13 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                 if (documentType !== 'print_registry') {
                 }
 
+                for (const th of thead) {
+                    if(th.type_action){
+                        if(th.name == "Действие"){
+                            tdOperation.css("display", "table-cell");
+                        }
+                    }
+                }
                 if (entry.status == 'active') {
                     if (!registryIsBlocked) {
                         if (documentType !== 'print_registry') {
@@ -5309,9 +5650,51 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                             editEntryIcon.on('click', function () {
                                 openEditRegistryEntryPopup(registryId, entry.id, entryData, registryName, registryType, documentType);
                             });
-                            $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить' }).on('click', function () {
+                            editEntryIcon.css("display", "none");
+                                              
+                            const delEntryIcon = $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить' }).on('click', function () {
                                 deleteRegistryEntry(registryId, entry.id, registryName, registryType, documentType)
-                            }).appendTo(tdOperation);
+                            });
+                            delEntryIcon.appendTo(tdOperation);
+                            delEntryIcon.css("display", "none");
+
+                            filesIcon = $('<i>', {id: 'obj_files_registry_icon', class: 'material-icons material_counts', title: 'Файлы', text: 'folder_open' });
+                            filesIcon.on('click', () => {   
+                                openPopupWindow('popup_object_files_registry');
+                            });
+                            filesIcon.attr("idRegStr", entry.id);
+                            filesIcon.attr('count', '0');
+                            filesIcon.appendTo(tdOperation);
+                            filesIcon.css("display", "none");
+
+                        $(tbody).each(function(index, element){
+                            if(element.files && !isEmpty(element.files)){
+                                console.log("сработало условие без пустой строки");
+                                $(filesIcon).each(function(i, elem){
+                                    if ($(elem).attr("idregstr") == element.id){
+                                        $(elem).text("folder");        
+                                    }
+                                });   
+                            }
+                        });
+
+                            initializeObjectFilesRegistry();
+
+                            for (const th of thead) {
+                                if(th.type_action){
+                                    if(th.type_action.includes("edit") && th.name == "Действие"){
+                                        editEntryIcon.css("display", "inline-flex");
+                                    }
+                            
+                                    if(th.type_action.includes("addfile") && th.name == "Действие"){
+                                        filesIcon.css("display", "inline-flex");
+                                    }
+                            
+                                    if(th.type_action.includes("delete") && th.name == "Действие"){
+                                        delEntryIcon.css("display", "inline-flex");
+                                    }
+                                }
+                            }
                         }
                         
                     }
@@ -5321,21 +5704,17 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                         tr.find('td').addClass('delete-td');
                 }
 
-                tr.appendTo(tbody);
+                tr.appendTo(tbodyDiv);
 
             }
 
-            return tbody;
+            return tbodyDiv;
         }
         else {
             return '';
         }
 
-    }
-
-    if (!registryIsBlocked && documentType !== 'print_registry') {
-        $('<th>', {text: 'Действия'}).appendTo(table.find('thead tr'));
-    }
+    }   
 
     if (!isEmpty(tfooter)) {
         for (const row of tfooter) {
@@ -5353,8 +5732,8 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
             tr.appendTo(table.find('tbody'));
         }
     }
-
-    addEntryTable.prependTo('#popup_add_edit_registry_entry .popup-content');
+    $("<div>", { id: 'add_container' }).prependTo('#popup_add_edit_registry_entry .popup-content');
+    addEntryTable.prependTo('#popup_add_edit_registry_entry .popup-content #add_container');
 
     const headerManipulation = $('#registry_settings_content .header-manipulation');
 
@@ -6019,7 +6398,7 @@ function initializeCompanyDocumentPopupWindow(documentName, interfaceData, funcN
                         changeMonth: true,
                         changeYear: true,
                         showButtonPanel: true,
-                        yearRange: '2005:2020',
+                        yearRange: '2005:2021',
                         beforeShow: function(input, inst) {
                             $('#ui-datepicker-div').addClass('input-datepicker');
                         },
