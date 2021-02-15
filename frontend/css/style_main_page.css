@@ -524,6 +524,19 @@ nav ul, nav li {
     margin-top: 15px;
 } */
 
+#parent_regular_registries_ul{
+	position: relative;
+	height: 90%;
+	overflow-y: auto;
+}
+
+#create_registry_div {
+    position: relative;
+    color: white;
+    top: 7px;
+    padding-left: 3px;
+}
+
 .popup-content-no-overflow  {
     width: 100%;
     height: calc(100% - 35px);
@@ -3148,7 +3161,7 @@ textarea {
     border: 1px solid var(--element-color);
     color: var(--element-color);
     border-radius: 5px;
-    width: 100%;
+    width: 86%;
     height: 30px;
     margin: 0;
     margin-top: 3px;

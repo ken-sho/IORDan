@@ -1144,8 +1144,6 @@ function getObjectData() {
             OBJECT_DATA = JSON.parse(data);
             console.log(OBJECT_DATA)
 
-            // initializeObjectFilesRegistry();
-
             initializeObjectFiles();
 
             initializeOfficeAdministration();
@@ -1175,25 +1173,226 @@ function getObjectData() {
     });
 }
 // конструкторы для функции работы с файлами
+function createFilesIcon(popupId, iconId, name){
+    const filesIconTem = $('<div>', {id: iconId, class: 'icon-with-count'}).append(
+        $('<i>', {class: 'material-icons', title: 'Файлы', text: 'folder_open' }).on('click', () => {
+            openPopupWindow(popupId);
+        })
+    )
+    filesIconTem.attr("names", name);
+
+    ;
+    return filesIconTem;
+}
+
+function CreateNumberUploadedFilesDiv(uploadFormBlock){
+    const numberUploadedFilesDivTemp = $('<div>', { style: 'height: 50%' }).append(
+        $('<span>', { text: 'Выбрано файлов: 0', style: 'display: flex; align-items: center; height: 100%' })
+    ).appendTo(uploadFormBlock.find('.block-content'));
+    return numberUploadedFilesDivTemp;
+}
+
+function CreateChooseFilesButton(forName){
+    const chooseFilesButtonTem = $('<button>', { class: 'button-primary', style: 'margin-right: 5px' }).append(
+        $('<label>', { for: forName, text: 'Выбрать файлы' })
+    );
+    return chooseFilesButtonTem;
+}
+
+function ChangefilesInput(event){
+    const files = event.data.name1.prop('files');
+    console.log(files);
+    console.log(files[0]);   
+    event.data.name2.find('span').text(`Выбрано файлов: ${files.length}`);
+    event.data.name3.empty();
+    if (files.length > 0) {
+        for (const file of files) {
+            const fileNameDiv = $('<div>', { style: 'padding-bottom: 5px' }).append(
+                $('<span>', { text: file.name, style: 'color: var(--third-color)' })
+            );
+            const fileTypeDiv = $('<div>').append(
+                $('<select>', { class: 'input-main', file_name: file.name })
+            )
+            const fileDiv = $('<div>', { class: 'file-block' }).append(fileNameDiv, fileTypeDiv);
+
+            fileDiv.appendTo(event.data.name3);
+            
+            event.data.name4[file.name] = fileDiv;
+            
+            const fileTypesSelect = fileTypeDiv.find('select');
+
+            $('<option>', { text: 'Выбрать тип файла', disabled: 'true', selected: 'true' }).appendTo(fileTypesSelect);
+            for (const type of OBJECT_DATA.upload_file_types) {
+                $('<option>', { text: type.name, value: type.value }).appendTo(fileTypesSelect);
+            }
+
+            if (file.type == 'text/xml') {
+                fileTypesSelect.val('rosreester');
+
+                for (const option of fileTypesSelect.find('option')) {
+                    if ($(option).val() !== 'rosreester') {
+                        $(option).attr('disabled', true);
+                    }
+                }
+            }
+            else {
+                for (const option of fileTypesSelect.find('option')) {
+                    if ($(option).val() == 'rosreester') {
+                        $(option).attr('disabled', true);
+                    }
+                }
+            }
+
+        }
+    }
+    else {
+        $('<span>', { class: 'text-center-small', text: 'Выберите файлы для загрузки' }).appendTo(event.data.name3);
+    }
+}
+
+function ClickUploadFilesButton(event){
+    const fileTypesObj = {};
+
+    for (const select of event.data.name1.find('select')) {
+        const fileName = $(select).attr('file_name'); // находим селект и его имя
+        let fileType = $(select).val();// получаем значение селекта пример справка об отсутствии долга 
+
+        fileTypesObj[fileName] = fileType; // забили в объект имя: тип
+    }
+
+    let typesCorrect = true;
+
+    for (const elem in fileTypesObj) { // перебираем  забитый объект
+        const type = fileTypesObj[elem]; // тип файла
+        console.log(type)
+        if (type == null || type == '') {
+            typesCorrect = false;
+            break;
+        }
+    }
+
+    if (typesCorrect) { // если файл присутствует то
+        const files = event.data.name2.prop('files'); // берем файлы или объект файлов
+        console.log(files);
+        console.log(files[0]);  
+        const parentNode = event.data.name5.find('.block-content'); // загрузка
+        const filesInfoNode = event.data.name6.find('span'); // сколько выбрано фалов
+        let count = 0;
+        const callback = (data) => {
+            const fileObj = JSON.parse(data);
+            console.log(fileObj);
+            event.data.name4([fileObj], event.data.name8);
+            event.data.name7[fileObj.name].remove();
+            count++;
+            if (count == files.length) {
+                event.data.name2.val('');
+            }
+
+            if (event.data.name3.find('.icon-count').length == 0) {
+                const counterIcons = $('<div>', { class: 'icon-count', text: '1', title: 'Файлы' }).appendTo(event.data.name3);
+            }
+            else {
+                const numberOfFiles = event.data.name3.find('.icon-count').text();
+                event.data.name3.find('.icon-count').text(parseInt(numberOfFiles) + 1);
+            }
+        };
+        uploadFiles(files, fileTypesObj, parentNode, filesInfoNode, event.data.name9, callback);
+
+    }
+    else {
+        showPopupNotification('alert', 'Укажите типы для всех загружаемых файлов!');
+    };
+}
+
+// функция загрузки правого окна файлов
+function initializeFilesList(files, filesListBlock) {
+    for (const file of files) {
+        const fileDiv = $('<div>', { class: 'file-block' }).append(
+            $('<div>', { style: 'display: flex; align-items: center' }).append(
+                $('<div>', { class: 'file-type' }).append(
+                    $('<span>', { text: `${file.type}` })
+                )
+            ),
+            $('<div>', { style: 'display: flex; align-items: center; margin: 5px 0px' }).append(
+                $('<div>', { class: 'file-name' }).append(
+                    $('<span>', { text: file.name })
+                ),
+                $('<div>', { class: 'file-operation' }).append(
+                    $('<i>', { class: 'material-icons', text: 'remove_red_eye', title: 'Открыть'}).on('click', () => {
+                        $.ajax({
+                            type: 'GET',
+                            url: file.path,
+                            xhrFields: {
+                                responseType: 'blob'
+                            },
+                            success: (data) => {
+                                blob = data.slice(0, data.size, "image/jpeg");
+                                const url = window.URL.createObjectURL(blob);
+                                console.log(url)
+                                window.open(url, '_blank');
+                                window.URL.revokeObjectURL(url);
+                            }
+                        });
+                    }),
+                    $('<i>', { class: 'material-icons', text: 'save', title: 'Скачать' }).on('click', () => {
+                        showPopupNotification('notification', 'Загрузка файла начнется автоматически!');
+                        $.ajax({
+                            type: 'GET',
+                            url: file.path,
+                            xhrFields: {
+                                responseType: 'blob'
+                            },
+                            success: (data) => {
+                                var a = document.createElement('a');
+                                var url = window.URL.createObjectURL(data);
+                                a.href = url;
+                                a.download = file.name;
+                                document.body.append(a);
+                                a.click();
+                                a.remove();
+                                window.URL.revokeObjectURL(url);
+                            }
+                        });
+                    })
+
+                )
+            ),
+            $('<div>', { style: 'display: flex; align-items: center' }).append(
+                $('<div>', { class: 'file-creation' }).append(
+                    $('<span>', { text: `Загрузил: ${file.author} ${file.creation_time}` })
+                )
+            )
+        );
+
+        console.log(files.length)
+
+        if (files.length == 1) {
+            fileDiv.hide();
+            fileDiv.prependTo(filesListBlock.find('.block-content'));
+            fileDiv.fadeIn(400);
+
+        }
+        else {
+            fileDiv.prependTo(filesListBlock.find('.block-content'));
+        }
+    }
+}
+/// работа с файлами отдельных адресов
 function initializeObjectFiles() {
 
     const popupId = 'popup_object_files';
-
     $(`#${popupId}, #obj_files_icon`).remove();
 
     const uploadedFilesRepository = {};
 
-    const filesIcon = $('<div>', {id: 'obj_files_icon', class: 'icon-with-count'}).append(
-        $('<i>', {class: 'material-icons', title: 'Файлы', text: 'folder_open' }).on('click', () => {
-            openPopupWindow(popupId);
-        })
-    ).appendTo('#obj_ls_info .header-manipulation');
+    const filesIcon = createFilesIcon(popupId,'obj_files_icon');
+    
+    filesIcon.appendTo('#obj_ls_info .header-manipulation');
         
     if (!isEmpty(OBJECT_DATA.files)) {
         const counterIcons = $('<div>', { class: 'icon-count', text: OBJECT_DATA.files.length, title: 'Файлы' }).appendTo(filesIcon);
         addEventListenersToCounterIcons(counterIcons);
     }
-
     const popupLayout = createPopupLayout('Файлы', popupId);
     popupLayout.appendTo('#popup_background');
 
@@ -1201,117 +1400,13 @@ function initializeObjectFiles() {
 
     const filesDownloadDiv = $('<div>', { id: 'object_files_upload' });
     const uploadFormBlock = createContentBlock('Загрузка', { 'width': '100%', 'height': '120px' }).appendTo(filesDownloadDiv);
-    const numberUploadedFilesDiv = $('<div>', { style: 'height: 50%' }).append(
-        $('<span>', { text: 'Выбрано файлов: 0', style: 'display: flex; align-items: center; height: 100%' })
-    ).appendTo(uploadFormBlock.find('.block-content'));
+    const numberUploadedFilesDiv = CreateNumberUploadedFilesDiv(uploadFormBlock);
     uploadFormBlock.find('.block-content').css({ 'position': 'relative' });
 
-    const chooseFilesButton = $('<button>', { class: 'button-primary', style: 'margin-right: 5px' }).append(
-        $('<label>', { for: 'object_files_input', text: 'Выбрать файлы' })
-    );
-
-    const filesInput = $('<input>', { id: 'object_files_input', type: 'file', style: 'display: none', multiple: 'true' });
-    filesInput.on('change', () => {
-        const files = filesInput.prop('files');
-        numberUploadedFilesDiv.find('span').text(`Выбрано файлов: ${files.length}`);
-        uploadFilesListBlockContent.empty();
-        if (files.length > 0) {
-            for (const file of files) {
-                const fileNameDiv = $('<div>', { style: 'padding-bottom: 5px' }).append(
-                    $('<span>', { text: file.name, style: 'color: var(--third-color)' })
-                );
-                const fileTypeDiv = $('<div>').append(
-                    $('<select>', { class: 'input-main', file_name: file.name })
-                )
-                const fileDiv = $('<div>', { class: 'file-block' }).append(fileNameDiv, fileTypeDiv);
-
-                fileDiv.appendTo(uploadFilesListBlockContent);
-                
-                uploadedFilesRepository[file.name] = fileDiv;
-                
-                const fileTypesSelect = fileTypeDiv.find('select');
-
-                $('<option>', { text: 'Выбрать тип файла', disabled: 'true', selected: 'true' }).appendTo(fileTypesSelect);
-                for (const type of OBJECT_DATA.upload_file_types) {
-                    $('<option>', { text: type.name, value: type.value }).appendTo(fileTypesSelect);
-                }
-
-                if (file.type == 'text/xml') {
-                    fileTypesSelect.val('rosreester');
-
-                    for (const option of fileTypesSelect.find('option')) {
-                        if ($(option).val() !== 'rosreester') {
-                            $(option).attr('disabled', true);
-                        }
-                    }
-                }
-                else {
-                    for (const option of fileTypesSelect.find('option')) {
-                        if ($(option).val() == 'rosreester') {
-                            $(option).attr('disabled', true);
-                        }
-                    }
-                }
-
-            }
-        }
-        else {
-            $('<span>', { class: 'text-center-small', text: 'Выберите файлы для загрузки' }).appendTo(uploadFilesListBlockContent);
-        }
-    });
-
-    const uploadFilesButton = $('<button>', { class: 'button-secondary', text: 'Загрузить' });
-    uploadFilesButton.on('click', () => {
-        const fileTypesObj = {};
-
-        for (const select of uploadFilesListBlockContent.find('select')) {
-            const fileName = $(select).attr('file_name');
-            let fileType = $(select).val();
-
-            fileTypesObj[fileName] = fileType;
-        }
-
-        let typesCorrect = true;
-
-        for (const elem in fileTypesObj) {
-            const type = fileTypesObj[elem];
-            console.log(type)
-            if (type == null || type == '') {
-                typesCorrect = false;
-                break;
-            }
-        }
-
-        if (typesCorrect) {
-            const files = filesInput.prop('files');
-            const parentNode = uploadFormBlock.find('.block-content');
-            const filesInfoNode = numberUploadedFilesDiv.find('span');
-            let count = 0;
-            const callback = (data) => {
-                const fileObj = JSON.parse(data);
-                initializeFilesList([fileObj]);
-                uploadedFilesRepository[fileObj.name].remove();
-                count++;
-                if (count == files.length) {
-                    filesInput.val('');
-                }
-
-                if (filesIcon.find('.icon-count').length == 0) {
-                    const counterIcons = $('<div>', { class: 'icon-count', text: '1', title: 'Файлы' }).appendTo(filesIcon);
-                }
-                else {
-                    const numberOfFiles = filesIcon.find('.icon-count').text();
-                    filesIcon.find('.icon-count').text(parseInt(numberOfFiles) + 1);
-                }
-            };
-            uploadFiles(files, fileTypesObj, parentNode, filesInfoNode, callback);
-
-        }
-        else {
-            showPopupNotification('alert', 'Укажите типы для всех загружаемых файлов!');
-        };
-    });
-
+    const chooseFilesButton = CreateChooseFilesButton('object_files_input');
+    const filesInput = $('<input>', { id: 'object_files_input', type: 'file', style: 'display: none', multiple: 'true' });    
+// кнопка загрузить
+    const uploadFilesButton = $('<button>', { class: 'button-secondary', text: 'Загрузить' });  
     const navigateButtonsDiv = $('<div>', { style: 'height: 50%' }).append(chooseFilesButton, filesInput, uploadFilesButton);
     navigateButtonsDiv.appendTo(uploadFormBlock.find('.block-content'));
 
@@ -1323,81 +1418,12 @@ function initializeObjectFiles() {
     const filesList = $('<div>', { id: 'object_files_list' });
     const filesListBlock = createContentBlock('Список файлов', { 'width': '100%', 'height': '100%' }).appendTo(filesList);
     filesList.appendTo(popupContent);
-
-    function initializeFilesList(files) {
-        for (const file of files) {
-            const fileDiv = $('<div>', { class: 'file-block' }).append(
-                $('<div>', { style: 'display: flex; align-items: center' }).append(
-                    $('<div>', { class: 'file-type' }).append(
-                        $('<span>', { text: `${file.type}` })
-                    )
-                ),
-                $('<div>', { style: 'display: flex; align-items: center; margin: 5px 0px' }).append(
-                    $('<div>', { class: 'file-name' }).append(
-                        $('<span>', { text: file.name })
-                    ),
-                    $('<div>', { class: 'file-operation' }).append(
-                        $('<i>', { class: 'material-icons', text: 'remove_red_eye', title: 'Открыть'}).on('click', () => {
-                            $.ajax({
-                                type: 'GET',
-                                url: file.path,
-                                xhrFields: {
-                                    responseType: 'blob'
-                                },
-                                success: (data) => {
-                                    blob = data.slice(0, data.size, "image/jpeg");
-                                    const url = window.URL.createObjectURL(blob);
-                                    console.log(url)
-                                    window.open(url, '_blank');
-                                    window.URL.revokeObjectURL(url);
-                                }
-                            });
-                        }),
-                        $('<i>', { class: 'material-icons', text: 'save', title: 'Скачать' }).on('click', () => {
-                            showPopupNotification('notification', 'Загрузка файла начнется автоматически!');
-                            $.ajax({
-                                type: 'GET',
-                                url: file.path,
-                                xhrFields: {
-                                    responseType: 'blob'
-                                },
-                                success: (data) => {
-                                    var a = document.createElement('a');
-                                    var url = window.URL.createObjectURL(data);
-                                    a.href = url;
-                                    a.download = file.name;
-                                    document.body.append(a);
-                                    a.click();
-                                    a.remove();
-                                    window.URL.revokeObjectURL(url);
-                                }
-                            });
-                        })
-
-                    )
-                ),
-                $('<div>', { style: 'display: flex; align-items: center' }).append(
-                    $('<div>', { class: 'file-creation' }).append(
-                        $('<span>', { text: `Загрузил: ${file.author} ${file.creation_time}` })
-                    )
-                )
-            );
-
-            console.log(files.length)
-
-            if (files.length == 1) {
-                fileDiv.hide();
-                fileDiv.prependTo(filesListBlock.find('.block-content'));
-                fileDiv.fadeIn(400);
-
-            }
-            else {
-                fileDiv.prependTo(filesListBlock.find('.block-content'));
-            }
-        }
-    }
-
-    initializeFilesList(OBJECT_DATA.files);
+// кнопка загрузить функция
+    uploadFilesButton.on('click',{name1: uploadFilesListBlockContent, name2: filesInput, name3: filesIcon, name4: initializeFilesList, name5: uploadFormBlock, name6: numberUploadedFilesDiv, name7: uploadedFilesRepository, name8: filesListBlock, name9: CURRENT_OBJECT_DATA.accid}, ClickUploadFilesButton);
+// кнопка выбрать файлы
+    filesInput.on('change',{name1: filesInput, name2: numberUploadedFilesDiv, name3: uploadFilesListBlockContent, name4: uploadedFilesRepository}, ChangefilesInput);
+    
+    initializeFilesList(OBJECT_DATA.files, filesListBlock);
 }
 // работа с файлами отдельных строк реестров
 function initializeObjectFilesRegistry() {
@@ -1556,7 +1582,8 @@ function initializeObjectFilesRegistry() {
                 
                 
             };
-            uploadFiles(files, fileTypesObj, parentNode, filesInfoNode, IDAccid, IdRegStr, callback);
+            let AccidRessid = `${IDAccid}@${IdRegStr}`;
+            uploadFiles(files, fileTypesObj, parentNode, filesInfoNode, AccidRessid, callback);
 
         }
         else {
@@ -4138,7 +4165,7 @@ function DatepickerSetCurrentDate(inputId) {
     }
 }
 // загрузка файлов
-function uploadFiles(files, fileTypes, parentNode, filesInfoNode, accid, reccid, callback) {
+function uploadFiles(files, fileTypes, parentNode, filesInfoNode, accid, callback) {
     event.preventDefault();
 
     if (files.length > 0) {
@@ -4150,11 +4177,10 @@ function uploadFiles(files, fileTypes, parentNode, filesInfoNode, accid, reccid,
             let formdata = new FormData();
             formdata.append('file', files[index]);
 
-            console.log(reccid)
 
             if (!isEmpty(fileTypes)) {
                 formdata.append('type', fileTypes[files[index].name]);
-                formdata.append('accid', `${accid}@${reccid}`);
+                formdata.append('accid', accid);
             }
             
             console.log(formdata)
@@ -5042,12 +5068,16 @@ function getRegistryList(callback) {
         $('#constant_registries_ul').hide();
         $('#registry_settings_calendar, #regular_registries_ul').show();
         registryUl = $('#regular_registries_ul');
+        parent_registryUl = $('#parent_regular_registries_ul');
+        parent_registryUl.show();
         calendarValue = getCalendarValue('registry_settings_calendar');
     }
     else if (registryType == 'constant') {
         $('#constant_registries_ul').show();
         $('#registry_settings_calendar, #regular_registries_ul').hide();
         registryUl = $('#constant_registries_ul');
+        parent_registryUl = $('#parent_regular_registries_ul');
+        parent_registryUl.hide();
         calendarValue = '';
     }
     
@@ -5128,11 +5158,9 @@ function getRegistryList(callback) {
             if (validMonth && validYear) {
                 initializePopupAddRegistry();
 
-                $('<div>', { id: 'create_registry_div', style: 'text-align: center; padding: 10px 0px' }).append(
-                    $('<button>', { class: 'button-secondary', text: 'Создать' }).on('click', () => {
+                $('<i>', {id: 'create_registry_div', class: 'material-icons', text: 'add_circle_outline' }).on('click', () => {
                         openPopupWindow('popup_create_registry');
-                    })
-                ).appendTo('#registry_settings_select_menu');
+                    }).appendTo('.ui-datepicker-buttonpane');
             }
         }
     });
