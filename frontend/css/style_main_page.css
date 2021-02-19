@@ -3405,12 +3405,21 @@ textarea {
     height: 85%;
 }
 
+#popup_object_files_registry{
+    display: none;
+}
 #object_files_upload, #object_files_upload_registry {
     float: left;
     width: 45%;
     /* border-right: 1px solid #D9E0E3; */
     height: 100%;
     padding-right: 5px;
+}
+
+#object_files_upload_registry .material-icons{
+    padding: 0 14px;
+    position: absolute;
+    top: 44px;
 }
 
 #object_files_list {
@@ -3452,6 +3461,8 @@ textarea {
     color: #323232;
     margin: 0px 2px;
 }
+
+
 
 #registry_pagination {
     display: none;

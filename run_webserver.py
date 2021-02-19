@@ -309,6 +309,7 @@ class UploadHandler(tornado.web.RequestHandler):
         original_fname = file1['filename']
         try:
             accid = self.get_argument('accid')
+            accid_path = accid.split('@')[0]
         except:
             accid = ''
         try:
@@ -337,21 +338,21 @@ class UploadHandler(tornado.web.RequestHandler):
         else:
             fid=''
             res=''
-            dexist = os.path.exists("/opt/IORDan/privat_file/" + accid)
+            dexist = os.path.exists("/opt/IORDan/privat_file/" + accid_path)
             if dexist!=True:
-              os.mkdir("/opt/IORDan/privat_file/" + accid)
+              os.mkdir("/opt/IORDan/privat_file/" + accid_path)
             conn = db_conn.db_connect('web_receivables')
             cur = conn.cursor()
             cur.callproc('loader.add_privat_file',[asid,original_fname,accid,vtype])
             for row in cur:
                 fid=(row[0])
                 res=(row[1])
-            output_file = open("/opt/IORDan/privat_file/"+accid+'/'+ fid, 'wb')
+            output_file = open("/opt/IORDan/privat_file/"+accid_path+'/'+ fid, 'wb')
             output_file.write(file1['body'])
             output_file.close()
             f_ext = os.path.splitext(original_fname)[1] 
             if f_ext.lower() == '.xml' and vtype=='rosreester':
-                loadxml.read_file("/opt/IORDan/privat_file/"+accid+'/'+ fid,accid)
+                loadxml.read_file("/opt/IORDan/privat_file/"+accid_path+'/'+ fid,accid_path)
             conn.commit()
             cur.close()
             conn.close()
