@@ -63,6 +63,7 @@ $(document).ready(function() {
     });
 
     if (!sessionStorage.noFirstVisit) {
+        $('#popup_info').show();
         $('#update_info_content').show();
         $('#info_page').addClass('active');
         $('#obj_content').hide();
@@ -708,6 +709,7 @@ function showCurrentCompany() { // показать текущую компан�
     if (currentCompany) { // если значение true сделать следующее
         $('#main_menu_company_name').text(currentCompany); //изменить текст в названии компании
         $('#popup_control .popup-fullscreen-name').text('Управление ' + currentCompany); // и в шапке в управлении
+        $('#popup_registry .popup-fullscreen-name').text('Реестры ' + currentCompany);
     }
 }
 
@@ -741,6 +743,7 @@ function chooseCompany(li, companyName, companyId) {
         $('.object-list-tree').empty();
         $('#main_menu_company_name').text(companyName);
         $('#popup_control .popup-fullscreen-name').text('Управление ' + companyName);
+        $('#popup_registry .popup-fullscreen-name').text('Реестры ' + companyName);
         setCookie('companyId', companyId);
         initializationPopupControl();
         initializeUserRight();
@@ -1764,10 +1767,30 @@ function initializeOfficeAdministration() {
         addEntryPopup.find('.popup-content').append(addEntryTable, addEntryBtn)
 
         if (!$('#office_administration_add_registry').length) {
-            const addRegistryBtn = $('<button>', {id: 'office_administration_add_registry', class: 'button-primary', title: 'Добавить запись в реестр', text: 'Добавить запись'}).on('click', () => {
+            const addRegistryBtn = $('<button>', {id: 'office_administration_add_registry', class: 'button-primary', title: 'Добавить запись в реестр', text: 'Добавить запись'}).appendTo(registryNode.find('.header-manipulation'));
+            addRegistryBtn.off('click');
+            addRegistryBtn.on('click', () => {
                 openPopupWindowLayer2(addEntryPopupId);
-            }).appendTo(registryNode.find('.header-manipulation'));
+            });
+
+            const convertReg = $('<button>', {id: 'office_administration_registy_excel', class: 'excel-button', title: 'Конвертировать реестр в Excel', text: 'Excel'}).appendTo(registryNode.find('.header-manipulation'));
+            convertReg.off('click');
+            convertReg.on('click', () => {
+                const table = $('#registry_settings_content .block-content');
+                let convertibleContent = table.clone();
+                const hiddenTdCollection = convertibleContent.find('td, th');
+                hiddenTdCollection.each(function() {
+                    if ($(this).css('display') == 'none' || $(this).hasClass('delete-td')) {
+                        $(this).remove()
+                    }
+                })
+            });
             
+            const printReg = $('<i>', {id: 'office_administration_registry_print', class: 'material-icons', title: 'Печать реестра', text: 'print'}).appendTo(registryNode.find('.header-manipulation'));
+            printReg.off('click');
+            printReg.on('click', () => {
+            printRegistry();
+            });
         }
 
         const entryFilesPopupLayout = createPopupLayoutLayer2('Файлы', entryFilesPopupId);
@@ -2483,9 +2506,16 @@ function openHomePage() {
     $('#obj_content').show();
 }
 
-function openInfoPage() {
+function openInfoPage(popupId) {
+    $('.popup-with-menu').hide();
+    $(`#${popupId}`).css({ 'display': 'block' });
     $('#update_info_content').show();
-    $('#obj_content, .popup-with-menu').hide();
+}
+
+function openRegistryPage(popupId) {
+    $('.popup-with-menu').hide();
+    $(`#${popupId}`).css({ 'display': 'block' });
+    $('#control_registry').show();
 }
 
 function openTab(tabsId, elem, tabId) {
@@ -5439,6 +5469,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                         if(e.which == 13){
                             if(e.currentTarget == e.currentTarget.parentElement.parentElement.lastChild.lastChild) {
                                     addRegistryEntry(registryId, registryName, registryType, documentType);
+                                    console.log(registryId, registryName, registryType, documentType);
                             } else {
                             let nextInput = e.currentTarget.parentElement.nextElementSibling.lastChild.firstChild;
                             nextInput.focus();
@@ -5655,6 +5686,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                 addRegistryBtn.off('click');
                 addRegistryBtn.on('click', () => {
                     openAddRegistryEntryPopup(registryId, registryName, registryType, documentType);
+                    console.log(registryId, registryName, registryType, documentType);
                 });
             }
         }
@@ -5692,7 +5724,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
             }
         }
 
-        if(registryId == 568){
+        if(registryId == 568 || registryId == 579){
             $("<i>",{id: 'registry_update_icon', class: 'material-icons', title: 'Запросить данные ФССП', text: 'update'}).on("click", () =>{
                 getRegistryData(registryId, registryName, registryType, documentType);
             }).appendTo(headerManipulation);
@@ -5899,6 +5931,7 @@ function openAddRegistryEntryPopup(registryId, registryName, registryType, docum
     $('#add_registry_entry_btn').off('click');
     $('#add_registry_entry_btn').on('click', () => {
         addRegistryEntry(registryId, registryName, registryType, documentType);
+        console.log(registryId, registryName, registryType, documentType);
     });
 
     const inputCollection = $('#add_registry_entry_table').find('tr:nth-child(4) input');
