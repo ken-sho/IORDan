@@ -6080,7 +6080,7 @@ function saveRegisrtrySettings(registryId, registryName, registryType, documentT
 } 
 
 function addRegistryEntry(registryId, registryName, registryType, documentType) {
-    event.preventDefault();
+    // event.preventDefault();
     const validateinputsArray = [];
     const valuesObj = {};
 
@@ -6118,7 +6118,7 @@ function addRegistryEntry(registryId, registryName, registryType, documentType) 
 }
 
 function editRegistryEntry(registryId, entryId, registryName, registryType, documentType) {
-    event.preventDefault();
+    // event.preventDefault();
     const validateinputsArray = [];
     const valuesObj = {};
 
