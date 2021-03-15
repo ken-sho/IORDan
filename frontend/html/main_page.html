@@ -60,6 +60,14 @@
                                 </span>
                             </a>
                         </li>
+                        <li class="has-subnav li-change-events" title="Реестры" onclick="openRegistryPage('popup_registry')">
+                            <a>
+                                <i class="left-menu-icon material-icons">library_books</i>
+                                <span class="nav-text">
+                                    Реестры
+                                </span>
+                            </a>
+                        </li>
                         <li class="has-subnav li-change-events" title="Управление" onclick="openPopupWithMenu('popup_control')">
                             <a>
                                 <i class="left-menu-icon material-icons">assessment</i>
@@ -68,14 +76,14 @@
                                 </span>
                             </a>
                         </li>
-                        <li id="info_page" class="has-subnav" title="Информация" onclick="openInfoPage()">
+                        <!-- <li id="info_page" class="has-subnav" title="Информация" onclick="openInfoPage('popup_info')">
                             <a>
                                 <i class="left-menu-icon material-icons">help_outline</i>
                                 <span class="nav-text">
                                     Информация
                                 </span>
                             </a>
-                        </li>
+                        </li> -->
                         <li id="menu_change_state" title="Раскрыть меню" onclick="openCloseMainMenu()">
                             <a>
                                 <i class="left-menu-icon material-icons">arrow_forward</i>
@@ -211,35 +219,6 @@
                                 </div>
                                 <div id="obj_main_table"></div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="update_info_content">
-                    <div id="redmine_content">
-                        <div class="block-main-header-with-icon">
-                            <div class="header"><i class="material-icons">list</i>Список задач</div>
-                            <div class="header-icon"><i class="material-icons" title="Добавить задачу" onclick="openPopupWindow('popup_add_task')">add</i></div>
-                        </div>
-                        <div class="info-block-content">
-                            <div id="tasks_list"></div>
-                        </div>
-                    </div>
-                    <div id="updates_content">
-                        <div class="block-main-header">
-                            <div class="header">
-                                <i class="material-icons">sync</i>Обновления системы</div>
-                            </div>
-                        <div class="info-block-content">
-                            <div id="updates_list"></div>
-                        </div>
-                    </div>
-                    <div id="news_content">
-                        <div class="block-main-header">
-                            <div class="header">
-                                <i class="material-icons">subject</i>Новости</div>
-                            </div>
-                        <div class="info-block-content">
-                            <div id="news_list"></div>
                         </div>
                     </div>
                 </div>
@@ -925,18 +904,57 @@
         </div>
     </div>
     
+    <div id="popup_registry" class="popup-with-menu">
+        <div class="popup-header">
+            <div class="popup-fullscreen-name">Реестры Текущая компания</div>
+            <div class="popup-close" onclick="closePopupWindow('popup_registry')"><i class="material-icons"
+                    title="Закрыть">close</i></div>
+        </div>
+        <div class="popup-content">
+                <div id="control_registry" class="tab-content">
+                    <div id="registry_settings_select_menu" class="main-list">
+                        <div id="registry_type_div">
+                            <p>Тип реестров:
+                                <select id="registry_type_select">
+                                    <option value="regular">Ежемесячные</option>
+                                    <option value="constant">Постоянные</option>
+                                </select>
+                            </p>
+                        </div>
+                        <div id="registry_settings_calendar"></div>
+                        <div id="parent_regular_registries_ul">
+                        <ul id="regular_registries_ul"></ul>
+                        </div>
+                        <ul id="constant_registries_ul"></ul>
+                    </div>
+                    <div id="registry_settings_content" class="main-content">
+                        <div class="block">
+                            <div class="block-header-with-manipulation">
+                                <div class="header"></div>
+                                <div class="header-manipulation">
+                                    
+                                </div>
+                            </div>
+                            <div class="block-content no-padding"></div>
+                        </div>
+                    </div>
+                    <div id="registry_pagination"></div>
+                </div>
+            </div>
+        </div>
+        
+
     <div id="popup_control" class="popup-with-menu">
         <div class="popup-header">
                 <div class="popup-fullscreen-name">Управление Текущая компания</div>
                 <div class="popup-close" onclick="closePopupWindow('popup_control')"><i class="material-icons"
                         title="Закрыть">close</i></div>
-            </div>
+        </div>
             <div class="popup-content">
                 <div class="tabs" id="control_tabs">
                     <button class="tab-button active" onclick="openTab('control_tabs', this,'control_reports')">Справки</button>
                     <button class="tab-button" onclick="openTab('control_tabs', this,'control_report_settings')">Настройка справок</button>
                     <button id="control_files_tab" class="tab-button default-hidden" onclick="openTab('control_tabs', this,'control_files')">Работа с файлами</button>
-                    <button id="control_registry_tab" class="tab-button default-hidden" onclick="openTab('control_tabs', this,'control_registry')">Реестры</button id="control_registry_tab">
                     <button class="tab-button" onclick="openTab('control_tabs', this,'control_documents')">Отчеты</button>
                     <button class="tab-button" onclick="openTab('control_tabs', this,'control_object_groups')">Группы объектов</button>
 
@@ -1116,35 +1134,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="control_registry" class="tab-content">
-                            <div id="registry_settings_select_menu" class="main-list">
-                                <div id="registry_type_div">
-                                    <p>Тип реестров:
-                                        <select id="registry_type_select">
-                                            <option value="regular">Ежемесячные</option>
-                                            <option value="constant">Постоянные</option>
-                                        </select>
-                                    </p>
-                                </div>
-                                <div id="registry_settings_calendar"></div>
-                                <div id="parent_regular_registries_ul">
-                                <ul id="regular_registries_ul"></ul>
-                                </div>
-                                <ul id="constant_registries_ul"></ul>
-                            </div>
-                            <div id="registry_settings_content" class="main-content">
-                                <div class="block">
-                                    <div class="block-header-with-manipulation">
-                                        <div class="header"></div>
-                                        <div class="header-manipulation">
-                                            
-                                        </div>
-                                    </div>
-                                    <div class="block-content no-padding"></div>
-                                </div>
-                            </div>
-                            <div id="registry_pagination"></div>
-                        </div>
                         <div id="control_documents" class="tab-content">
                             <div class="block">
                                 <div class="block-header-with-manipulation">
@@ -1171,6 +1160,43 @@
             </div>
         </div>
     </div>
+
+    <!-- <div id="popup_info" class="popup-with-menu">
+        <div id="update_info_content">
+            <div class="popup-header">
+                <div class="popup-fullscreen-name">Информация</div>
+                <div class="popup-close" onclick="closePopupWindow('popup_info')"><i class="material-icons"
+                        title="Закрыть">close</i></div>
+            </div>
+            <div id="redmine_content">
+                <div class="block-main-header-with-icon">
+                    <div class="header"><i class="material-icons">list</i>Список задач</div>
+                    <div class="header-icon"><i class="material-icons" title="Добавить задачу" onclick="openPopupWindow('popup_add_task')">add</i></div>
+                </div>
+                <div class="info-block-content">
+                    <div id="tasks_list"></div>
+                </div>
+            </div>
+            <div id="updates_content">
+                <div class="block-main-header">
+                    <div class="header">
+                        <i class="material-icons">sync</i>Обновления системы</div>
+                    </div>
+                <div class="info-block-content">
+                    <div id="updates_list"></div>
+                </div>
+            </div>
+            <div id="news_content">
+                <div class="block-main-header">
+                    <div class="header">
+                        <i class="material-icons">subject</i>Новости</div>
+                    </div>
+                <div class="info-block-content">
+                    <div id="news_list"></div>
+                </div>
+            </div>
+        </div>
+    </div> -->
 
     <div id="jq-dropdown-company-list" class="jq-dropdown">
         <ul class="jq-dropdown-menu">
@@ -1285,4 +1311,4 @@
 
 </body>
 
-</html>
+</html> 

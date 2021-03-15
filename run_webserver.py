@@ -256,7 +256,6 @@ class ReportHandler(BaseHandler):
         conn = db_conn.db_connect('web_receivables')
         cur = conn.cursor()
         cur.callproc('report.proxy_srv',[asid,orgid,adate])
-        print(adate)
         for row in cur:
             res=(row[0])
             self.write(res)
@@ -499,12 +498,12 @@ application = tornado.web.Application([
     (r"/icon/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/material-design-icons'}),
     (r"/images/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/frontend/images'}),
     (r"/download/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/download'}),
-    (r"/privat_file/(.*)", tornado.web.StaticFileHandler, {'path': 'privat_file'}),
+    (r"/privat_file/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/privat_file'}),
 ], **settings)
 
 if __name__ == "__main__":
-    print ("WEB server Running...")
-    print ("Press ctrl + C to close")
+    #print ("WEB server Running...")
+    #print ("Press ctrl + C to close")
     #http_server = tornado.httpserver.HTTPServer(application,xheaders=True, ssl_options={'certfile': 'ssl/tornado.crt', 'keyfile': 'ssl/tornado.key'})
     http_server = tornado.httpserver.HTTPServer(application, ssl_options={'certfile': '/opt/IORDan/ssl/tornado.crt', 'keyfile': '/opt/IORDan/ssl/tornado.key'})
     http_server.listen(443)

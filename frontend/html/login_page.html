@@ -13,64 +13,229 @@
 
 <body>
     <div id="page_body">
-        <div id="page_content">
-            <div id="login_form_div">
-                <p id="login_form_title">Добро пожаловать!</p>
-                <form id="login_form">
-                    <div class="group">
-                        <input id="login_email" class="input" type="text" name="email" required>
-                        <span class="highlight"></span>
-                        <span class="bar"></span>
-                        <label class="input-label">Email</label>
-                    </div>
-                    <div class="group">
-                        <input id="login_password" class="input" type="password" name="password" required>
-                        <span class="highlight"></span>
-                        <span class="bar"></span>
-                        <label class="input-label">Пароль</label>
-                    </div>
-                    <div id="remember_me">
-                        <label class="checkbox-container">
-                            Запомнить меня
-                            <input id="remember_me_checkbox" class="checkbox" type="checkbox">
-                            <span class="checkmark"></span>
-                        </label>
-                    </div>
-                    <button id="login_form_btn" onclick="loginSubmit()">ВОЙТИ</button>
-                    <div id="login_alert"></div>
-                </form>
-            </div>
-            <div id="browsers_info">
-                <div id="browsers_info_text">
-                    <p>Для корректной работы портала рекомендуем использовать следующие браузеры:</p>
+        <div class="up_space">
+            <div class="container top__box">
+                <!-- Шапка сайта -->
+                <div class="cap">
+                    <ul class="cap_li">
+                        <li class="menu"><img src="../images/login_page_img/menu.svg" alt="menu"></li>
+                        <li class="padding_menu"><a href="https://webdeb.ru/"><img class="logo_mini" src="../images/login_page_img/logo.svg" alt="logo"></a><a
+                                class="text_logo" href="https://webdeb.ru/">WebDeb</a></li>
+                        <li class="hidden_li">
+                            <!-- <img class="zn_tel" src="../images/login_page_img/zn_tel.svg" alt="znachok_tel">
+                            <a class="tel_cap" href="#" onclick="return false">8 (999)
+                                464-06-21</a>
+                            <img class="zn_tel" src="../images/login_page_img/zn_tel.svg" alt="znachok_tel">
+                            <a class="tel_cap" href="#" onclick="return false">8 (905) 979-09-28</a>--><a class="logo_button"
+                                href="#contacts"><img src="../images/login_page_img/logo_vhod.svg" alt="logo_button"></a>
+                        </li>
+                    </ul>
                 </div>
-                <div id="browser_info_icons">
-                    <div>
-                        <a href="https://www.google.com/intl/ru/chrome/" target="_blank"><img src="/images/browser_icons/chrome_icon.png" title="Скачать Chrome"></a>
-                    </div>
-                    <div>
-                        <a href="https://www.mozilla.org/ru/firefox/" target="_blank"><img src="/images/browser_icons/firefox_icon.png" title="Загрузить Firefox"></a>
-                    </div>
-                    <div>
-                        <a href="https://browser.yandex.ru/" target="_blank"><img src="/images/browser_icons/yandex_icon.png" title="Скачать Яндекс Браузер"></a>
-                    </div>
+            </div>
+            <div class="container container-padding">
+                <!-- Основная часть -->
+                <div class="facepage">
+                    <h1 class="big_header">Веб-сервис по работе с дебиторской задолженностью для УК, ТСЖ в
+                        сфере ЖКХ,<br>а также для коммерческих структур, занимающихся<br>покупкой и судебным<br>взысканием долгов</h1>
+                    <p class="paragraf p_padding_face">Наша компания состоит в реестре операторов по работе с персональными
+                        данными</p>
+                    <a href="#contacts" class="top__button">Вход в сервис</a>
                 </div>
             </div>
         </div>
 
-        <div id="demo_access">
-            <div id="demo_access_header">Демо-доступ</div>
-            <div id="demo_access_content">
-                <b>Email:</b> demo<br>
-                <b>Пароль:</b> demo
+        <div class="middle_space">
+            <div class="container padding_middle_space">
+                <h2 class="middle_header">Наши преимущества</h2>
+
+                <div class="spacecard">
+
+                    <div class="card card_order_0">
+                        <img class="card__img" src="../images/login_page_img/CRM.svg" alt="CRM">
+                        <h3 class="card_header">Комплексная CRM</h3>
+                        <p class="p_card">Автоматизация практически всех бизнес-процессов УК, ТСЖ, АВД</p>
+                    </div>
+
+                    <div class="card card_order_0">
+                        <img class="card__img" src="../images/login_page_img/cloud.svg" alt="cloud">
+                        <h3 class="card_header">Облачное решение</h3>
+                        <p class="p_card">Не требует установки и работает с любого устройства через Интернет</p>
+                    </div>
+
+                    <div class="card card_order_1">
+                        <img class="card__img" src="../images/login_page_img/BD.svg" alt="BD">
+                        <h3 class="card_header">Загрузка из баз данных Росреестра</h3>
+                        <p class="p_card">Предусматривается самостоятельная загрузка данных или массовая загрузка
+                            сотрудниками нашей компании</p>
+                        <p class="p_card_ps">Cтоимость данной услуги рассчитывается индивидуально и оплачивается
+                            единовременно,
+                            в зависимости от количества загружаемой информации и сложности ее импорта.</p>
+                    </div>
+
+                    <div class="card card_order_0">
+                        <img class="card__img" src="../images/login_page_img/economic.svg" alt="economic">
+                        <h3 class="card_header">Экономия на оборудовании</h3>
+                        <p class="p_card">Не требует затрат на покупку/аренду и обслуживание дорогостоящего серверного
+                            оборудования
+                        </p>
+                    </div>
+
+                    <div class="card card_order_1">
+                        <img class="card__img" src="../images/login_page_img/book.svg" alt="book">
+                        <h3 class="card_header">Обучение работе</h3>
+                        <p class="p_card">Проведение онлайн-обучений, актуальное руководство пользователя, видеоматериалы
+                        </p>
+                    </div>
+
+                    <div class="card card_order_1">
+                        <img class="card__img" src="../images/login_page_img/analitic.svg" alt="analitic">
+                        <h3 class="card_header">Подробная аналитика</h3>
+                        <p class="p_card">Мониторинг дебиторской задолженности (фактическое погашение, количество
+                            задолженностей и др.) по БД, а такжена сайте судебных приставов реестре операторов перс данных
+                        </p>
+                    </div>
+
+                    <div class="card card_order_2">
+                        <img class="card__img" src="../images/login_page_img/message.svg" alt="message">
+                        <h3 class="card_header">Система оповещения</h3>
+                        <p class="p_card">Автоматическое отслеживание и информирование о возникновении дебиторской
+                            задолженности в зависимости от выбранных параметров (срок возникновения, предельная сумма и
+                            т.д.)</p>
+                    </div>
+
+                    <div class="card card_order_2">
+                        <img class="card__img" src="../images/login_page_img/dolg.svg" alt="dolg">
+                        <h3 class="card_header">Продажа долгов</h3>
+                        <p class="p_card">При работе в нашей системе у вас не возникнет проблем при продаже долгов (для УК).
+                            Формирование электронной и/или печатной выгрузки из БД для передачи долга по договору цессии</p>
+                    </div>
+
+                    <div class="card card_order_2">
+                        <img class="card__img" src="../images/login_page_img/reports.svg" alt="reports">
+                        <h3 class="card_header">Формирование отчётов</h3>
+                        <p class="p_card">В пару кликов формируйте отчеты по проведенной работе с поэтапной детализацией</p>
+                    </div>
+
+                    <div class="card card_order_3">
+                        <img class="card__img" src="../images/login_page_img/settings.svg" alt="settings">
+                        <h3 class="card_header">Постоянное развитие</h3>
+                        <p class="p_card">Оптимизация работы сервиса под каждого заказчика и разработка востребованных
+                            модулей</p>
+                    </div>
+
+                    <div class="card card_order_3">
+                        <img class="card__img" src="../images/login_page_img/hand.svg" alt="hand">
+                        <h3 class="card_header">Льготный период</h3>
+                        <p class="p_card">Первые три месяца 50% скидка на обслуживание</p>
+                    </div>
+
+                    <div class="card card_order_3">
+                        <img class="card__img" src="../images/login_page_img/cash.svg" alt="cash">
+                        <h3 class="card_header">Выгодная цена</h3>
+                        <p class="p_card">Гибкая система расчёта стоимости обслуживания в зависимости от типа организации</p>
+                    </div>
+
+                    <div class="card card_order_4">
+                        <img class="card__img" src="../images/login_page_img/judges.svg" alt="judges">
+                        <h3 class="card_header">Подготовка к суду</h3>
+                        <p class="p_card">Формирование полного комплекта документов для взыскания задолженности через суд,
+                            учитывая территориальные особенности субъектов федерации.</p>
+                    </div>
+
+                    <div class="card card_order_4">
+                        <img class="card__img" src="../images/login_page_img/talk.svg" alt="talk">
+                        <h3 class="card_header">Поддержка и сопровождение</h3>
+                        <p class="p_card">Специалисты нашей компании всегда готовы квалифицированно ответить на все ваши
+                            вопросы</p>
+                    </div>
+
+                    <div class="card card_order_4">
+                        <img class="card__img" src="../images/login_page_img/guard.svg" alt="guard">
+                        <h3 class="card_header">Надёжное хранение данных</h3>
+                        <p class="p_card">Вся информация находится на отдельном сервере и защищена от потерь данных, права
+                            доступа настраиваются администратором системы</p>
+                    </div>
+
+                    <div class="card card_order_5">
+                        <img class="card__img" src="../images/login_page_img/listen.svg" alt="listen">
+                        <h3 class="card_header">Автоинформирование должников</h3>
+                        <p class="p_card">Возможность подключения автоматизированных модулей СМС-рассылки или телефонного
+                            автоинформатора для массового оповещения по базе</p>
+                    </div>
+
+
+
+                </div>
             </div>
         </div>
-        
-        <footer>
-            <div id="certified_operator_notification">Обработка персональных данных осуществляется <a href="https://rkn.gov.ru/personal-data/register/?id=24-15-002862" target="_blank">сертифицированным оператором</a><br>© ООО &laquo;Интел-Град Плюс&raquo;</div>
-        </footer>
+        </div>
+        <div class="conclusion">
+
+            <div id="contacts" class="contacts">
+                <div class="cont_data">
+                    <h3 class="middle_header tal">Попробуйте прямо сейчас</h3>
+                    <p class="paragraf">Зайдите на адрес <a href="https://webdeb.ru/">webdeb.ru</a> и оцените возможности
+                        сервиса в демонстрационном режиме
+                    </p>
+                    <ul class="ul_cont_data">
+                        <li class="li_cont_data">Быстро</li>
+                        <li>Надёжно</li>
+                    </ul>
+                </div>
+
+                <div class="input_data">
+                    <form id="login_form">
+                        <h4 class="input_data_header">Для входа введите логин и пароль</h4>
+                        <input id="login_email" class="input_data_form" type="text" name="email"  placeholder="Логин" required>
+                        <input id="login_password" class="input_data_form" type="password" name="password"  placeholder="Пароль" required>
+                        <div id="remember_me">
+                            <label class="checkbox-container">
+                                Запомнить меня
+                                <input id="remember_me_checkbox" class="checkbox" type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <button id="login_form_btn" class="submit_data" onclick="loginSubmit()">Вход в сервис</button>
+                        <div id="login_alert"></div>
+                    </form>
+                </div>
+
+            </div>
+
+
+        </div>
+        <!-- Подвал сайта -->
+    <!--    <div class="footer">
+            <img class="circles" src="../images/login_page_img/circles.svg" alt="circles">
+            <div class="container footer_flex">
+     <!--           <div class="footer__card otstup">
+                    <h4 class="header__bascard">Федоненко Сергей<br>Васильевич</h4>
+                    <p class="p_status">Генеральный директор</p>
+                    <p class="p_footer_tel">+7 (999) 464-06-21</p>
+                </div>-->
+
+                <div class="footer__card">
+                    <h4 class="header__bascard">Наши контакты</h4>
+                   <!-- <p class="p_status">Технический директор</p>-->
+                    <p class="p_footer_tel">+7 (905) 979-09-28</p>
+                 <!--   <p class="p_footer_tel">+7 (3919) 36-09-28</p>-->
+                </div>
+
+            </div>
+            <img class="circles2" src="../images/login_page_img/circles.svg" alt="circles">
+        </div> -->
+        <div class="container">
+            <ul class="ul_footer">
+                <li><a href="https://webdeb.ru/"><img class="logo_mini" src="../images/login_page_img/logo.svg" alt="logo"></a><a
+                        class="text_logo_footer" href="https://webdeb.ru/">WebDeb</a></li>
+                <li>
+            </ul>
+            <hr>
+            <div class="allrigres">
+                <p>© ООО «Интел-Град Плюс»</p>
+            </div>
+        </div>
     </div>
-
 </body>
 
 </html>

@@ -1,3 +1,8 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
 :root {
     --first-color: #002F6C;
     --second-color: #19437A;
@@ -20,101 +25,333 @@
     --element-active-color: #1661D9;  
 }
 
-body {
-    margin: 0;
-    font-family: 'Roboto', sans-serif;
-    background-color: #FFFFFF;
+.container {
+    max-width: 1240px;
+    margin: 0 auto;
 }
 
-#page_body {
-    display: none;
-    margin: auto;
-    width: 534px;
+.padding_middle_space {
+    padding: 96px 62px 66px 92px;
+}
+
+.top__box {
+    display: flex;
+    flex-direction: column;
     height: 100%;
-    min-width: max-content;
+    background-color: #FAFBFE;
 }
 
-#page_content {
-    width: 100%;
-    padding-top: 15%;
+.text_logo {
+    padding-left: 16px;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 30px;
+    line-height: 36px;
+    color: #29323C;
+    text-decoration: none;
+    vertical-align: 7px
 }
 
-#login_form_div {
-    width: 100%;
-    background: #FFFFFF;
-    border: 1px solid #EDEDF1;
+.logo_button {
+    padding-left: 3.5px;
+}
+
+.container-padding {
+    padding-left: 15px;
     box-sizing: border-box;
-    box-shadow: 0px 2px 16px #E6E6EA;
-    border-radius: 5px;
+    background-color: rgba(229,229,229,0.22);
 }
 
-#login_form {
-    width: 426px;
-    margin: auto;
+
+body{
+    font-family: Arial, Helvetica, sans-serif;
+}
+.paragraf{
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 24px;
+    color: #29323C;
+    text-transform: none;
 }
 
-.input {
-    width: 426px;
-    height: 46px;
-    border: 1px solid #D9E0E3;
-    box-sizing: border-box;
-    border-radius: 5px;
+.p_padding_face {
+    padding-top: 27px;
+    width: 409px;
+}
+
+.p_card {
+    font-size: 13px;
+    line-height: 18px;
+    text-align: center;
+    color: #7483A9;
+    mix-blend-mode: normal;
+    padding-top: 12px;
+    width: 272px;
+}
+
+.p_card_ps {
+    font-family: Roboto;
     font-weight: normal;
+    font-size: 12px;
+    line-height: 14px;
+    text-align: center;
+    color: #7483A9;
+    mix-blend-mode: normal;
+    padding-top: 10px;
+    width: 272px;
+}
+
+.p_status {
+    font-style: italic;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 24px;
+    text-align: center;
+    color: #FAFBFE;
+    mix-blend-mode: normal;
+    margin-bottom: 16px;
+}
+
+.p_footer_tel {
+    font-style: normal;
+    font-weight: 300;
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    color: #FAFBFE;
+    mix-blend-mode: normal;
+}
+
+.card_order_0 {
+    order: 0;
+}
+
+.card_order_1 {
+    order: 1;    
+}
+
+.card_order_2 {
+    order: 2;
+}
+
+.card_order_3 {
+    order: 3;
+}
+
+.card_order_4 {
+    order: 4;
+}
+
+.card_order_5 {
+    order: 5;
+}
+
+.top__button {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+    align-items: center;
+    text-align: center;
+    color: #FAFBFE;
+    background: #000DFF;
+    box-shadow: 0px 1px 1px #E5E9F6, 0px 2px 4px #E5E9F6;
+    border-radius: 48px;
+    text-decoration: none;
+    padding: 12px 66px;
+    display: inline-block;
+    margin-top: 27px;
+}
+
+.big_header{
+    font-style: normal;
+    font-weight: bold;
+    font-size: 38px;
+    line-height: 48px;
+    color: #29323C;
+    width: 640px;
+    padding-top: 18px;
+}
+.middle_header{
+    font-weight: bold;
+    font-size: 32px;
+    line-height: 39px;
+    text-align: center;
+    color: #29323C;    
+}
+.card_header{
+    margin-top: 20px;
+    width: 272px;
+    font-weight: bold;
+    font-size: 18px;
+    line-height: 22px;
+    text-align: center;
+    letter-spacing: 0.02em;
+    color: #29323C;
+}
+.header__bascard{
+    font-size: 24px;
+    line-height: 28px;
+    text-align: center;
+    color: #FAFBFE;
+    font-weight: normal;
+    margin-bottom: 8px;
+}
+
+.facepage{    
+    margin-top: 22px;
+    padding-bottom: 56px;
+    background-image: url(../images/login_page_img/Podlojka.svg);
+    background-repeat: no-repeat;
+    background-position: right bottom;
+    height: 750px;
+}
+
+.up_space{
+    background-color: #FAFBFE;
+}
+
+.middle_space {
+    background-color: rgba(234,237,244,0.22);
+}
+
+.cap{
+    padding: 28.5px 15px 28.5px;
+    height: 98px;
+    box-sizing: border-box;
+}
+
+.cap_li {
+    list-style-type: none;
+    display: flex;
+    justify-content: space-between;
+    height: 41px;
+    align-items: center;
+}
+
+.tel_cap {
+    font-family: Roboto;
     font-size: 16px;
     line-height: 19px;
-    padding-left: 14px;
+    color: #29323C;
+    vertical-align: 13px;
+    text-decoration: none;
+    padding-right: 28.5px;
 }
 
-#login_password {
-    margin-top: 30px;
+.zn_tel {
+    vertical-align: 10px;
+    padding-right: 10.5px;
+}
+
+.spacecard {
+    margin-top: 56px;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    position: relative;
 }
 
 
-#login_form_btn {
-    width: 100%;
-    height: 48px;
-    margin-top: 31px;
-    margin-bottom: 33px;
-    background: var(--element-color);
-    border: 0;
-    border-radius: 5px;
-    transition: 0.2s;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 16px;
-    text-transform: uppercase;
-    color: #FFFFFF;
+.card{
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+    width: 332px;
+    background-color: #FAFBFE;
+    box-shadow: 0px 2px 16px rgba(229, 233, 246, 0.84), 0px 20px 20px rgba(229, 233, 246, 0.4);
+    border-radius: 20px;
+    box-sizing: border-box;
+    margin-right: 30px;
+    margin-bottom: 30px;
+    height: 100%;
+    align-self: center;
+}
+.conclusion{
+    flex-grow: 1;
+    background-image: url(../images/login_page_img/background.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 682px;
+    padding: 138px 0px;
+    box-sizing: border-box;
 }
 
-#login_form_btn:hover {
-    background: var(--element-hover-color);
+.contacts {
+    display: flex;
+    justify-content: space-between;
+    width: 1030px;
+    height: 406px;
+    align-items: start;
+    margin: 0 auto;
+    background-color: #FAFBFE;
+    box-shadow: 0px 1px 18px rgba(47, 48, 53, 0.05), 0px 4px 42px rgba(47, 48, 53, 0.1);
+    border-radius: 16px;
+    box-sizing: border-box;
+    padding: 0px 178px;
 }
 
-#login_form_btn:active {
-    background: var(--element-active-color);
+.cont_data {
+    text-align: left;
+    margin-top: 80px;
+    width: 292px;
 }
 
-button {
-    cursor: pointer;
+.tal {
+    text-align: left;
+    margin-bottom: 16px;
 }
 
-#login_form_title {
-    margin: 0;
-    margin-top: 30px;
-    margin-bottom: 32px;
-    color: #263238;
-    font-weight: 500;
-    font-size: 28px;
-    line-height: 33px;
+.ul_cont_data {
+    margin-top: 24px;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 20px;
+    line-height: 24px;
+    list-style-image: url(../images/login_page_img/marker.svg);
+    list-style-position: inside;
+
+}
+
+.li_cont_data {
+    margin-bottom: 8px;
+}
+
+.input_data {
+    margin-top: 74px;
+    width: 300px;
+}
+
+.input_data_header {
+    font-style: normal;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 24px;
     text-align: center;
+    color: #000DFF;
+    margin-bottom: 22px;
+}
+
+.input_data_form {
+    width: 300px;
+    height: 58px;
+    background-color: #FAFBFE;
+    border: 2px solid rgba(234, 237, 244, 0.6);
+    border-radius: 8px;
+    box-sizing: border-box;
+    padding: 18px;    
+    margin-bottom: 20px;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 22px;
+    color: #AAB3C8;
 }
 
 #remember_me {
     text-align: left;
-    margin-top: 14px;
+    margin-top: 0px;
     font-weight: normal;
     font-size: 12px;
-    line-height: 14px;
+    line-height: 12px;
 }
 
 /* Customize the label (the checkbox-container) */
@@ -145,7 +382,26 @@ button {
     height: 0;
     width: 0;
 }
+/* end checkbox */
 
+.submit_data {
+    margin-top: 9px;
+    width: 300px;
+    height: 48px;
+    background: #000DFF;
+    box-shadow: 0px 1px 1px #E5E9F6, 0px 2px 4px #E5E9F6;
+    border-radius: 48px;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+    align-items: center;
+    text-align: center;
+    color: #FAFBFE;
+    mix-blend-mode: normal
+}
+#login_form_btn:hover {
+    cursor: pointer;
+}
 /* Create a custom checkbox */
 .checkmark {
     position: absolute;
@@ -174,12 +430,10 @@ button {
     position: absolute;
     display: none;
 }
-
 /* Show the checkmark when checked */
 .checkbox-container input:checked ~ .checkmark:after {
     display: block;
 }
-
 /* Style the checkmark/indicator */
 .checkbox-container .checkmark:after {
     left: 5px;
@@ -192,163 +446,387 @@ button {
     transform: rotate(45deg);
 }
 
-#certified_operator_notification {
-    font-size: 13px;
-    line-height: 20px;
-    position: absolute;
-    bottom: 38px;
-    text-align: center;
-    color: #A8ADAF;
-}
-
 #login_alert {
     margin-bottom: 16px;
     color: red;
 }
 
-#demo_access {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    width: 250px;
-    height: 80px;
-    border: 1px solid gray;
-}
-
-#demo_access_header {
-    height: 25px;
-    text-align: center;
-    font-size: 18px;
-    border-bottom: 1px solid gray;
-}
-
-#demo_access_content {
-    height: 53px;
-    text-align: center;
-    font-size: 21px;
-}
-
-* { box-sizing:border-box; }
-
-/* form starting stylings ------------------------------- */
-.group 			  { 
-  position:relative; 
-}
-
-input 				{
-  font-size:18px;
-  padding:10px 10px 10px 5px;
-  display:block;
-  width:300px;
-  border:none;
-  border-bottom:1px solid #757575;
-}
-input:focus 		{ outline:none; }
-
-/* LABEL ======================================= */
-.input-label 				 {
-    color: #A8ADAF;
-    font-size: 16px;
-    font-weight: normal;
-    position: absolute;
-    pointer-events: none;
-    left: 14px;
-    top: 13px;
-    transition: 0.2s ease all;
-    -moz-transition: 0.2s ease all;
-    -webkit-transition: 0.2s ease all;
-}
-
 /* active state */
 input:focus ~ label, input:valid ~ label 		{
-  top:-20px;
-  font-size:14px;
-  color: var(--element-color);
+    top:-20px;
+    font-size:14px;
+    color: var(--element-color);
+  }
+
+.allrigres{
+    font-family: Roboto;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 19px;
+    text-align: center;
+    color: #000DFF;
+    padding-top: 31px;
+    padding-bottom: 31px;
 }
 
-/* BOTTOM BARS ================================= */
-.bar 	{ position:relative; display:block; width:426px; }
-.bar:before, .bar:after 	{
-  content:'';
-  height:2px; 
-  width:0;
-  bottom:1px; 
-  position:absolute;
-  background: var(--element-color); 
-  transition:0.2s ease all; 
-  -moz-transition:0.2s ease all; 
-  -webkit-transition:0.2s ease all;
-}
-.bar:before {
-  left:50%;
-}
-.bar:after {
-  right:50%; 
+.footer{
+    background-color: #000DFF;
+    height: 320px;
+    display: flex;
+    align-items: center;
+    position: relative;   
 }
 
-/* active state */
-input:focus ~ .bar:before, input:focus ~ .bar:after {
-  width:50%;
+.circles {
+    position: absolute;
+    left: 115px;
+    top: -5px;
 }
 
-/* HIGHLIGHTER ================================== */
-.highlight {
-  position:absolute;
-  height:60%; 
-  width:100px; 
-  top:25%; 
-  left:0;
-  pointer-events:none;
-  opacity:0.5;
+.circles2 {
+    position: absolute;
+    right: 115px;
+    bottom: -5px;
 }
 
-/* active state */
-input:focus ~ .highlight {
-  -webkit-animation:inputHighlighter 0.3s ease;
-  -moz-animation:inputHighlighter 0.3s ease;
-  animation:inputHighlighter 0.3s ease;
-}
-
-/* ANIMATIONS ================ */
-@-webkit-keyframes inputHighlighter {
-	from { background:#5264AE; }
-  to 	{ width:0; background:transparent; }
-}
-@-moz-keyframes inputHighlighter {
-	from { background:#5264AE; }
-  to 	{ width:0; background:transparent; }
-}
-@keyframes inputHighlighter {
-	from { background:#5264AE; }
-  to 	{ width:0; background:transparent; }
-}
-
-#browsers_info_text {
-    font-size: 13px;
-    color: #A8ADAF;
+.footer__card{
+    padding: 0px;
+    width: 364px;
     text-align: center;
 }
 
-#browser_info_icons {
-    width: 55%;
-    margin: auto;
+.footer_flex {
+    display: flex;
+    justify-content: center;
 }
 
-#browser_info_icons div {
-    float: left;
-    width: calc(100% / 3);
+.otstup {
+    margin-right: 88px;
+}
+
+.ul_footer {
+    list-style-type: none;
     text-align: center;
+    padding-top: 32px;
+    padding-bottom: 32px;
 }
 
-#browser_info_icons img {
-    width: 48px;
-    height: 48px;
-    cursor: pointer;
-    filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.2)) grayscale(100%);
-    opacity: 0.7;
+.text_logo_footer {
+    font-family: Roboto;
+    padding-left: 18px;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 32px;
+    line-height: 37px;
+    color: #000DFF;
+    text-decoration: none;
+    vertical-align: 7px
 }
 
-#browser_info_icons img:hover {
-    filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.2));
-    opacity: 1;
+hr {
+    width: 820px;
+    border: 1px solid #000DFF;
+    margin: 0 auto;
 }
+
+.menu {
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    .container {
+        padding-left: 13px;
+        padding-right: 13px;
+    }
+
+    .facepage {
+        padding-bottom: 72px;
+        background-position: right bottom;
+        height: 734px;
+        
+        background-size: 90%;
+    }
+
+    .spacecard{
+        margin-top: 43px;
+    }
+
+    .card {
+        margin: 13px;
+    }
+
+    .conclusion {
+        padding: 128px 0px;
+        height: 663px;
+    }
+
+    .contacts {
+        width: 690px;
+        height: 407px;
+        padding: 0px 49px;
+    }
+
+    .cont_data {
+        text-align: left;
+        margin-top: 74px;
+        width: 276px;
+    }
+
+    .paragraf {
+        font-size: 16px;
+        line-height: 24px;
+        color: #29323C;
+        text-transform: none;
+        }
+
+    hr {
+            width: 690px;
+        }
+
+    .otstup {
+        margin-right: 0px;
+    }
+
+    .circles {
+        position: absolute;
+        left: 39px;
+        top: 0px;
+        height: 65px;
+    }
+
+    .circles2 {
+        position: absolute;
+        right: 39px;
+        bottom: 0px;
+        height: 65px;
+    }
+
+}
+
+
+@media (max-width: 667px) {
+    .text_logo {
+        font-style: normal;
+        text-align: center;
+        font-weight: bold;
+        font-size: 20px;
+        line-height: 24px;
+        color: #29323C;
+        text-decoration: none;
+        vertical-align: 7px
+    }
+
+    .cap{
+        padding: 14.75px 0px;
+        height: 56px;
+        box-sizing: border-box;    
+    }
+
+    .cap_li {
+        justify-content: flex-start;
+        height: 26.5px;
+        align-items: center;
+    }
+
+    .hidden_li {
+        display: none;
+    }
+
+    .logo_mini {
+        height: 26.5px;
+    }
+
+    .facepage {
+        margin-top: 2px;
+        padding-bottom: 48px;
+        background-position: right 202px;
+        background-image: image();
+        height: 571px;
+    }
+
+    .big_header {
+        font-size: 24px;
+        line-height: 29px;
+        width: 290px;
+    }
+
+    .paragraf {
+        line-height: 22px;
+    }
+
+    .p_padding_face {
+        padding-top: 60px;
+        width: 290px;
+    }
+
+    .top__button {
+        margin-top: 18px;
+        font-size: 18px;
+        line-height: 22px;
+        mix-blend-mode: normal;
+    }
+
+    .padding_middle_space {
+        padding: 48px 15px 39px;
+    }
+
+    .spacecard {
+        margin-top: 29px;
+    }
+
+    .card {
+        margin: 9px;
+        width: 290px;
+        padding: 30px 9px;
+    }
+
+    .middle_header {
+        font-size: 22px;
+        line-height: 27px;
+    }
+
+    .card_header {
+        color: #2D4379;
+    }
+
+    .conclusion {
+        padding: 60px 15px;
+        height: 726px;
+        background-position: top;
+        background-repeat: round;
+    }
+
+    .contacts {
+        width: 290px;
+        height: 606px;
+        padding: 38px 24px;
+        flex-direction: column;
+        justify-content: start;
+    }
+
+    .cont_data {
+        text-align: left;
+        margin-top: 0px;
+        width: 100%;
+    }
+
+    .ul_cont_data {
+        margin-top: 16px;
+        font-size: 16px;
+        line-height: 22px;
+        }
+
+        .input_data {
+            margin-top: 26px;
+            width: 100%;
+        }
+
+        .input_data_header {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .input_data_form {
+            width: 100%;
+        }
+
+        .submit_data {
+            margin-top: 10px;
+            width: 100%;
+ 
+        }
+
+        
+
+        .header__bascard {
+            font-size: 22px;
+            line-height: 24px;
+        }
+
+        .footer {
+            height: 418px;
+        }
+
+        .circles {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            height: 65px;        
+        }
+
+        .circles2 {
+            position: absolute;
+            right: 0px;
+            bottom: 0px;
+            height: 65px;        
+        }
+
+        .otstup {
+            margin-bottom: 38px;        
+        }
+
+        .menu {
+            display: inline;
+            flex-grow: 2;
+        }
+
+        .footer_flex {
+            flex-direction: column; 
+            justify-content: start;   
+        }
+
+        .footer__card {
+            width: 100%;
+        }
+
+        .padding_menu {
+            flex-grow: 3;
+        }
+
+    .allrigres {
+        padding-top: 32px;
+        padding-bottom: 32px;
+    }
+    hr {
+        width: 290px;
+    }
+
+    .text_logo_footer {
+        padding-left: 8px;
+        font-size: 20px;
+        line-height: 24px;
+        font-family: Arial;
+    }
+
+}
+
+
+
+@media (min-width: 380px) and (max-width: 667px) {
+       /* CSS-стили */
+	   
+	.facepage{    
+    margin-top: 22px;
+    padding-bottom: 56px;
+    background-image: url(../images/login_page_img/Podlojka.svg);
+    background-repeat: no-repeat;
+    background-position: right center;
+    height: 558px;
+	background-size: 50%;
+	} 
+}
+
+@media (min-width: 500px) and (max-width: 667px) {
+       /* CSS-стили */
+	   
+	.facepage{    
+    margin-top: 22px;
+    padding-bottom: 56px;
+    background-image: url(../images/login_page_img/Podlojka.svg);
+    background-repeat: no-repeat;
+    background-position: right;
+    height: 500px;
+	background-size: 60%;
+	} 
+}
+

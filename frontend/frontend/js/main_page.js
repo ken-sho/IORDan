@@ -9,9 +9,6 @@ var IdRegStr;
 var IDAccid;
 var registryData;
 var filesRegistry;
-var COUNT_ID = 0;
-var C_REG_DATA = {};
-
 
 $(document).ready(function() {  
     sessionStorage.setItem('printMode', 'off');
@@ -66,10 +63,10 @@ $(document).ready(function() {
     });
 
     if (!sessionStorage.noFirstVisit) {
-        // $('#popup_info').show();
-        // $('#update_info_content').show();
-        $('#home_page').addClass('active');
-        $('#obj_content').show();
+        $('#popup_info').show();
+        $('#update_info_content').show();
+        $('#info_page').addClass('active');
+        $('#obj_content').hide();
     }
     else {
         $('#home_page').addClass('active');
@@ -188,8 +185,6 @@ $(document).ready(function() {
             $('#object_communication_textarea_tr').hide();
         }
     });
-
-    postIdReccid ();
 
     setInterval(() => {
         checkSession();
@@ -5075,14 +5070,12 @@ function getRegistryList(callback) {
                     $('<i>', {class: 'material-icons', text: 'lock', style: 'font-size: 20px'}).appendTo(li.find('span'));
                     li.attr('title', 'Реестр закрыт');
                 }
-                li.off('click');
+
                 li.on('click', function () {
                     const tabsCollection = registryUl.find('li');
                     tabsCollection.removeClass('active');
                     $(this).addClass('active');
-                    $("#add_container").remove();
                     getRegistryData(registry.id, registry.name, registryType, registry.doc_type);
-                    
                 })
             }
 
@@ -5406,102 +5399,12 @@ function addSettingChangeToObj(obj, elem, objKey, hiddenCurrentState) {
         console.log(obj);
     });
 }
-
-function operationRegistry (Obj, registryId, registryName, registryType, documentType, Operation, previosString) {
-
-    const tr = $("<tr>");
-    const tdOperation = $("<td>");
-   
-    for (const entry of Obj.tbody) {
-        for (const index in entry.data) {
-            const td = $('<td>', { text: entry.data[index] }).appendTo(tr);
-        }
-    }
-    tdOperation.appendTo(tr);
-
-    if (Operation == "edit"){
-        $(previosString).after(tr);
-    } else if(Operation == "add"){
-        tr.appendTo(previosString);
-    }
-
-
-    for(const action of Obj.thead){
-        if(action.name == "Действие"){
-            if(action.type_action.includes("edit")){
-                const editEntryIcon = $('<i>', { class: 'material-icons', text: 'edit', title: 'Изменить' }).appendTo(tdOperation);
-                editEntryIcon.on('click', function (e) {
-                    openEditRegistryEntryPopup(e, registryId, Obj.tbody[0].id, registryName, registryType, documentType, Obj);
-                });
-                editEntryIcon.css("display", "inline-flex");
-            }
-
-            if(action.type_action.includes("delete")){
-                
-                const delEntryIcon = $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить' }).on('click', function (e) {
-                    deleteRegistryEntry(e, registryId, Obj.tbody[0].id, registryName, registryType, documentType)
-                });
-                delEntryIcon.appendTo(tdOperation);
-                delEntryIcon.css("display", "inline-flex");
-            }
-            if(action.type_action.includes("addfile")){
-                const filesIcon = $('<i>', {id: 'obj_files_registry_icon', class: 'material-icons material_counts', title: 'Файлы', text: 'folder_open' });
-                filesIcon.on('click', function (e) { 
-                    IdRegStr = e.currentTarget.attributes.idRegStr.value;        
-                    $(registryData.tbody).each(function(index, element){
-                        if(element.id == IdRegStr){
-                            filesRegistry = element.files;                 
-                        }
-                    });     
-                    IDAccid = $.ajax({
-                        async: false,
-                        url: `/web_request?query=recid@${IdRegStr}`,
-                        type: 'get'
-                    }).responseText;
-                    openFilesRegistryPopup(registryId, registryName, registryType, documentType);  
-                    return IDAccid;
-                    
-                });
-                filesIcon.attr("idRegStr", Obj.tbody[0].id);
-                filesIcon.appendTo(tdOperation);
-            }
-        }       
-    } 
-}
-
-function postIdReccid() {
-   return setInterval(() => {
-       if(C_REG_DATA.registryId !== undefined){
-           if($('#popup_registry').css("display") == "block" && $('#popup_add_edit_registry_entry').css("display") !== "block" && $('#popup_registry_settings').css("display") !== "block" && $('#popup_object_files_registry').css("display") !== "block") {
-            let summServer = $.ajax({
-                async: false,
-                url: `/web_request?query=reechksumm@${C_REG_DATA.registryId}`,
-                type: 'get'
-            }).responseText
-            if(summServer != COUNT_ID){
-            const saveScroll =  $('#registry_settings_content .block-content');
-            let countSaveScroll = saveScroll.scrollTop()
-            showPopupNotification('notification', 'В текущем реестре произошло изменение!');
-            getRegistryData(C_REG_DATA.registryId, C_REG_DATA.registryName, C_REG_DATA.registryType, C_REG_DATA.documentType,saveScroll, countSaveScroll);  
-            }             
-           }
-       }
-    }, 300000);
-    
-}
-
 // получить данные рееестра
-function getRegistryData(registryId, registryName, registryType, documentType, saveScroll = "false", countSaveScroll = "false") {
+function getRegistryData(registryId, registryName, registryType, documentType) {
     $('#registry_print_icon').off('click');
     $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon, #registy_convert_to_excel_btn, #no_registries_div, #registry_printed_document_icon, #add_registry_entry_table', '#add_container').remove();
     $("#add_container").remove();
-    COUNT_ID = 0;
-    C_REG_DATA = {
-        registryId: registryId,
-        registryName: registryName,
-        registryType: registryType,
-        documentType: documentType
-    }
+
     $('#registry_settings_content .block-content').empty();
     createContentLoader('#registry_settings_content .block-content');
     
@@ -5514,55 +5417,100 @@ function getRegistryData(registryId, registryName, registryType, documentType, s
             registryData = JSON.parse(data);
             console.log(registryData);
             displayRegistry(registryData, registryId, registryName, registryType, documentType);
-            if(!(saveScroll == "false") && !(countSaveScroll == "false")){
-                saveScroll.scrollTop(countSaveScroll);
-            }
-
-            COUNT_ID = 0;
-            for(let i = 0; i < registryData.tbody.length; i++){
-               COUNT_ID += registryData.tbody[i].id; 
-            }
         }
     });
 }
 
 function getAddRegistryEntry(Obj, registryId, registryName, registryType, documentType){
-    const previosString = $("#registry_table tbody");
-    const Operation = "add";
-    COUNT_ID += Obj.tbody[0].id;    
-    operationRegistry (Obj, registryId, registryName, registryType, documentType, Operation, previosString);      
-}
+    const tr = $("<tr>");
+    const tdOperation = $("<td>");
 
-function getEditRegistryEntry(e, Obj, registryId, registryName, registryType, documentType ){
-    const previosString = e.currentTarget.parentElement.parentElement.previousElementSibling;    
-    const CurrentString = e.currentTarget.parentElement.parentElement.children;
-    $(CurrentString).remove();
-    const Operation = "edit";
-    operationRegistry (Obj, registryId, registryName, registryType, documentType, Operation, previosString);
-}
+    let theadData = [];
+    for (const th of Obj.thead) {
+        theadData.push({ name: th.name, editable: th.editable });
+    }
+    let editEntryData = theadData.slice();
+    
+    for (const entry of Obj.tbody) {
+        for (const index in entry.data) {
+            editEntryData[index].value = entry.data[index];
+            const td = $('<td>', { text: entry.data[index] }).appendTo(tr);
+        }
 
-function getDelRegistryEntry(e){
-    const CurrentString = e.currentTarget.parentElement.parentElement.children;
-     console.dir(CurrentString);
-     $(CurrentString).each( function (index, elem) {
-         if(!CurrentString.lastChild){
-             if($(elem.children).is(".material-icons")){
-                $(elem).text("");
-                $(elem).css("background-color", "#d1e1e8"); 
-             }else {              
-                 $(elem).css("text-decoration","line-through");
-                if(localStorage.getItem('color_theme') =='dark'){
-                    $(elem).css("background-color", "#d1e1e8");
-                } else if(localStorage.getItem('color_theme') =='default'){
-                    $(elem).css("background-color", "#b3d5e3");
+    }
+
+    let entryData = {};
+    for (const elem of editEntryData) {
+        entryData[elem.name] = elem.value;
+    }
+
+    tr.appendTo($("#registry_table tbody"));
+    tdOperation.appendTo(tr);
+
+    for(const action of Obj.thead){
+        if(action.name == "Действие"){
+                    if(action.type_action.includes("edit")){
+                        const editEntryIcon = $('<i>', { class: 'material-icons', text: 'edit', title: 'Изменить' }).appendTo(tdOperation);
+                        editEntryIcon.on('click', function (e) {
+                            openEditRegistryEntryPopup(e, registryId, Obj.tbody[0].id, entryData, registryName, registryType, documentType);
+                        });
+                        editEntryIcon.css("display", "inline-flex");
+                    }
+        
+                    if(action.type_action.includes("delete")){
+                        
+                        const delEntryIcon = $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить' }).on('click', function () {
+                            deleteRegistryEntry(registryId, Obj.tbody[0].id, registryName, registryType, documentType)
+                        });
+                        delEntryIcon.appendTo(tdOperation);
+                        delEntryIcon.css("display", "inline-flex");
+                    }
+                    if(action.type_action.includes("addfile")){
+                        const filesIcon = $('<i>', {id: 'obj_files_registry_icon', class: 'material-icons material_counts', title: 'Файлы', text: 'folder_open' });
+                        filesIcon.on('click', function (e) { 
+                            IdRegStr = e.currentTarget.attributes.idRegStr.value;        
+                            $(registryData.tbody).each(function(index, element){
+                                if(element.id == IdRegStr){
+                                    filesRegistry = element.files;                 
+                                }
+                            });     
+                            IDAccid = $.ajax({
+                                async: false,
+                                url: `/web_request?query=recid@${IdRegStr}`,
+                                type: 'get'
+                            }).responseText;
+                            openFilesRegistryPopup(registryId, registryName, registryType, documentType);  
+                            return IDAccid;
+                            
+                        });
+                        filesIcon.attr("idRegStr", Obj.tbody[0].id);
+                        filesIcon.appendTo(tdOperation);
                 }
-             }            
-         }
-     });
- }
+            }
+        
+    }
+        
+}
+
+function getEditRegistryEntry(e, Obj, registryId, registryName, registryType, documentType){
+   const CurrentString = e.currentTarget.parentElement.parentElement.children;
+    console.dir(CurrentString);
+    $(CurrentString).each( function (index, elem) {
+        if(!CurrentString.lastChild){
+            if($(elem.children).is(".material-icons")){
+            }else if(Obj.tbody[0].data[index] == null){              
+                Obj.tbody[0].data[index] = "";
+                $(elem).text(Obj.tbody[0].data[index]);
+            }
+            else {
+                $(elem).text(Obj.tbody[0].data[index]);
+            }
+            
+        }
+    });
+}
 
 function displayRegistry(data, registryId, registryName, registryType, documentType) {
-    $("#add_container").remove();
     const {thead, tbody, tfooter, blocked, rows_per_page, upload_file_types} = data; // data.thead, data,tbody ...
 
     const registryIsBlocked = (blocked == 'true');
@@ -5668,6 +5616,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                 const tr = $('<tr>');
 
                 let editEntryData = theadData.slice();
+                console.log(editEntryData);
                 for (const index in entry.data) {
                     if(index == "files"){
 
@@ -5705,10 +5654,12 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                     
                 }
                 
+
                 let entryData = {};
                 for (const elem of editEntryData) {
                     entryData[elem.name] = elem.value;
                 }
+
 
                 for (const th of thead) {
                     if(th.type_action){
@@ -5726,15 +5677,15 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                                     if(th.type_action.includes("edit") && th.name == "Действие"){
                                         const editEntryIcon = $('<i>', { class: 'material-icons', text: 'edit', title: 'Изменить' }).appendTo(tdOperation);
                                         editEntryIcon.on('click', function (e) {
-                                            openEditRegistryEntryPopup(e,registryId, entry.id, registryName, registryType, documentType, registryData);
+                                            openEditRegistryEntryPopup(e,registryId, entry.id, entryData, registryName, registryType, documentType);
                                         });
                                         editEntryIcon.css("display", "inline-flex");
                                     }
                            
                                     if(th.type_action.includes("delete") && th.name == "Действие"){
                                         
-                                        const delEntryIcon = $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить' }).on('click', function (e) {
-                                            deleteRegistryEntry(e, registryId, entry.id, registryName, registryType, documentType)
+                                        const delEntryIcon = $('<i>', { class: 'material-icons', text: 'delete', title: 'Удалить' }).on('click', function () {
+                                            deleteRegistryEntry(registryId, entry.id, registryName, registryType, documentType)
                                         });
                                         delEntryIcon.appendTo(tdOperation);
                                         delEntryIcon.css("display", "inline-flex");
@@ -5771,8 +5722,10 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                                         }); 
                                     }
                                 }
-                            }                                                
+                            }
+                                                  
                         }
+
                     }
                 }
                 else {
@@ -5859,12 +5812,13 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                 });
             }
         }
-            $("<i>",{id: 'registry_update_icon', class: 'material-icons', title: 'Обновить реестр', text: 'autorenew'}).on("click", () =>{
-                const saveScroll =  $('#registry_settings_content .block-content');
-                let countSaveScroll = saveScroll.scrollTop()
-                getRegistryData(registryId, registryName, registryType, documentType, saveScroll, countSaveScroll);
+
+        if(registryId == 568 || registryId == 579){
+            $("<i>",{id: 'registry_update_icon', class: 'material-icons', title: 'Запросить данные ФССП', text: 'update'}).on("click", () =>{
+                getRegistryData(registryId, registryName, registryType, documentType);
             }).appendTo(headerManipulation);
         }
+    }
 
     $('#add_registry_entry_table input').each(function() {
         const input = $(this);
@@ -6114,7 +6068,7 @@ function openAddRegistryEntryPopup(registryId, registryName, registryType, docum
     openPopupWindow('popup_add_edit_registry_entry');
 }
 
-function openEditRegistryEntryPopup(e, registryId, entryId, registryName, registryType, documentType, Obj) {
+function openEditRegistryEntryPopup(e, registryId, entryId, entryData, registryName, registryType, documentType) {
     $('#popup_add_edit_registry_entry .popup-name').text('Изменить запись в реестре');
     $('#add_registry_entry_btn').text('Сохранить');
     $('#add_registry_entry_table tr:nth-child(4) input').attr('disabled', false);
@@ -6124,28 +6078,7 @@ function openEditRegistryEntryPopup(e, registryId, entryId, registryName, regist
     $('#add_registry_entry_btn').on('click', () => {
         editRegistryEntry(e, registryId, entryId, registryName, registryType, documentType);
     });
-
-    let theadData = [];
-    for (const th of Obj.thead) {
-        theadData.push({ name: th.name, editable: th.editable });
-    }
-    let editEntryData = theadData.slice();
-    
-    for (const entry of Obj.tbody) {
-        if(entry.id == entryId){
-           for (const index in entry.data) {
-            editEntryData[index].value = entry.data[index];
-            } 
-        }
-    }
-
-    let entryData = {};
-    for (const elem of editEntryData) {
-        entryData[elem.name] = elem.value;
-    }
-
     console.log(entryData);
-
     $('#add_registry_entry_table input').each(function() {
         const inputName = $(this).attr('name');
         $(this).val(entryData[inputName]);
@@ -6309,12 +6242,13 @@ function editRegistryEntry(e, registryId, entryId, registryName, registryType, d
                     showPopupNotification('alert', 'У Вас нет прав на изменение этой записи!')
                 }
                 else if (data == 'already_deleted') {
-                    getDelRegistryEntry(e);
+                    getRegistryData(registryId, registryName, registryType, documentType);
                     showPopupNotification('alert', 'Данная запись уже удалена из реестра!'); 
                 } else {
                         closePopupWindow('popup_add_edit_registry_entry');
+                        // getRegistryData(registryId, registryName, registryType, documentType);
+                        console.log(JSON.parse(data));
                         getEditRegistryEntry(e, JSON.parse(data), registryId, registryName, registryType, documentType);
-
                         showPopupNotification('notification', 'Запись в реестре успешно изменена!');
                 }
             }
@@ -6325,7 +6259,7 @@ function editRegistryEntry(e, registryId, entryId, registryName, registryType, d
     }
 }
 
-function deleteRegistryEntry(e, registryId, entryId, registryName, registryType, documentType) {
+function deleteRegistryEntry(registryId, entryId, registryName, registryType, documentType) {
     if (confirm(`Вы уверены, что хотите удалить запись из реестра?`)) {
         const data = {
             id: entryId,
@@ -6337,16 +6271,16 @@ function deleteRegistryEntry(e, registryId, entryId, registryName, registryType,
             url: '/base_func?fnk_name=addchg_ree_recodrs',
             data: encodeURI(JSON.stringify(data)),
             success: (data) => {
-                if (data == 'wrong_user') {
-                    showPopupNotification('alert', 'У Вас нет прав на удаление этой записи!')
+                if (data == 'success') {
+                    getRegistryData(registryId, registryName, registryType, documentType);
+                    showPopupNotification('notification', 'Запись из реестра успешно удалена!');
+                }
+                else if (data == 'wrong_user') {
+                    showPopupNotification('alert', 'У Вас нет прав на удаление этой за��иси!')
                 }
                 else if (data == 'already_deleted') {
-                    getDelRegistryEntry(e);
+                    getRegistryData(registryId, registryName, registryType, documentType);
                     showPopupNotification('alert', 'Данная запись уже удалена из реестра!'); 
-                } else {
-                    getDelRegistryEntry(e);
-
-                    showPopupNotification('notification', 'Запись из реестра успешно удалена!');
                 }
             }
         });
