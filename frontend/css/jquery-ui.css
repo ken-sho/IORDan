@@ -411,8 +411,10 @@ button.ui-button::-moz-focus-inner {
 
 /* with multiple calendars */
 .ui-datepicker.ui-datepicker-multi {
-	width: auto;
+	width: 95%;
+    margin: 0 auto .4em;
 }
+
 .ui-datepicker-multi .ui-datepicker-group {
 	float: left;
 }

@@ -195,6 +195,10 @@ class ReportHandler(BaseHandler):
             multi = self.get_argument('multi')
         except:
             multi = ''
+        try:
+            fio = self.get_argument('fio')
+        except:
+            fio = ''
         conn = db_conn.db_connect('web_receivables')
         cur = conn.cursor()
         if rtype == 'certificate' and multi=='' and rnum=='16':
@@ -206,7 +210,7 @@ class ReportHandler(BaseHandler):
             encoded = base64.b64encode(q_sql.encode()).decode()
             logg_web.add_log(asid,encoded,'Выполнение справки')
         elif rtype == 'certificate' and multi=='':
-            q_sql = "select report.sprav"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"')"
+            q_sql = "select report.sprav"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"','"+ fio +"')"
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
@@ -216,7 +220,7 @@ class ReportHandler(BaseHandler):
         elif rtype == 'report' and multi=='':
             dateb = self.get_argument('dateb')
             datee = self.get_argument('datee')
-            q_sql = "select report.rep"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"','"+ dateb +"','"+ datee +"')"
+            q_sql = "select report.rep"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"','"+ dateb +"','"+ datee +"','"+ fio +"')"
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])

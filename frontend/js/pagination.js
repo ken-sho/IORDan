@@ -940,7 +940,7 @@
     ellipsisText: '...',
 
     // 'Go' button text
-    goButtonText: 'Go',
+    goButtonText: 'Перейти',
 
     // Additional className for Pagination element
     //className: '',

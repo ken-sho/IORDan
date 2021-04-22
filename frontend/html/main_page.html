@@ -108,9 +108,12 @@
                                 <i class="material-icons object-search-icon" title="Закрыть" onclick="closeObjectList()">
                                     close
                                 </i>
-                                <i class="material-icons object-search-icon" title="Настройки списка объектов" onclick="openPopupWindow('popup_object_list_settings')">
+                                <div class="icon-with-count" id="icon-setting">
+                                    <i class="material-icons object-search-icon" title="Настройки списка объектов" onclick="openPopupWindow('popup_object_list_settings')">
                                     settings_applications
-                                </i>
+                                    </i>                                 
+                                </div>
+                                
                                 <i id="objects_list_reports" data-jq-dropdown="#jq-dropdown-objects-list"
                                     class="material-icons object-search-icon" title="Печать">print</i>
                                 <div id="print_mode_object_num" title="Нажмите, чтобы выбрать все"></div>
@@ -161,7 +164,31 @@
                     <div id="obj_content_background">
                         <div id="obj_adress"></div>
                         <div id="obj_info">
-                            <div id="obj_agreements_info">
+                            <div id="obj_print_form">
+                                <div class="block-header-with-manipulation">
+                                    <div class="header">Печатные формы</div>
+                                </div>
+                                <div class="block-content full-area">
+                                    <table id="obj_cerfiticat_report">
+                                        <thead>
+                                            <tr><th colspan="2">Справки и отчеты</th></tr>
+                                        </thead>
+                                        <tbody>
+                                         </tbody>
+                                    </table>
+                                    <table  id="obj_package">
+                                        <thead>
+                                            <tr>
+                                                <th>Пакетные формы</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                         </tbody>
+                                    </table>
+                                </div>
+                               
+                            </div>
+                            <!-- <div id="obj_agreements_info">
                                 <div class="block-header-with-manipulation">
                                     <div class="header">
                                         <button id="obj_agreements_btn" class="button-primary" disabled>Договора</button>
@@ -175,14 +202,11 @@
                                 <div class="block-content full-area">
                                     <div id="agreements_owners_content"></div>
                                 </div>
-                            </div>
+                            </div> -->
                             <div id="obj_additional_info">
                                 <div class="block-header-with-manipulation">
                                     <div class="header">Дополнительная информация</div>
                                     <div class="header-manipulation">
-                                        <!-- <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-owners" title="Справка"
-                                            onclick="">help_outline</i>
-                                        <i class="material-icons" title="Добавить прописанного" onclick="openPopupWindow('popup_add_owner')">add</i> -->
                                     </div>
                                 </div>
                                 <div class="block-content full-area">
@@ -191,7 +215,13 @@
                             </div>
                             <div id="obj_ls_info">
                                 <div class="block-header-with-manipulation">
-                                    <div class="header">ЛС</div>
+                                    <div class="header-ls">ЛС</div>
+                                    <div class="header-toggle">
+                                        <input type="checkbox" name="toggle" id="check-box2"/>
+                                        <label for="check-box2" title="Выбрать режим"></label>
+                                    </div>
+                                    <div class="header-title">   
+                                    </div>
                                     <div class="header-manipulation">
                                         <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-info" title="Справка"
                                             onclick="">help_outline</i>
@@ -218,7 +248,38 @@
                                     <div id="main_calendar"></div>
                                 </div>
                                 <div id="obj_main_table"></div>
-                            </div>
+                            
+                                <div id="obj_agreements_info">
+                                    <div class="block-content full-area" id="block-contract">
+                                        <div class="block-header-with-manipulation">
+                                            <div class="header_agr">Документы на право собственности</div>
+                                            <div class="header-manipulation-agr">
+                                                <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-owners" title="Справка" onclick="">help_outline</i>
+                                                <i id="add_agreement_icon" class="material-icons" title="Добавить">add</i>
+                                            </div>
+                                        </div>
+                                        <div id="agreements_contract_content"></div>
+                                    </div>
+                                    <div class="block-content full-area" id="block-pasport">
+                                        <div class="block-header-with-manipulation">
+                                            <div class="header_agr">Прописанные</div>
+                                            <div class="header-manipulation-agr">
+                                                <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-owners" title="Справка" onclick="">help_outline</i>
+                                                <i id="add_owner_icon" class="material-icons" title="Добавить">add</i>
+                                            </div>
+                                        </div>
+                                       <div id="agreements_passport_content"></div> 
+                                    </div> 
+                                    <div id="obj_list_group">
+                                        <div class="block-header-with-manipulation">
+                                            <div class="header_agr">Подробная информация</div>
+                                        </div>
+                                        <div class="block-content">
+                                            
+                                        </div>    
+                                    </div>                              
+                                </div>
+                                
                         </div>
                     </div>
                 </div>
@@ -433,6 +494,26 @@
                         <div class="block-content"></div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div id='popup_add_person' class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name">Добавление нового пользователя</div>
+                <div class="popup-close" onclick="closePopupWindow('popup_add_person')"><i class="material-icons">close</i></div>
+            </div>
+            <div class="popup-content">
+               <table class='table-form'>
+                    <tr>
+                        <td class="table-input-name">
+                            ФИО
+                        </td>
+                        <td>
+                            <input type="text" class="input-main">
+                        </td>
+                    </tr>
+               </table>
+               <div class="form-submit-btn"><button id="" class="button-primary">Создать пользователя</button></div>
             </div>
         </div>
 
@@ -881,26 +962,74 @@
             <div class="popup-close" onclick="closePopupWindow('popup_profile')"><i class="material-icons"
                     title="Закрыть">close</i></div>
         </div>
-        <div class="popup-content">
-            <div class="tabs" id="profile_tabs">
-                <!-- <button class="tab-button active" onclick="openTab('profile_tabs', this, 'profile_basic_data')">Основные данные</button> -->
+        <div class="popup-content" id="content-profile">
+            <div class="tabs" id="profile_tabs">                
                 <button class="tab-button active" onclick="openTab('profile_tabs', this, 'profile_settings')">Настройки</button>
-            </div>
-            <div id="profile_tabs_area">
-                <div class="background">
-                    <div id="profile_tabs_content" class="tabs-content">
-                        <div id="profile_settings" class="tab-content flex active"></div>
+                <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_log_data')">Лог</button>
+            </div>   
+
+            <div id="profile_tabs_content">
+                <div  class="tab-content-prof" id="profile_settings"></div>
+                <div  class="tab-content-prof" id="profile_log_data" style="display: none;">
+                    <div id="datapicker-in-log">
+                        <label for="from">Выбрать диапозон дат С</label>
+                        <input type="text" id="from" name="from">
+                        <label for="to">До</label>
+                        <input type="text" id="to" name="to">
+                    </div>
+                    <div id="container-div">
+                        
+                    </div>
+                    <div id="log_pagination">
+                        <div class="paginationjs">
+                        <div class="paginationjs-pages">
+                            <ul>
+                                <!-- <li class="paginationjs-prev disabled"><a>«</a></li>
+                                <li class="paginationjs-next disabled"><a>»</a></li> -->
+                                <li class="paginationjs-prev" id="prev-log-btn"><a>«</a></li>
+                                <li class="paginationjs-next" id="next-log-btn"><a>»</a></li>
+                                <li class="paginationjs-page J-paginationjs-page" id="pag-page-sum"><a>1</a></li>
+                            </ul>
+                        </div>
+                        <div class="paginationjs-go-input">
+                            <input type="text" class="J-paginationjs-go-pagenumber" id="page-number" value="1">
+                        </div>
+                            <div class="paginationjs-go-button">
+                                <button type="button" class="button-primary"  id="btn-go">Перейти</button>
+                            </div>
+                            <button id="btn-clear" style="margin-left: 5px;">Очистить</button>
+                        </div>
                     </div>
                 </div>
             </div>
+            
             <div id="profile_chat_area">
                 <div id="profile_chat">
                     <div class="block-header">
                         <div class="header">Чат</div>
                     </div>
-                    <div id="chat_content"></div>
+                    <div id="chat_content">
+                        <div id="users-block">
+                            <div><i class="material-icons">person</i> Система <i class="material-icons"></i></div>
+                            <div><i class="material-icons">person</i> Николай <i class="material-icons" onclick="$(this.parentElement).remove()">close</i></div>
+                            <div><i class="material-icons">person</i> Алексей <i class="material-icons" onclick="$(this.parentElement).remove()">close</i></div>
+                            <div><i class="material-icons">person</i> Кирилл <i class="material-icons" onclick="$(this.parentElement).remove()">close</i></div>
+                            <div><i class="material-icons">person</i> Александр <i class="material-icons" onclick="$(this.parentElement).remove()">close</i></div>
+                            <div><i class="material-icons">person</i> Тимур <i class="material-icons" onclick="$(this.parentElement).remove()">close</i></div>
+                        </div>
+                        <div id="dialogs-block">
+                            
+                        </div>
+                        <div id="send-block">
+                           <input type="usermsg" placeholder="Введите сообщение" class="input-search" id="user-msg">
+                           <i type="submit" class="material-icons" id="submit-msg">send</i> 
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
+        <div>
+            
         </div>
     </div>
     
@@ -1309,6 +1438,23 @@
         </div>
     </div>
 
+    <div id = "jq-dropdown-exception-filter" class = "jq-dropdown jq-dropdown-tip" >
+        <div class = "jq-dropdown-panel" >
+            Выборка данных из имеющегося полного списка объектов путём исключения определённых объектов, не соответствующих выбранным критериям фильтрации (исключающие фильтры помечаем галочками).
+        </div>
+    </div>
+    <div id = "jq-dropdown-including-filter" class = "jq-dropdown jq-dropdown-tip" >
+        <div class = "jq-dropdown-panel" >
+            Формирование списка объектов путём добавления объектов, соответствующих выбранным критериям фильтрации (включающие фильтры помечаем галочками).
+        </div>
+    </div>
+    <div id = "jq-dropdown-stat-filter" class = "jq-dropdown jq-dropdown-tip" >
+        <div class = "jq-dropdown-panel" >
+            Дополнительные фильтры, позволяющие осуществить более детальную выборку для списков, сформированных с помощью исключающих и включающих фильтров.
+        </div>
+    </div>
+
+    
 </body>
 
 </html> 
