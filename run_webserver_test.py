@@ -11,14 +11,24 @@ import urllib
 import requests
 import zipfile
 import base64
-sys.path.append('/opt/IORDan/modules')
-import logg_web
-import db_conn
-import base_fnk
-import adm_base_fnk
-import login_db
-import loadxls
-import unloadxls
+import modules.logg_web as logg_web
+import modules.db_conn as db_conn
+import modules.base_fnk as base_fnk
+import modules.adm_base_fnk as adm_base_fnk
+import modules.login_db as login_db
+import modules.loadxls as loadxls
+import modules.unloadxls as unloadxls
+import modules.loadxml as loadxml
+
+class chck_sid(tornado.web.RequestHandler):
+    def post(self):
+        asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
+        res = login_db.chck_ss(asid)
+        if res=='0':
+            stt = '{"is_active": false}'
+        else:
+            stt = '{"is_active": true}'
+        self.write(stt)
 
 class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
@@ -92,11 +102,18 @@ class Base_FNCHandler(BaseHandler):
         #autor = tornado.escape.native_str(self.get_secure_cookie('user'))
         asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
         orgid = str(self.get_cookie('companyId'))
-        val_param = self.get_argument('val_param')
+        try:
+            fnk_name = self.get_argument('fnk_name')
+        except:
+            fnk_name = ''
         try:
             adate = str(((self.request.body).decode('UTF8')))
         except:
             adate = ''
+        try:
+            val_param = self.get_argument('val_param')
+        except:
+            val_param = ''
         try:
             val_param1 = self.get_argument('val_param1')
         except:
@@ -137,7 +154,7 @@ class Base_FNCHandler(BaseHandler):
             val_param10 = self.get_argument('val_param10')
         except:
             val_param10 = ''
-        res=base_fnk.fnk_lst(asid,orgid,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10)
+        res=base_fnk.fnk_lst(asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10)
         if res == None:
             res=''
         #print(res)            
@@ -150,46 +167,14 @@ class Base_ADMINHandler(BaseHandler):
         orgid = str(self.get_cookie('companyId'))
         fnk_name = self.get_argument('fnk_name')
         try:
-            val_param1 = self.get_argument('val_param1')
+            adate = str(((self.request.body).decode('UTF8')))
         except:
-            val_param1 = ''
+            adate = ''
         try:
-            val_param2 = self.get_argument('val_param2')
+            operation = self.get_argument('operation')
         except:
-            val_param2 = ''
-        try:
-            val_param3 = self.get_argument('val_param3')
-        except:
-            val_param3 = ''
-        try:
-            val_param4 = self.get_argument('val_param4')
-        except:
-            val_param4 = ''
-        try:
-            val_param5 = self.get_argument('val_param5')
-        except:
-            val_param5 = ''
-        try:
-            val_param6 = self.get_argument('val_param6')
-        except:
-            val_param6 = ''
-        try:
-            val_param7 = self.get_argument('val_param7')
-        except:
-            val_param7 = ''
-        try:
-            val_param8 = self.get_argument('val_param8')
-        except:
-            val_param8 = ''
-        try:
-            val_param9 = self.get_argument('val_param9')
-        except:
-            val_param9 = ''
-        try:
-            val_param10 = self.get_argument('val_param10')
-        except:
-            val_param10 = ''
-        res=adm_base_fnk.fnk_lst(asid,orgid,fnk_name,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10)
+            operation = ''
+        res=adm_base_fnk.fnk_lst(asid,orgid,fnk_name,adate,operation)
         if res == None:
             res=''
         #print(fnk_name +' '+res)            
@@ -202,6 +187,8 @@ class ReportHandler(BaseHandler):
             self.redirect("/")
             return
         asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
+        orgid = str(self.get_cookie('companyId'))
+        hdate = str(self.get_cookie('history_table_date'))
         accid = self.get_argument('accid')
         humanid = self.get_argument('humanid')
         rtype = self.get_argument('rtype')
@@ -210,10 +197,14 @@ class ReportHandler(BaseHandler):
             multi = self.get_argument('multi')
         except:
             multi = ''
+        try:
+            fio = self.get_argument('fio')
+        except:
+            fio = ''
         conn = db_conn.db_connect('web_receivables')
         cur = conn.cursor()
-        if rtype == 'certificate' and multi=='':
-            q_sql = "select report.sprav"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"')"
+        if rtype == 'certificate' and multi=='' and rnum=='16':
+            q_sql = "select report.sprav"+ rnum +"('"+ asid +"','"+ accid +"','0','"+ hdate +"')"
             print(q_sql)
             cur.execute(q_sql)
             for row in cur:
@@ -221,10 +212,19 @@ class ReportHandler(BaseHandler):
                 self.write(res)
             encoded = base64.b64encode(q_sql.encode()).decode()
             logg_web.add_log(asid,encoded,'Выполнение справки')
+        elif rtype == 'certificate' and multi=='':
+            q_sql = "select report.sprav"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"','"+ fio +"')"
+            print(q_sql)
+            cur.execute(q_sql)
+            for row in cur:
+                res=(row[0])
+                self.write(res)
+            encoded = base64.b64encode(q_sql.encode()).decode()
+            logg_web.add_log(asid,encoded,'Выполнение отчёта')
         elif rtype == 'report' and multi=='':
             dateb = self.get_argument('dateb')
             datee = self.get_argument('datee')
-            q_sql = "select report.rep"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"','"+ dateb +"','"+ datee +"')"
+            q_sql = "select report.rep"+ rnum +"('"+ asid +"','"+ accid +"','"+ humanid +"','"+ dateb +"','"+ datee +"','"+ fio +"')"
             print(q_sql)
             cur.execute(q_sql)
             for row in cur:
@@ -233,12 +233,15 @@ class ReportHandler(BaseHandler):
             encoded = base64.b64encode(q_sql.encode()).decode()
             logg_web.add_log(asid,encoded,'Выполнение отчёта')
         elif multi=='true':
+            createRegistry = self.get_argument('createRegistry')
             q_sql = "select report.rep_multi('"+ asid +"','"+ accid +"','"+ rtype +"','"+ rnum +"')"
-            #print(q_sql)
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
                 self.write(res)
+            if createRegistry== 'true':
+                q_sql = "select main.ree_registry_create('"+ asid +"','"+ orgid +"','"+ res +"','"+ accid +"')"
+                cur.execute(q_sql)
             encoded = base64.b64encode(q_sql.encode()).decode()
             logg_web.add_log(asid,encoded,'Выполнение массового отчёта/справки')
         elif multi!='true' and multi!='':
@@ -252,6 +255,24 @@ class ReportHandler(BaseHandler):
                 self.write(res)
             encoded = base64.b64encode(q_sql.encode()).decode()
             logg_web.add_log(asid,encoded,'Выполнение групового отчёта/справки')
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    def post(self):
+        asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
+        orgid = str(self.get_cookie('companyId'))
+        adate = str(((self.request.body).decode('UTF8')))
+        conn = db_conn.db_connect('web_receivables')
+        cur = conn.cursor()
+        cur.callproc('report.proxy_srv',[asid,orgid,adate])
+        print(asid)
+        print(orgid)
+        print(adate)
+        for row in cur:
+            res=(row[0])
+            self.write(res)
+        conn.commit()
         cur.close()
         conn.close()
 
@@ -268,7 +289,7 @@ class WebRequestHandler(BaseHandler):
             q_sql = "select access.user_rights('"+asid +"')"
         else:
             q_sql = "select main.webrqst('"+asid +"','"+ val_param +"')"
-        #print(q_sql)
+        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -299,24 +320,58 @@ class UploadHandler(tornado.web.RequestHandler):
         autor = tornado.escape.native_str(self.get_secure_cookie("user"))
         file1 = self.request.files['file'][0]
         original_fname = file1['filename']
+        try:
+            accid = self.get_argument('accid')
+            accid_path = accid.split('@')[0]
+        except:
+            accid = ''
+        try:
+            vtype = self.get_argument('type')
+        except:
+            vtype = ''
         #fexist = os.path.exists("www/upload/" + autor + "/" + original_fname)
         fexist = os.path.exists("upload/" + original_fname)
-        if fexist==True:
-           for cnt in range (1,1000):
-               final_filename = "Копия_"+str(cnt)+"-"+original_fname
-               #fexist = os.path.exists("upload/" + autor + "/" + final_filename)
-               fexist = os.path.exists("upload/" + final_filename)
-               if fexist==True:
-                  cnt =+1
-               else:
-                  break
+        if accid=='':
+            if fexist==True:
+                for cnt in range (1,1000):
+                    final_filename = "Копия_"+str(cnt)+"-"+original_fname
+                    #fexist = os.path.exists("upload/" + autor + "/" + final_filename)
+                    fexist = os.path.exists("upload/" + final_filename)
+                    if fexist==True:
+                        cnt =+1
+                    else:
+                        break
+            else:
+                final_filename = original_fname
+                #output_file = open("upload/" + autor + "/" + final_filename, 'wb')
+                output_file = open("upload/" + final_filename, 'wb')
+                output_file.write(file1['body'])
+                output_file.close()
+                self.write('success')
         else:
-           final_filename = original_fname
-        #output_file = open("upload/" + autor + "/" + final_filename, 'wb')
-        output_file = open("upload/" + final_filename, 'wb')
-        output_file.write(file1['body'])
-        output_file.close()
-        self.write('success')
+            fid=''
+            res=''
+            dexist = os.path.exists("/opt/IORDan/privat_file/" + accid_path)
+            if dexist!=True:
+              os.mkdir("/opt/IORDan/privat_file/" + accid_path)
+            conn = db_conn.db_connect('web_receivables')
+            cur = conn.cursor()
+            cur.callproc('loader.add_privat_file',[asid,original_fname,accid,vtype])
+            for row in cur:
+                fid=(row[0])
+                res=(row[1])
+            output_file = open("/opt/IORDan/privat_file/"+accid_path+'/'+ fid, 'wb')
+            output_file.write(file1['body'])
+            output_file.close()
+            f_ext = os.path.splitext(original_fname)[1] 
+            if f_ext.lower() == '.xml' and vtype=='rosreester':
+                loadxml.read_file("/opt/IORDan/privat_file/"+accid_path+'/'+ fid,accid_path)
+            conn.commit()
+            cur.close()
+            conn.close()
+            self.write(res)
+
+
         #logg_web.add_log(asid,'','Загрузка файла на портал',final_filename)
 
 class OpFileHandler(tornado.web.RequestHandler):
@@ -359,13 +414,8 @@ class BankTemplHandler(BaseHandler):
         q_sql = "select loader.bank_template"+tname +"('"+asid +"','"+ pid +"','"+ orgid +"')"
         print(q_sql)
         cur.execute(q_sql)
-        #print(conn.notices)
-        #self.write(conn.notices)
-        for notice in conn.notices:
-            print(notice)
         for row in cur:
             res=(row[0])
-            #print(res)
             self.write(res)
         cur.close()
         conn.close()
@@ -399,7 +449,6 @@ class RedmineHandler(tornado.web.RequestHandler):
     def post(self):
         request = self.get_argument('request')
         encoding = 'windows-1251'
-        #args = ((self.request.body).decode(encoding))
         args = self.request.body
         url = "https://intelgradplus.ru:10443"+request
         response = requests.post(url, headers={"Content-Type": "application/json"}, data=args)
@@ -424,11 +473,14 @@ class ReportsrvHandler(BaseHandler):
             conn = db_conn.db_connect('web_receivables')
             cur = conn.cursor()
             q_sql = "select report."+attr+"('"+ asid +"','"+ orgid +"','"+param+"')"
-            print(q_sql)
+            total=''
             cur.execute(q_sql)
             for row in cur:
                 res=(row[0])
-            self.write(res)
+                total=total+str(res)
+            self.write(total)
+            encoded = base64.b64encode(q_sql.encode()).decode()
+            logg_web.add_log(asid,encoded,'Выполение отчёта '+attr)
 
 class ConverHandler(BaseHandler):
     def post(self):
@@ -446,6 +498,7 @@ settings = {
 
 application = tornado.web.Application([
     (r"/", LoginHandler),
+    (r"/chck_sid", chck_sid),
     (r"/main", MainHandler),
     (r"/base_func", Base_FNCHandler),
     (r"/admin_func", Base_ADMINHandler),
@@ -464,11 +517,12 @@ application = tornado.web.Application([
     (r"/icon/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/material-design-icons'}),
     (r"/images/(.*)", tornado.web.StaticFileHandler, {'path': 'frontend/images'}),
     (r"/download/(.*)", tornado.web.StaticFileHandler, {'path': 'download'}),
+    (r"/privat_file/(.*)", tornado.web.StaticFileHandler, {'path': 'privat_file'}),
 #], **settings)
 ], **settings, debug=True)
 
 if __name__ == "__main__":
-    print ("WEB server Running...")
+    print ("WEB server Running..")
     print ("Press ctrl + C to close")
     #http_server = tornado.httpserver.HTTPServer(application,xheaders=True, ssl_options={'certfile': 'ssl/tornado.crt', 'keyfile': 'ssl/tornado.key'})
     #http_server = tornado.httpserver.HTTPServer(application, ssl_options={'certfile': 'ssl/tornado.crt', 'keyfile': 'ssl/tornado.key'})
