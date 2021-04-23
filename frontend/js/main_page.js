@@ -2206,8 +2206,7 @@ function clickDropdownMenu() {
             const humanId = $(this).attr('humanid');
             let personName; 
 
-            ($(this).hasClass("is-input")) ? personName = $(".input-fio").val() : personName = $(this).attr('person_name')
-                         
+            ($(this).hasClass("is-input")) ? personName = $(".input-fio").val() : personName = $(this).attr('person_name')            
             const reportId = `${repType}_${repNum}`;
 
             setPrintNotation(reportId);
@@ -2241,7 +2240,7 @@ function clickDropdownMenu() {
                     }
                 });
             } else {
-                $.get(`/report?rnum=${repNum}&rtype=${repType}&accid=${accid}&humanid=${humanId}`, function (data) {
+                $.get(`/report?rnum=${repNum}&rtype=${repType}&accid=${accid}&humanid=${humanId}&fio=${personName}`, function (data) {
                     if (repNum == '2' || repNum == '3') {
                         $('#popup_report table').addClass('export-table-border');
                     }
@@ -2268,6 +2267,8 @@ function getReportContent(data, callback) {
 }
 
 function initializeReportNewWindow(reportContent, reportName, reportId, personName = "") {
+    console.log(personName)
+    console.log(reportContent)
     const theme = localStorage.getItem('color_theme');
     const reportsList = getCurrentCompanyReportsArray();
     const toExcel = reportsList[reportId].to_excel;
@@ -2743,6 +2744,8 @@ function sendReportRange(repName, repNum, repType, accid, humanId, startDate, en
     const reportId = `${repType}_${repNum}`;
 
     $.get(`/report?rnum=${repNum}&rtype=${repType}&accid=${accid}&humanid=${humanId}&dateb=${startDate}&datee=${endDate}&fio=${personName}`, function (data) {
+        console.log(data)
+        console.log(personName)
         initializeReportNewWindow(data, repName, reportId, personName);
         closePopupWindow('popup_report');
     });
