@@ -993,7 +993,7 @@ form {
 }
 
 #obj_cerfiticat_report, #obj_package{
-    height: 100%;
+    /* height: 100%; */
 }
 
 #obj_cerfiticat_report table{
@@ -2538,9 +2538,9 @@ td.add-template-adress {
     box-sizing: border-box;
 }
 
-#input-fio{
+.input-fio{
     display: inline-flex;
-    width: 85%;
+    width: 80%;
     margin: 5px;
     height: 31px;
 }

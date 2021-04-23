@@ -2206,7 +2206,7 @@ function clickDropdownMenu() {
             const humanId = $(this).attr('humanid');
             let personName; 
 
-            ($(this).hasClass("is-input")) ? personName = $("#input-fio").val() : personName = $(this).attr('person_name')
+            ($(this).hasClass("is-input")) ? personName = $(".input-fio").val() : personName = $(this).attr('person_name')
                          
             const reportId = `${repType}_${repNum}`;
 
@@ -2223,7 +2223,7 @@ function clickDropdownMenu() {
                     let startDate = $('#start_date').val();
                     let endDate = $('#final_date').val();
                     sendReportRange(repName, repNum, repType, accid, humanId, startDate, endDate, personName);
-                    $("#input-fio").val("");
+                    $(".input-fio").val("");
                 });
 
                 $("#start_date, #final_date").datepicker({
@@ -2246,7 +2246,7 @@ function clickDropdownMenu() {
                         $('#popup_report table').addClass('export-table-border');
                     }
                     initializeReportNewWindow(data, repName, reportId, personName);
-                    $("#input-fio").val("");
+                    $(".input-fio").val("");
                 });
             }
         });
@@ -2693,7 +2693,7 @@ function createDropdownMenuForPerson(index, listPerson, rep_name, rep_num, rep_t
     const multiPerson = [];
     let i = 0;
     console.log(listPerson);
-    const input = $('<input>', {placeholder:'Введите собственника',class:"input-main", id:"input-fio"}).appendTo($(`#jq-dropdown-${index} ul`));
+    const input = $('<input>', {placeholder:'Введите собственника',class:"input-main input-fio"}).appendTo($(`#jq-dropdown-${index} ul`));
     
     $('<li>', {class: 'dropdown-menu-item is-input', rep_name: rep_name, rep_num: rep_num, rep_type: rep_type, accid: CURRENT_OBJECT_DATA.accid, humanid: 0 }).append(
         $('<i>', { class: 'material-icons', text: 'arrow_forward' })
@@ -6989,24 +6989,24 @@ function addInputmask(input, mask) {
 }
 
 function getChatPopup(){
-    const data = [
-        {
-            name: "tester",
-            date: "15:03:29",
-            text: " Привет!"
-        },
-        {
-            name: "tester",
-            date: "15:07:21",
-            text: " Как чат?"
-        },
-        {
-            name: "tester",
-            date: "15:07:21",
-            text: " Дизаин норм?"
-        }
+    // const data = [
+    //     {
+    //         name: "tester",
+    //         date: "15:03:29",
+    //         text: " Привет!"
+    //     },
+    //     {
+    //         name: "tester",
+    //         date: "15:07:21",
+    //         text: " Как чат?"
+    //     },
+    //     {
+    //         name: "tester",
+    //         date: "15:07:21",
+    //         text: " Дизаин норм?"
+    //     }
         
-    ]
+    // ]
 
     const submitBtn = $("#submit-msg");
     const inputText = $("#user-msg");
@@ -7081,7 +7081,7 @@ function getChatPopup(){
         }, 50000);  
     }
 
-    getNewMessage(data);
+    // getNewMessage(data);
 }
 
 function initializeLogData() {
