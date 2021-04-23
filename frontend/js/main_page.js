@@ -2347,9 +2347,7 @@ function getObjectAgreementsData() {
     const agreementsCount = Object.keys(agreementsData).length;
     $("#obj_agreements_btn").text(`Документы на право собственности (${agreementsCount})`); 
 
-    $('<tr>').append(
-        $('<th>', {text: 'ФИО'}),        
-    ).appendTo(table);
+    $('<tr>').append($('<th>', {text: 'ФИО'})).appendTo(table);
 
     for (const prop in agreementsData) {
         let propData = prop.split('&');
