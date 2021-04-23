@@ -19,6 +19,7 @@ import modules.login_db as login_db
 import modules.loadxls as loadxls
 import modules.unloadxls as unloadxls
 import modules.loadxml as loadxml
+import modules.tracert as tracert
 
 
 class chck_sid(tornado.web.RequestHandler):
