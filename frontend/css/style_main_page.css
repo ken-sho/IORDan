@@ -955,17 +955,39 @@ form {
 
 #obj_print_form{
     grid-area: document;
-    /* display: grid;
-    grid-template-columns: 100%;
-    grid-template-rows: 35px 82%; */
-    /* grid-template-areas:
-        "printHeader"
-        "printLeft printRight";   */
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 35px 82%;
+    grid-template-areas:
+        "printHeader printHeader"
+        "printLeft printRight";
 }
+
+#obj_print_form .block-header-with-manipulation{
+    grid-area: printHeader;
+}
+
+#block-left{
+    grid-area: printLeft;
+    height: 100%;
+    border-left: 1px solid #D9E0E3;
+    border-bottom: 1px solid #D9E0E3;
+    border-bottom-left-radius: 5px;
+}
+
+#block-right{
+    grid-area: printRight;
+    height: 100%;
+    margin-left: -2px;
+    border-right: 1px solid #D9E0E3;
+    border-bottom: 1px solid #D9E0E3;
+    border-bottom-right-radius: 5px;
+}
+
 
 #obj_print_form table {
     display: inline-table;
-    width: 49%;
+    width: 100%;
     bottom: 0;
     box-sizing: border-box;
     border-collapse: collapse;
@@ -2078,6 +2100,13 @@ div {
     font-weight: bold;
 }
 
+#jq-dropdown-additional-block li, #jq-dropdown-additional-block input, #jq-dropdown-additional-block label{
+    cursor: pointer;
+}
+#jq-dropdown-additional-block li:hover{
+border: 1px solid #fff;
+}
+
 .popup-fullscreen .main-content,
 .tab-content > .main-content {
     width: calc(100% - 260px);
@@ -2596,6 +2625,17 @@ td.add-template-adress {
     font-weight: bold;
 }
 
+#obj_list_group .table-input-name{
+    text-align: center;
+}
+
+#obj_list_group .form-submit-btn{
+    float: right;
+    padding-top: 5px;
+    padding-right: 7px;
+    bottom: 4px; 
+}
+    
 #main_calendar .ui-datepicker {
     width: 300px;
     margin: auto;

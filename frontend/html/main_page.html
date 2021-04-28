@@ -168,7 +168,7 @@
                                 <div class="block-header-with-manipulation">
                                     <div class="header">Печатные формы</div>
                                 </div>
-                                <div class="block-content full-area">
+                                <div class="block-content full-area" id="block-left">
                                     <table id="obj_cerfiticat_report">
                                         <thead>
                                             <tr><th colspan="2">Справки и отчеты</th></tr>
@@ -176,6 +176,8 @@
                                         <tbody>
                                          </tbody>
                                     </table>
+                                </div>
+                                <div class="block-content full-area" id="block-right">
                                     <table  id="obj_package">
                                         <thead>
                                             <tr>
@@ -185,8 +187,7 @@
                                         <tbody>
                                          </tbody>
                                     </table>
-                                </div>
-                               
+                                </div>                              
                             </div>
                             <!-- <div id="obj_agreements_info">
                                 <div class="block-header-with-manipulation">
@@ -400,51 +401,6 @@
             </div>
         </div>
 
-        <div id="popup_add_agreement" class="popup-window">
-            <div class="popup-header">
-                <div class="popup-name">Добавить договор</div>
-                <div class="popup-close" onclick="closePopupWindow('popup_add_agreement')"><i class="material-icons">close</i></div>
-            </div>
-            <div class="content">
-                <form name="add_agreement">
-                    <table class="table-form">
-                        <tbody>
-                            <tr>
-                                <td class="table-input-name">Собственник прописан?</td>
-                                <td colspan="3"><input id="owner_yes" type="radio" name="owner" value="yes" checked><label for="owner_yes">Да</label><input id="owner_no" type="radio" name="owner" value="no"><label for="owner_no">Нет</label></td>
-                            </tr>
-                            <tr class="add-agreement-owner">
-                                <td class="table-input-name">Собственник</td>
-                                <td colspan="3"><select id="add_agreement_owner_select" class="input-main"></select></td>
-                            </tr>
-                            <tr class="add-agreement-no-owner">
-                                <td class="table-input-name">ФИО *</td>
-                                <td colspan="3"><input id="add_agreement_fio" type="text" class="input-main"></td>
-                            </tr>
-                            <tr class="add-agreement-no-owner">
-                                <td class="table-input-name">Дата рождения</td>
-                                <td colspan="3"><input id="add_agreement_birth_date" type="date" class="input-main"></td>
-                            </tr>
-                            <tr>
-                                <td class="table-input-name">Наименование договора *</td>
-                                <td colspan="3"><input id="add_agreement_name" type="text" class="input-main"></td>
-                            </tr>
-                            <tr>
-                                <td class="table-input-name">Дата договора *</td>
-                                <td><input id="add_agreement_date" type="date" class="input-main"></td>
-                                <td class="table-input-name">Доля</td>
-                                <td><input id="add_agreement_part" type="text" class="input-main"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
-                    <div class="form-submit-btn">
-                        <button id="add_agreement_btn" class="button-primary" onclick="addNewAgreement()">Добавить</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
         <div id="popup_add_edit_registry_entry" class="popup-window">
             <div class="popup-header">
                 <div class="popup-name">Добавить запись в реестр</div>
@@ -514,85 +470,6 @@
                     </tr>
                </table>
                <div class="form-submit-btn"><button id="" class="button-primary">Создать пользователя</button></div>
-            </div>
-        </div>
-
-        <div id="popup_add_owner" class="popup-window">
-            <div class="popup-header">
-                <div class="popup-name">Добавить прописанного</div>
-                <div class="popup-close" onclick="closePopupWindow('popup_add_owner')"><i class="material-icons">close</i></div>
-            </div>
-            <div class="popup-content">
-                <form name="add_owner">
-                    <table class="table-form">
-                        <tbody>
-                            <tr>
-                                <td class="table-input-name">ФИО *</td>
-                                <td colspan="3"><input id="add_owner_name" type="text" class="input-main"></td>
-                            </tr>
-                            <tr>
-                                <td class="table-input-name">Паспортные данные</td>
-                                <td colspan="3"><input id="" type="text" class="input-main"></td>
-                            </tr>
-                            <tr>
-                                <td class="table-input-name">Дата рождения</td>
-                                <td colspan="3"><input id="add_owner_birth_date" type="date" class="input-main"></td>
-                            </tr>
-                            <tr>
-                                <td class="table-input-name">Дата прописки</td>
-                                <td><input id="add_owner_subscribe_date" type="date" class="input-main"></td>
-                                <td class="table-input-name">Дата выписки</td>
-                                <td><input id="add_owner_unsubscribe_date" type="date" class="input-main"></td>
-                            </tr>
-                            <tr>
-                                <td class="table-input-name">Место рождения</td>
-                                <td colspan="3"><textarea id="add_owner_birth_place" class="form-textarea" rows="3"></textarea></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
-                    <div class="form-submit-btn">
-                        <button id="add_owner_btn" class="button-primary" onclick="addNewOwner()">Добавить</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div id="popup_edit_owner" class="popup-window">
-            <div class="popup-header">
-                <div class="popup-name">Редактировать прописанного</div>
-                <div class="popup-close" onclick="closePopupWindow('popup_edit_owner')"><i class="material-icons">close</i></div>
-            </div>
-            <div class="popup-content">
-                <form name="edit_owner">
-                    <div id="edit_owner_creation_time" class="notification"></div>
-                    <table class="table-form">
-                        <tbody>
-                            <tr>
-                                <td class="table-input-name">ФИО *</td>
-                                <td colspan="3"><input id="edit_owner_name" type="text" class="input-main"></td>
-                            </tr>
-                            <tr>
-                                <td class="table-input-name">Дата рождения</td>
-                                <td colspan="3"><input id="edit_owner_birth_date" type="date" class="input-main birth-date"></td>
-                            </tr>
-                            <tr>
-                                <td class="table-input-name">Дата прописки</td>
-                                <td><input id="edit_owner_subscribe_date" type="date" class="input-main"></td>
-                                <td class="table-input-name">Дата выписки</td>
-                                <td><input id="edit_owner_unsubscribe_date" type="date" class="input-main"></td>
-                            </tr>
-                            <tr>
-                                <td class="table-input-name">Место рождения</td>
-                                <td colspan="3"><textarea id="edit_owner_birth_place" class="form-textarea" rows="3"></textarea></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="notification">Поля, отмеченные звездочкой (*), обязательны для заполнения</div>
-                    <div class="form-submit-btn">
-                            <button id="edit_owner_btn" class="button-primary" onclick="editOwnerRequest()">Сохранить</button>
-                    </div>
-                </form>
             </div>
         </div>
 
@@ -1451,6 +1328,18 @@
     <div id = "jq-dropdown-stat-filter" class = "jq-dropdown jq-dropdown-tip" >
         <div class = "jq-dropdown-panel" >
             Дополнительные фильтры, позволяющие осуществить более детальную выборку для списков, сформированных с помощью исключающих и включающих фильтров.
+        </div>
+    </div>
+    <div id = "jq-dropdown-additional-block" class = "jq-dropdown" >
+        <div class = "jq-dropdown-panel" >
+            <li> 
+                <input id = 'add_sp', type = 'checkbox', name = 'action_radio', value = 'add_sp' textname = "Добавить в СП"></input>
+                <label for = 'add_sp'><span>Добавить в СП</span></label>
+            </li>
+            <li> 
+                <input id = 'add_gp', type = 'checkbox', name = 'action_radio', value = 'add_gp' textname = "Добавить в ГП"></input>
+                <label for = 'add_gp'><span>Добавить в ГП</span></label>
+            </li>
         </div>
     </div>
 

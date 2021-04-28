@@ -149,10 +149,28 @@ $(document).ready(function() {
     }
 
     $('#add_agreement_icon').on('click', function() {
-        openPopupWindow('popup_add_agreement');
+        // openPopupWindow('popup_add_agreement');
+        addAgrData()
     });
+
     $('#add_owner_icon').on('click', function() {
-        openPopupWindow('popup_add_owner');
+
+        createInfRegData();
+
+        $("#owner_btn_edit").hide(); // скрыть кнопку редактировать
+
+        $("#obj_list_group .notification").css('display', "block"); // показать соообщение о полях
+
+        $("#owner_creation_time").hide();
+
+        $('#owner_name, #owner_birth_date, #owner_subscribe_date, #owner_unsubscribe_date, #owner_birth_place, #owner_snils, #owner_inn').removeAttr("disabled"); // разблокировать инпуты
+
+        const saveBtn = $("<i>", {id:"add_owner_btn", class:"material-icons", text:"person_add", title: "Создать пользователя"}).appendTo("#obj_list_group .form-submit-btn").css('margin-right', '12px'); // создать кнопку сохранения файлов
+        saveBtn.fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+
+        saveBtn.on("click", addNewOwner);
+
+        // openPopupWindow('popup_add_owner');
     });
 
     $('#object_communication_select').change(function() {
@@ -190,6 +208,9 @@ function initializeUserSettings() {
 
     if (localStorage.hasOwnProperty('display_city') && localStorage.getItem('display_city') == 'off') {
         currentValue = 'off';
+        localStorage.setItem('display_city', 'off');
+    } else {
+        localStorage.setItem('display_city', 'on');
     }
     if (localStorage.hasOwnProperty('debt_less_1000') && localStorage.getItem('debt_less_1000') == 'off') {
         currValDebt = 'off';
@@ -741,15 +762,23 @@ function toggleBlock () {
     
  }
 
- function createInfRegData (ownerName, ownerBirthDate, subDate, unsubDate, birthPlace, current){
-    const authorText = $(current).attr('author');
-    const creationTimeText = $(current).attr('creation_time');
+ function createInfRegData (ownerName = "", ownerBirthDate = "", subDate = "", unsubDate = "", birthPlace = "", current = ""){
+    let authorText;
+    let creationTimeText;
+     if(current == ""){
+        authorText = USER_DATA.login;
+        let date = new Date()
+        creationTimeText = date.toLocaleString('ru-RU');
+     } else{
+        authorText = $(current).attr('author');
+        creationTimeText = $(current).attr('creation_time');
+     }
 
     const parent = "#obj_list_group .block-content";
     $(parent).empty();
+    $("#obj_list_group .form-submit-btn").remove();
 
     const formBlock = $("<form>", {name: "owner"}).appendTo(parent);
-    const creationTime = $("<div>", { class:"notification", id:"owner_creation_time" ,text: `Добавил: ${authorText} ${creationTimeText}`}).appendTo(formBlock);
 
     const table = $("<table>", {class: "table-form"}).appendTo(formBlock);
     const tbody = $("<tbody>").append(
@@ -780,13 +809,30 @@ function toggleBlock () {
             $("<td>", {colspan:"3"}).append(
                 $("<textarea>", {id:"owner_birth_place", class:"form-textarea", rows:"3"}).val(birthPlace).attr("disabled", "true")
             )
+        ),
+        $("<tr>").append(
+            $("<td>", {class:"table-input-name", text: "СНИЛС"}),
+            $("<td>", {colspan:"3"}).append(
+                $("<input>", {id:"owner_snils",  type:"number", class:"input-main"}).attr("disabled", "true")
+            )
+        ),
+        $("<tr>").append(
+            $("<td>", {class:"table-input-name", text: "ИНН"}),
+            $("<td>", {colspan:"3"}).append(
+                $("<input>", {id:"owner_inn",  type:"number", class:"input-main"}).attr("disabled", "true")
+            )
         )
+
     ).appendTo(table);
+    
     $("<div>", { class:"form-submit-btn"}).append(
-        $("<button>", {id:"owner_btn_idit", class:"button-primary", text: "Редактировать"}).on("click",()=> clickIconEditOwner(ownerName, ownerBirthDate, subDate, unsubDate, birthPlace, current)).css("margin-right", "10px"),
-        $("<button>", {id:"owner_btn_save", class:"button-secondary", text: "Сохранить"}).on("click", editOwnerRequest).css("display", "none")
-    ).appendTo(parent);
-    $("<div>", { class:"notification", text: "Поля, отмеченные звездочкой (*), обязательны для заполнения<"}).appendTo(parent).css("display", "none");
+        $("<i>", {id:"owner_btn_save", class:"material-icons", text: 'save', title: 'Сохранить'}).on("click", editOwnerRequest).css("display", "none").css("margin-right", "10px"),
+        $("<i>", {id:"owner_btn_edit", class:"material-icons", text: "edit", title: 'Редактировать'}).on("click", () => clickIconEditOwner(ownerName, ownerBirthDate, subDate, unsubDate, birthPlace, current)).css("margin-right", "10px")
+    ).appendTo("#obj_list_group .block-header-with-manipulation");
+
+    $("<div>", { class:"notification", text: "Поля, отмеченные звездочкой (*), обязательны для заполнения"}).appendTo(parent).css("display", "none");
+
+    const creationTime = $("<div>", { class:"notification", id:"owner_creation_time" ,text: `Добавил: ${authorText} ${creationTimeText}`}).appendTo(formBlock);
  }
 
  function createAgrData (agreementsData){
@@ -798,6 +844,75 @@ function toggleBlock () {
         $('<div>', {class: "obj_list_item", text: agreementsData[i] }).appendTo(parent);
     }
     
+ }
+
+ function addAgrData(){
+    const parent = "#obj_list_group .block-content";
+    $(parent).empty();
+    $("#obj_list_group .form-submit-btn").remove();
+
+    const formBlock = $("<form>", {name: "add_agreement"}).appendTo(parent);
+
+    const table = $("<table>", {class: "table-form"}).appendTo(formBlock);
+    const tbody = $("<tbody>").append(
+        $("<tr>").append(
+            $("<td>", {class:"table-input-name", text: "Собственник прописан?"}),
+            $("<td>", {colspan: "3"}).append(
+                $("<input>", {id:"owner_yes",  type:"radio", name:"owner", value:"yes"}).prop("checked", "true"),
+                $("<label>", {for: "owner_yes", text: "Да"}),
+                $("<input>", {id:"owner_no",  type:"radio", name:"owner", value:"no"}),
+                $("<label>", {for: "owner_no", text: "Нет"})
+            )
+        ),
+        $("<tr>", {class:"add-agreement-owner"}).append(
+            $("<td>", {class:"table-input-name", text: "Собственник"}),
+            $("<td>", {colspan: "3"}).append(
+                $("<select>", {id:"add_agreement_owner_select", class:"input-main"})
+            )
+        ),
+        $("<tr>", {class:"add-agreement-no-owner"}).append(
+            $("<td>", {class:"table-input-name", text: "ФИО *"}),
+            $("<td>", {colspan: "3"}).append(
+                $("<input>", {id:"add_agreement_fio", type:"text", class:"input-main"})
+            )
+        ),
+        $("<tr>", {class:"add-agreement-no-owner"}).append(
+            $("<td>", {class:"table-input-name", text: "Дата рождения"}),
+            $("<td>", {colspan: "3"}).append(
+                $("<input>", {id:"add_agreement_birth_date", type:"date", class:"input-main"})
+            )
+        ),
+        $("<tr>").append(
+            $("<td>", {class:"table-input-name", text: "Наименование договора *"}),
+            $("<td>", {colspan: "3"}).append(
+                $("<input>", {id:"add_agreement_name", type:"text", class:"input-main"})
+            )
+        ),
+        $("<tr>").append(
+            $("<td>", {class:"table-input-name", text: "Дата договора *"}),
+            $("<td>", {colspan: "3"}).append(
+                $("<input>", {id:"add_agreement_date", type:"date", class:"input-main"})
+            ),
+            $("<td>", {class:"table-input-name", text: "Доля"}),
+            $("<td>", {colspan: "3"}).append(
+                $("<input>", {id:"add_agreement_part", type:"text", class:"input-main"})
+            )
+        )
+    ).appendTo(table);
+
+    $("<div>", { class:"notification", text: "Поля, отмеченные звездочкой (*), обязательны для заполнения"}).appendTo(parent).css("display", "none");
+
+    let registrationsData = OBJECT_DATA.registrations;
+    for (const registrationKey in registrationsData) {
+        let registrationData = registrationKey.split('&');    
+        $('<option>', {text: registrationData[0], humanId: registrationData[2]}).appendTo('#add_agreement_owner_select');
+    }
+
+    $("<div>", {class:"form-submit-btn"}).append(
+        $("<button>", {id:"add_agreement_btn", class:"button-primary", text: "Добавить"}).on("click", addNewAgreement)
+    ).appendTo(table).css("margin-left", "220%").css("margin-top", "13%").css("float", "none")
+
+    setInputRadio();
  }
 
 function createContentBlock(name, styles) {
@@ -1228,7 +1343,7 @@ function initializeObjectsTreeFilters() {
             filtersListDiv.attr("active", false);
             parentDiv.css("cursor", "pointer");
 
-            function DropDownDiv (e){
+            function DropDownDiv(e) {
                 if($(e.nextSibling).attr("active") == "false"){
                     $(".accordion").each((e,i)=>{
                         $(i.children).each((j, chekeds) => {
@@ -1280,16 +1395,11 @@ function initializeObjectsTreeFilters() {
             if (element.title == "Статические фильтры"){
                 input.on('change', () => {
                 const isSelected = input.prop('checked');
-                console.log(input);
-                console.dir(input)
-                console.log(isSelected);
                     if (isSelected) {
                         selectedFiltersConst.push(filter.value);
-                        console.log(selectedFiltersConst);
                     }
                     else {
                         selectedFiltersConst.pop(filter.value);
-                        console.log(selectedFiltersConst);
                     }
                 });
             } else {
@@ -1297,11 +1407,9 @@ function initializeObjectsTreeFilters() {
                 const isSelected = input.prop('checked');
                     if (isSelected) {
                         selectedFilters.push(filter.value);
-                        console.log(selectedFilters);
                     }
                     else {
                         selectedFilters.pop(filter.value);
-                        console.log(selectedFilters);
                     }
                 });
             }
@@ -1324,9 +1432,7 @@ function initializeObjectsTreeFilters() {
     const lS = localStorage;
 
     const submitBtn = $('<button>', {class: 'button-primary', text: 'Применить'}).on('click', () => {
-        $.each(selectedFiltersConst, function(i,elem){
-            selectedFilters.push(elem);
-        });
+        
         const data = {};
 
         if(lS.hasOwnProperty('debt_less_1000') && lS.getItem('debt_less_1000') == 'off'){
@@ -1339,7 +1445,8 @@ function initializeObjectsTreeFilters() {
         
         if (fromInput.val() !== '' || toInput.val() !== '') {
 
-            data.filters = selectedFilters;
+            data.filters = [...selectedFilters, ...selectedFiltersConst];
+            console.log(data)
             data.sum = {from: fromInput.val(), to: toInput.val()};
             // настройка звездочки на иконке "настройки".
             if(lS.getItem('debt_less_1000') == 'on' && lS.getItem('display_city') == 'on' && data.filters.length <= 0 && !data.sum){
@@ -1350,7 +1457,8 @@ function initializeObjectsTreeFilters() {
             sendFilters(data);
         }
         else {
-            data.filters = selectedFilters;
+            data.filters = [...selectedFilters, ...selectedFiltersConst];
+            console.log(data)
             // настройка звездочки на иконке "настройки".
             if(lS.getItem('debt_less_1000') == 'on' && lS.getItem('display_city') == 'on' && data.filters.length <= 0){
                 $("#icon-setting").find("span").remove();
@@ -1387,8 +1495,13 @@ function initializeObjectsTreeFilters() {
             data: JSON.stringify(data),
             success: function (data) {
                 console.log(JSON.parse(data));
-                createObjectsTree(JSON.parse(data)[0].objects_list);
-                removeContentLoader('#object_list_tree', '.object-list-tree');
+                if(JSON.parse(data) != null){
+                    createObjectsTree(JSON.parse(data)[0].objects_list);
+                    removeContentLoader('#object_list_tree', '.object-list-tree');  
+                } else {
+                    showPopupNotification('alert', 'Данные по указанным фильтрам отсутствуют!');
+                }
+                
             }
         });
     }  
@@ -2119,7 +2232,6 @@ function getPackage(repName, repNum, repType) {
         url: '/report',
         data: JSON.stringify({operation: "check", report_data: reportData}),
         success: (data) => {
-            console.log(data);
             const periodsData = JSON.parse(data);
             if (data !== 'error' && !isEmpty(periodsData)) {
                 const ownershipPeriodsRepository = [];
@@ -2162,10 +2274,14 @@ function getPackage(repName, repNum, repType) {
                                 ownershipPeriodsData.push({ name: period.name, start_date: RemakeDateFormatFromInput(period.start_date.val()), end_date: RemakeDateFormatFromInput(period.end_date.val()) });
                             }
                         }
-                        const isCheked = $(".additional-block").find("input").prop('checked')
-                        console.log(isCheked);
-                        const data = { operation: 'get_report', report_data: reportData, ownership_periods: ownershipPeriodsData, checkbox: isCheked};
+                        const isCheked = [];
+                        $('input[name="action_radio"]').each((index, elem) => {
+                            if($(elem).prop('checked') == true){
+                              isCheked.push($(elem).val())  
+                            }                            
+                        });
 
+                        const data = { operation: 'get_report', report_data: reportData, ownership_periods: ownershipPeriodsData, checkbox: isCheked};
 
                         if (!isEmpty(ownershipPeriodsData)) {
                             const callback = (data) => {
@@ -2178,13 +2294,48 @@ function getPackage(repName, repNum, repType) {
                             showPopupNotification('alert', 'Выберите хотя бы один период!')
                         }
 
-                    }).css("margin-left","15%"),$("<div>", {class: "additional-block"}).append(
-                        $('<label>', {class: 'checkbox-container' , text: 'Создать физическую копию' }).append(
-                            $("<input>", {type: "checkbox", class: "checkbox"}),
-                            $('<span>', {class: 'checkmark'})
-                        ) 
-                       )
+                    }).css("margin-left","15%"),$("<div>", {class: "additional-block"})
                 );
+                const btnAction = $("<button>",{text: "Выбрать действия", class:"button-secondary"}).appendTo(button); 
+                btnAction.css("float", "right");
+                btnAction.css("width", "175px");  
+
+                let btnAddSp = $("#add_sp"),
+                    btnAddGp = $("#add_gp");
+                
+                btnAddSp.on("click", () => {
+                    if(btnAddSp.prop('checked') == true){
+                        btnAction.text(btnAddSp.attr("textname"));
+
+                        if(btnAddGp.prop('checked') == true && btnAddSp.prop('checked') == true){
+                            btnAction.text("Добавить в ГП и СП");
+                        }
+
+                    } else if(btnAddSp.prop('checked') == false && btnAddGp.prop('checked') == true){
+                        btnAction.text("Добавить в ГП");
+
+                    } else if(btnAddSp.prop('checked') == false && btnAddGp.prop('checked') == false){
+                        btnAction.text("Без действий");
+                    }                    
+                });
+
+                btnAddGp.on("click", () => {
+                    if(btnAddGp.prop('checked') == true){
+                        btnAction.text(btnAddGp.attr("textname"));
+
+                        if(btnAddSp.prop('checked') == true && btnAddGp.prop('checked') == true){
+                            btnAction.text("Добавить в СП и ГП");
+                        }  
+                    }   else if(btnAddGp.prop('checked') == false && btnAddSp.prop('checked') == true){
+                        btnAction.text("Добавить в СП");
+
+                    }   else if(btnAddSp.prop('checked') == false && btnAddGp.prop('checked') == false){
+                        btnAction.text("Без действий");
+                    } 
+                    
+                });
+                                
+                btnAction.attr("data-jq-dropdown","#jq-dropdown-additional-block"); 
                 popupContent.empty();
                 popupContent.append(table, button);
             }
@@ -2258,7 +2409,6 @@ function getReportContent(data, callback) {
         url: '/report',
         data: JSON.stringify(data),
         success: (data) => {
-            console.log(data);
             if (callback) {
                 callback(data);
             }
@@ -2267,12 +2417,9 @@ function getReportContent(data, callback) {
 }
 
 function initializeReportNewWindow(reportContent, reportName, reportId, personName = "") {
-    console.log(personName)
-    console.log(reportContent)
     const theme = localStorage.getItem('color_theme');
     const reportsList = getCurrentCompanyReportsArray();
     const toExcel = reportsList[reportId].to_excel;
-    console.log(reportsList, toExcel)
     const objectAdress = `${CURRENT_OBJECT_DATA.adress} - ${CURRENT_OBJECT_DATA.apartNum}`;
     var printWindow = window.open('');
     printWindow.document.write(`<html theme=${theme} to_excel=${toExcel} adress="${objectAdress}" person_name="${personName}" report_name="${reportName}"><head><title>${objectAdress}, ${personName}, ${reportName}</title><link href="/css/style_report_page.css" rel="stylesheet" type="text/css"><link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"><script src="/js/jquery-3.4.1.min.js"></script><script src="/js/report_page.js"></script>`);
@@ -2329,6 +2476,7 @@ function getPrintForm(){
             $("<tr>", {class: "tr-btn"}).append(
                 $("<td>", {text: report.rep_name})
             ).on("click", () => {
+                $("#jq-dropdown-additional-block input").prop("checked", false);
                 getPackage(report.rep_name, report.rep_num, report.rep_type);
             }).appendTo("#obj_package tbody");
         }        
@@ -2386,7 +2534,6 @@ function getObjectRegistrationsData() {
         tr = $('<tr>', { 'accid': registrationData[1], 'human_id': registrationData[2], 'author': registrationValue.author, 'creation_time': registrationValue.creation_time, class: "tr-btn"}).append($('<td>', { text: registrationData[0] })).appendTo(table);
 
         tr.on("click", function() {
-            console.log("клик сработал")
             const ownerName = registrationData[0],
                   ownerBirthDate = RemakeDateFormatToInput(registrationValue.birth_date),
                   subDate = RemakeDateFormatToInput(registrationValue.registration_date);
@@ -3072,9 +3219,9 @@ function isActivePrintMode() {
 }
 
 function clickIconEditOwner(ownerName, ownerBirthDate, subDate, unsubDate, birthPlace, current) {
-    $('#owner_btn_save').css('display', "inline-block");
-    $("#obj_list_group .notification").css('display', "block");
-    $('#owner_name, #owner_birth_date, #owner_subscribe_date, #owner_unsubscribe_date, #owner_birth_place').removeAttr("disabled");
+    $('#owner_btn_save').fadeIn(100);
+    $("#obj_list_group .notification").fadeIn(100);
+    $('#owner_name, #owner_birth_date, #owner_subscribe_date, #owner_unsubscribe_date, #owner_birth_place, #owner_snils, #owner_inn').removeAttr("disabled");
 
     const author = $(current).attr('author');
     const creationTime = $(current).attr('creation_time');
@@ -3134,15 +3281,15 @@ function editOwnerRequest() {
 function addNewOwner() {
     event.preventDefault();
     let accid = CURRENT_OBJECT_DATA.accid,
-        name = $('#add_owner_name').val(),
-        date = RemakeDateFormatFromInput($('#add_owner_birth_date').val()),
-        subDate = RemakeDateFormatFromInput($('#add_owner_subscribe_date').val()),
-        unsubDate = RemakeDateFormatFromInput($('#add_owner_unsubscribe_date').val()),
-        birthPlace = $('#add_owner_birth_place').val();
+        name = $('#owner_name').val(),
+        date = RemakeDateFormatFromInput($('#owner_birth_date').val()),
+        subDate = RemakeDateFormatFromInput($('#owner_subscribe_date').val()),
+        unsubDate = RemakeDateFormatFromInput($('#owner_unsubscribe_date').val()),
+        birthPlace = $('#owner_birth_place').val();
 
-    if ($('#add_owner_name').val() == '') {
-        $('#add_owner_name').attr('placeholder', 'Заполните поле');
-        $('#add_owner_name').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+    if ($('#owner_name').val() == '') {
+        $('#owner_name').attr('placeholder', 'Заполните поле');
+        $('#owner_name').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
     }
     else {
         encodeURIstring = encodeURI(`/base_func?val_param=addchg_human&val_param1=${accid}&val_param2=${name}&val_param3=${date}&val_param4=add&val_param5=0&val_param6=${subDate}&val_param7=${unsubDate}&val_param8=${birthPlace}`);
@@ -3150,7 +3297,8 @@ function addNewOwner() {
             if (data == 'success') {
                 closePopupWindow();
                 refreshObjectData([getObjectRegistrationsData, clickDropdownMenu]);
-                $('#add_owner_name, #add_owner_birth_date').val('');
+                createInfRegData(name, date, subDate, unsubDate, birthPlace);
+                showPopupNotification('notification', 'Прописанный успешно создан!');
             }
         });
     }
@@ -3176,9 +3324,9 @@ function addNewAgreement() {
         humanId = '0';
     }
     let agreementDate = $('#add_agreement_date').val();
-    console.log(agreementDate);
-    console.log(part);
-    console.log(agreementName);
+
+    const agrArr = [`${agreementName} ${agreementDate} ${part} `]
+
     if (agreementDate !== '') {
         let splittedDate = agreementDate.split('-');
         agreementDate = `${splittedDate[2]}.${splittedDate[1]}.${splittedDate[0]}`;
@@ -3190,6 +3338,8 @@ function addNewAgreement() {
             closePopupWindow();
             refreshObjectData([getObjectAgreementsData]);
             $('#add_agreement_name, #add_agreement_date, #add_agreement_part, #add_agreement_fio, #add_agreement_birth_date').val('');
+            createAgrData(agrArr);
+            showPopupNotification('notification', 'Документ на право собственности успешно создан!');
         }
     });
 }
@@ -4642,15 +4792,15 @@ function mainSearchKeyup(inputId, menuId) {
 
                 $(`#${menuId} ul li`).each(function() {
                     $(this).on('click', function() {
+                        $(".header-toggle, .header-title").css("display","inline-flex");
+                        $("#obj_content .header-manipulation-agr").css("display","block");
+
                         let adress = $(this).attr('adress');
                         let accid = $(this).attr('accid');
                         input.val('');
                         openHomePage();
 
-                        // $('#obj_agreements_btn, #obj_owners_btn').prop('disabled', false);
-
                         CURRENT_OBJECT_DATA.accid = accid;
-                        // CURRENT_OBJECT_DATA.apartNum = $(this).text();
                         CURRENT_OBJECT_DATA.adress = adress;
                         getObjectData();
                         $('#obj_adress').text(adress);
@@ -4673,10 +4823,6 @@ function mainSearchKeyup(inputId, menuId) {
         parentDiv.empty();
         $(`#${menuId}`).hide();
     }
-
-    // input.focusout(function() {
-    //     $(`#${menuId}`).hide();
-    // });
 }
 
 function setOffsetFastSearchMenu() {
@@ -4734,7 +4880,6 @@ function getNewsList() {
                 $('<div>', {class: 'news-creation-date', text: `Добавлено: ${creationDate}`})
 
             ).appendTo('#news_list');
-
         }
     });
     removeContentLoader('#news_content .info-block-content', '#news_list');
@@ -5718,12 +5863,23 @@ function addSettingChangeToObj(obj, elem, objKey, hiddenCurrentState) {
 
 function operationRegistry (Obj, registryId, registryName, registryType, documentType, Operation, previosString) {
 
-    const tr = $("<tr>");
-    const tdOperation = $("<td>");
+    const {thead, tbody} = Obj;
+    if(Obj.tfooter){
+        $("#registry_table tbody tr:last").remove();
+    }
+
+    const tr = $( "<tr>" );
+    const tdOperation = $( "<td>" );
    
-    for (const entry of Obj.tbody) {
+    for (const entry of tbody) {
         for (const index in entry.data) {
-            const td = $('<td>', { text: entry.data[index] }).appendTo(tr);
+            const td = $( '<td>', { text: entry.data[index] }).appendTo(tr);
+
+            const isHidden = (thead[index].hidden == 'true');
+                        
+            if (isHidden) {
+                td.css({ 'display': 'none' });
+            }
         }
     }
     tdOperation.appendTo(tr);
@@ -5731,7 +5887,33 @@ function operationRegistry (Obj, registryId, registryName, registryType, documen
     if (Operation == "edit"){
         $(previosString).after(tr);
     } else if(Operation == "add"){
-        tr.appendTo(previosString);
+        if($("#registry_table").find("tbody")){
+            tr.appendTo(previosString);
+        } else{
+            const tbody = $("<tbody>").appendTo("#registry_table")
+            tr.appendTo(tbody);
+        }
+        
+        console.log(previosString);
+        
+    }
+
+    if(Obj.tfooter){
+        for (const entry of Obj.tfooter) {
+            const tr = $( "<tr>" );
+            for (const index in entry) {
+                const td = $( '<td>', {class:"table-tfoot-td", text: entry[index] }).appendTo(tr);
+
+                const isHidden = (thead[index].hidden == 'true');
+                        
+                if (isHidden) {
+                    td.css({ 'display': 'none' });
+                    console.log("скрыть")
+                }
+            }           
+
+            tr.appendTo(previosString);
+        }
     }
 
 
@@ -7032,12 +7214,14 @@ function getChatPopup(){
             inputText.val("");
     }
     submitBtn.on("click", () => {
-        postMessage();
+        if(inputText.val() != ""){
+          postMessage();  
+        }       
     });
 
     inputText.on("keypress", (e)=>{
-        if(e.which == 13){
-            postMessage();
+        if(e.which == 13 && inputText.val() != ""){
+            postMessage();  
         }
     })
 
