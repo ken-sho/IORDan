@@ -6908,6 +6908,7 @@ function deleteObjectsGroup(groupName) {
         $.post(encodeURIstring, function (data) {
             getObjectsGroupsList();
             showPopupNotification('notification', `Группа объектов "${groupName}" успешно удалена!`);
+            getObjectsTreeData([initializeObjectsTreeFilters]);
         });
     }
 }
