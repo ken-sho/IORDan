@@ -190,6 +190,8 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
+        encoded = base64.b64encode(q_sql.encode()).decode()
+        logg_web.add_log(asid,encoded,'Открытие реестра')
     elif fnk_name=='addchg_ree_recodrs':
         adate=urllib.parse.unquote(adate)
         q_sql = "select main.addchg_ree_recodrs('"+ asid +"','"+ orgid +"','"+ adate +"')"
