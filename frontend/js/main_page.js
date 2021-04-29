@@ -5562,7 +5562,7 @@ function getRegistryList(callback) {
 
                 $('<i>', {id: 'create_registry_div', class: 'material-icons', text: 'add_circle_outline' }).on('click', () => {
                         openPopupWindow('popup_create_registry');
-                    }).appendTo('.ui-datepicker-buttonpane');
+                    }).appendTo('#registry_settings_calendar .ui-datepicker-buttonpane');
             }
         }
     });
