@@ -61,7 +61,7 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         logg_web.add_log(asid,encoded,'Изменение настроект')
     if fnk_name=='objects_tree_filters':
         q_sql = "select main.house_tree('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        print(q_sql)
+        #print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -69,7 +69,7 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         logg_web.add_log(asid,encoded,'Применение фильтра объектов')
     elif fnk_name=='account_history':
         q_sql = "select main.account_history('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        print(q_sql)
+        #print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -258,7 +258,6 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         logg_web.add_log(asid,encoded,'Просмотр документа массовой печати')
     elif fnk_name=='chg_history_foropl':
         q_sql = "select main.chg_history_foropl('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -266,7 +265,6 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         logg_web.add_log(asid,encoded,'Разбивка оплаты')
     elif fnk_name=='get_last_pay_date':
         q_sql = "select main.get_last_pay_date('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -278,7 +276,6 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
             res=(row[0])
     elif fnk_name=='log_views':
         q_sql = "select log.log_views('"+ asid +"','"+ adate +"')"
-        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
