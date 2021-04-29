@@ -61,7 +61,7 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         logg_web.add_log(asid,encoded,'Изменение настроект')
     if fnk_name=='objects_tree_filters':
         q_sql = "select main.house_tree('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        #print(q_sql)
+        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -69,7 +69,7 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         logg_web.add_log(asid,encoded,'Применение фильтра объектов')
     elif fnk_name=='account_history':
         q_sql = "select main.account_history('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        #print(q_sql)
+        print(q_sql)
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
