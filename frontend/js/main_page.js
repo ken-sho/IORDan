@@ -6895,6 +6895,7 @@ function createObjectGroup() {
                     $('#create_object_group_ul input:checked').prop('checked', false);
                     showPopupNotification('notification', 'Группа объектов успешно создана!');
                     getObjectsGroupsList();
+                    getObjectsTreeData([initializeObjectsTreeFilters]);
                 }
             });
         }
