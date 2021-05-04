@@ -427,7 +427,7 @@ class BankTemplHandler(BaseHandler):
 class RedmineHandler(tornado.web.RequestHandler):
     def get(self):
         request = self.get_argument('request')
-        url = "https://intelgradplus.ru:10443"+request
+        url = "https://webdeb.ru:10443"+request
         response = requests.get(url)
         self.write(response.content)
 
@@ -436,7 +436,7 @@ class RedmineHandler(tornado.web.RequestHandler):
         encoding = 'windows-1251'
         #args = ((self.request.body).decode(encoding))
         args = self.request.body
-        url = "https://intelgradplus.ru:10443"+request
+        url = "https://webdeb.ru:10443"+request
         response = requests.post(url, headers={"Content-Type": "application/json"}, data=args)
         self.write(response.text)
 
