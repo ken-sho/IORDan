@@ -8,4 +8,4 @@ def add_log (asid,query,note):
     cur.execute(q_sql)
     conn.commit()
     cur.close()
-    conn.close ()
+    conn.close () 
