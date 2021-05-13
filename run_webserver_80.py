@@ -259,10 +259,13 @@ class ReportHandler(BaseHandler):
         adate = str(((self.request.body).decode('UTF8')))
         conn = db_conn.db_connect('web_receivables')
         cur = conn.cursor()
+        q_sql = 'report.proxy_srv' + str([asid,orgid,adate])
         cur.callproc('report.proxy_srv',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
             self.write(res)
+        encoded = base64.b64encode(q_sql.encode()).decode()
+        logg_web.add_log(asid,encoded,'Выполнение пакетного документа')
         conn.commit()
         cur.close()
         conn.close()

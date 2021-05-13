@@ -7,9 +7,7 @@ def login (uname, pwd ,ip_adr):
     conn = db_conn.db_connect('web_receivables')
     cur = conn.cursor()
     note = '{"ip": "'+ip_adr+'"}'
-    #q_sql = "SELECT count(sid) FROM access.t_users where sid ='"+ uname +"'and passwd='"+ passwd +"'"
-    q_sql = "select access.login('"+ uname +"','"+ passwd +"','"+ note +"')"
-    cur.execute(q_sql)
+    cur.callproc('access.login',[uname,passwd,note])
     for row in cur:
         res=(row[0])
         print(res)
@@ -31,8 +29,7 @@ def login (uname, pwd ,ip_adr):
 def chck_ss (asid):
     conn = db_conn.db_connect('web_receivables')
     cur = conn.cursor()
-    q_sql = "select access.check_sid('"+ asid +"')"
-    cur.execute(q_sql)
+    cur.callproc('access.check_sid',[asid])
     conn.commit()
     for row in cur:
         res=(row[0])

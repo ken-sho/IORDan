@@ -260,10 +260,13 @@ class ReportHandler(BaseHandler):
         adate = str(((self.request.body).decode('UTF8')))
         conn = db_conn.db_connect('web_receivables')
         cur = conn.cursor()
+        q_sql = 'report.proxy_srv' + str([asid,orgid,adate])
         cur.callproc('report.proxy_srv',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
             self.write(res)
+        encoded = base64.b64encode(q_sql.encode()).decode()
+        logg_web.add_log(asid,encoded,'Выполнение пакетного документа')
         conn.commit()
         cur.close()
         conn.close()
@@ -428,7 +431,7 @@ class BankTemplHandler(BaseHandler):
 class RedmineHandler(tornado.web.RequestHandler):
     def get(self):
         request = self.get_argument('request')
-        url = "https://intelgradplus.ru:10443"+request
+        url = "https://webdeb.ru:10443"+request
         response = requests.get(url)
         self.write(response.content)
 
@@ -437,7 +440,7 @@ class RedmineHandler(tornado.web.RequestHandler):
         encoding = 'windows-1251'
         #args = ((self.request.body).decode(encoding))
         args = self.request.body
-        url = "https://intelgradplus.ru:10443"+request
+        url = "https://webdeb.ru:10443"+request
         response = requests.post(url, headers={"Content-Type": "application/json"}, data=args)
         self.write(response.text)
 

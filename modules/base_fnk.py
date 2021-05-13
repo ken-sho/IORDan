@@ -47,41 +47,40 @@ import modules.tracert as tracert
 #get_last_pay_date
 #office_administration_add_entry
 #log_views
+#get_egrp_rec
 
 def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10):
     conn = db_conn.db_connect('web_receivables')
     cur = conn.cursor()
     res=''
     if fnk_name=='chg_history_setting':
-        q_sql = "select main.chg_history_setting('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        cur.execute(q_sql)
+        q_sql = 'main.chg_history_setting' + str([asid,orgid,adate])
+        cur.callproc('main.chg_history_setting',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Изменение настроект')
     if fnk_name=='objects_tree_filters':
-        q_sql = "select main.house_tree('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        #print(q_sql)
-        cur.execute(q_sql)
+        q_sql = 'main.house_tree' + str([asid,orgid,adate])
+        cur.callproc('main.house_tree',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Применение фильтра объектов')
     elif fnk_name=='account_history':
-        q_sql = "select main.account_history('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        #print(q_sql)
-        cur.execute(q_sql)
+        q_sql = 'main.account_history' + str([asid,orgid,adate])
+        cur.callproc('main.account_history',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
     elif fnk_name=='adr_info':
-        q_sql = "select main.adr_info('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        #print(q_sql)
-        cur.execute(q_sql)
+        q_sql = 'main.adr_info' + str([asid,orgid,adate])
+        cur.callproc('main.adr_info',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
     elif val_param=='addchg_human':
-        q_sql = "select main.addchg_human('"+ asid +"','"+ val_param1 +"','"+ val_param2 +"','"+ val_param3 +"','"+ val_param4 +"','"+ val_param5 +"','"+ val_param6 +"','"+ val_param7 +"','"+ val_param8 +"')"
-        cur.execute(q_sql)
+        q_sql = 'main.addchg_human' + str([asid,orgid,adate])
+        print(q_sql)
+        cur.callproc('main.addchg_human',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
@@ -108,8 +107,8 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Добавление/удаление контактных данных')
     elif fnk_name=='reports_setting':
-        q_sql = "select report.sprav_note_chg('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        print(q_sql)
+        q_sql = 'report.sprav_note_chg' + str([asid,orgid,adate])
+        cur.callproc('report.sprav_note_chg',[asid,orgid,adate])
         cur.execute(q_sql)
         for row in cur:
             res=(row[0])
@@ -133,8 +132,8 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Примечание по адресу')
     elif val_param=='loader_file_list':
-        q_sql = "select loader.filelist('"+ asid +"','"+ orgid +"')"
-        cur.execute(q_sql)
+        q_sql = 'loader.filelist' + str([asid,orgid])
+        cur.callproc('loader.filelist',[asid,orgid])
         for row in cur:
             res=(row[0])
     elif val_param=='delfilepart':
@@ -145,8 +144,8 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Удалить лист платёжного документа')
     elif val_param=='document_list':
-        q_sql = "select main.document_list('"+ asid +"','"+ orgid +"')"
-        cur.execute(q_sql)
+        q_sql = 'main.document_list' + str([asid,orgid])
+        cur.callproc('main.document_list',[asid,orgid])
         for row in cur:
             res=(row[0])
     elif val_param=='rollback_bank':
@@ -162,8 +161,8 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         for row in cur:
             res=(row[0])
     elif val_param=='registries_list':
-        q_sql = "select main.registries_list('"+ asid +"','"+ orgid +"')"
-        cur.execute(q_sql)
+        q_sql = 'main.registries_list' + str([asid,orgid])
+        cur.callproc('main.registries_list',[asid,orgid])
         for row in cur:
             res=(row[0])
     elif val_param=='chg_passwd':
@@ -174,8 +173,8 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Смена пароля')
     elif val_param=='chg_user_attr':
-        q_sql = "select access.chg_user_attr('"+ asid +"','"+ adate +"')"
-        cur.execute(q_sql)
+        q_sql = 'access.chg_user_attr' + str([asid,adate])
+        cur.callproc('access.chg_user_attr',[asid,adate])
         for row in cur:
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
@@ -186,17 +185,17 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         for row in cur:
             res=(row[0])
     elif fnk_name=='get_registry':
-        q_sql = "select main.ree_recodrs('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        cur.execute(q_sql)
+        q_sql = 'main.ree_recodrs' + str([asid,orgid,adate])
+        cur.callproc('main.ree_recodrs',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Открытие реестра')
     elif fnk_name=='addchg_ree_recodrs':
         adate=urllib.parse.unquote(adate)
-        q_sql = "select main.addchg_ree_recodrs('"+ asid +"','"+ orgid +"','"+ adate +"')"
+        q_sql = 'main.addchg_ree_recodrs' + str([asid,orgid,adate])
         tracert.tprint('addchg_ree_recodrs',q_sql)
-        cur.execute(q_sql)
+        cur.callproc('main.addchg_ree_recodrs',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
@@ -209,8 +208,8 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Добавление группы домов')
     elif val_param=='house_group_list':
-        q_sql = "select main.house_group_list('"+ asid +"','"+ orgid +"')"
-        cur.execute(q_sql)
+        q_sql = 'main.house_group_list' + str([asid,orgid])
+        cur.callproc('main.house_group_list',[asid,orgid])
         for row in cur:
             res=(row[0])
     elif val_param=='add_usr_hsgrlst':
@@ -224,8 +223,8 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         for row in cur:
             res=(row[0])
     elif fnk_name=='registry_settings':
-        q_sql = "select main.chgthead_reereestrs('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        cur.execute(q_sql)
+        q_sql = 'main.chgthead_reereestrs' + str([asid,orgid,adate])
+        cur.callproc('main.chgthead_reereestrs',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
@@ -245,42 +244,46 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Изменение репутации')
     elif fnk_name=='ree_regular_create':
-        q_sql = "select main.ree_regular_create('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        cur.execute(q_sql)
+        q_sql = 'main.ree_regular_create' + str([asid,orgid,adate])
+        cur.callproc('main.ree_regular_create',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Создание регулярного реестра')
     elif fnk_name=='ree_print_registry_content':
-        q_sql = "select main.ree_print_registry_content('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        cur.execute(q_sql)
+        q_sql = 'main.ree_print_registry_content' + str([asid,orgid,adate])
+        cur.callproc('main.ree_print_registry_content',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Просмотр документа массовой печати')
     elif fnk_name=='chg_history_foropl':
-        q_sql = "select main.chg_history_foropl('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        cur.execute(q_sql)
+        q_sql = 'main.chg_history_foropl' + str([asid,orgid,adate])
+        cur.callproc('main.chg_history_foropl',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Разбивка оплаты')
     elif fnk_name=='get_last_pay_date':
-        q_sql = "select main.get_last_pay_date('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        cur.execute(q_sql)
+        q_sql = 'main.get_last_pay_date' + str([asid,orgid,adate])
+        cur.callproc('main.get_last_pay_date',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
+        encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Разбивка оплаты')
-    elif fnk_name=='office_administration_add_entry':
-        q_sql = "select main.office_administration_add_entry('"+ asid +"','"+ orgid +"','"+ adate +"')"
-        cur.execute(q_sql)
-        for row in cur:
-            res=(row[0])
     elif fnk_name=='log_views':
-        q_sql = "select log.log_views('"+ asid +"','"+ adate +"')"
-        cur.execute(q_sql)
+        q_sql = 'log.log_views' + str([asid,adate])
+        cur.callproc('log.log_views',[asid,adate])
         for row in cur:
             res=(row[0])
+    elif fnk_name=='get_egrp_rec':
+        q_sql = 'main.get_egrp_rec' + str([asid,orgid,adate])
+        print(q_sql)
+        cur.callproc('main.get_egrp_rec',[asid,orgid,adate])
+        for row in cur:
+            res=(row[0])
+        encoded = base64.b64encode(q_sql.encode()).decode()
+        logg_web.add_log(asid,encoded,'Добавление собственников из ЕГРП')
 
     conn.commit()
     cur.close()
