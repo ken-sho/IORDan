@@ -203,7 +203,7 @@
                                 <div class="block-content full-area">
                                     <div id="agreements_owners_content"></div>
                                 </div>
-                            </div> -->
+                            </div> --> 
                             <div id="obj_additional_info">
                                 <div class="block-header-with-manipulation">
                                     <div class="header">Дополнительная информация</div>
@@ -250,17 +250,18 @@
                                 </div>
                                 <div id="obj_main_table"></div>
                             
-                                <div id="obj_agreements_info">
-                                    <div class="block-content full-area" id="block-contract">
-                                        <div class="block-header-with-manipulation">
-                                            <div class="header_agr">Документы на право собственности</div>
-                                            <div class="header-manipulation-agr">
-                                                <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-owners" title="Справка" onclick="">help_outline</i>
-                                                <i id="add_agreement_icon" class="material-icons" title="Добавить">add</i>
-                                            </div>
-                                        </div>
-                                        <div id="agreements_contract_content"></div>
-                                    </div>
+<div id="obj_agreements_info">
+    <div class="block-content full-area" id="block-contract">
+        <div class="block-header-with-manipulation">
+            <div class="header_agr">Документы на право собственности</div>
+            <div class="header-manipulation-agr">
+                <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-owners" title="Справка" onclick="">help_outline</i>
+                <i id="add_agreement_icon" class="material-icons" title="Добавить">add</i>
+                <i id="update_agreement_icon" class="material-icons" title="Загрузить собственников из выписки ЕГРП">system_update_alt</i>
+            </div>
+        </div>
+        <div id="agreements_contract_content"></div>
+    </div>
                                     <div class="block-content full-area" id="block-pasport">
                                         <div class="block-header-with-manipulation">
                                             <div class="header_agr">Прописанные</div>
@@ -1342,7 +1343,11 @@
             </li>
         </div>
     </div>
-
+    <div id = "jq-dropdown-agreements-ergp-block" class = "jq-dropdown" >
+        <div class = "jq-dropdown-panel" >
+            
+        </div>
+    </div>
     
 </body>
 

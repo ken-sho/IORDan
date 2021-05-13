@@ -46,6 +46,12 @@ $(document).ready(function() {
             checkbox.removeClass('active');
         }
     });
+    function currentYear(){
+        const currentYear = new Date;
+        $(".allrigres p").text(`© ООО «Интел-Град Плюс» c 2019-${currentYear.getFullYear()}`)
+    }
+    
+    currentYear();
 })
 
 function createContentLoader(parentDivSelector) {
@@ -61,3 +67,4 @@ function removeContentLoader(parentDivSelector, contentDivSelector) {
     $(`[parent_div='${parentDivSelector}']`).remove();
     $(contentDivSelector).show();
 }
+
