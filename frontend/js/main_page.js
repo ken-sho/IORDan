@@ -2155,10 +2155,10 @@ function initializeOfficeAdministration() {
     const popupLayout = createPopupFullscreenLayout(`Делопроизводство: ${CURRENT_OBJECT_DATA.adress}`, popupId, {'display' : 'flex', 'justify-content' : 'space-around'});
     popupLayout.appendTo('#popup_background');
     const icon = $('<div>', {id: 'office_administration_icon', class: 'icon-with-count'}).append(
-                    $('<i>', {class: 'material-icons', title: 'Делопроизводство', text: 'description' }).on('click', () => {
-                        openPopupWindow(popupId);
-                    })
-    ).appendTo('#obj_ls_info .header-manipulation');
+                    $('<i>', {class: 'material-icons', title: 'Делопроизводство', text: 'description' })
+    ).on('click', () => {
+        openPopupWindow(popupId);
+    }).appendTo('#obj_ls_info .header-manipulation');
     
     console.log(OBJECT_DATA.office_administration)
     if(OBJECT_DATA.office_administration){
