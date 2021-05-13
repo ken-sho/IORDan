@@ -1012,18 +1012,12 @@ function openCloseMainMenu () {
 }
 
 function openPopupWindow(id) {
-    // $('.popup-with-menu').each(function() {
-    //     if ($(this).attr('id') !== 'popup_control') {
-    //         $(this).hide();
-    //     }
-    // });
     $('.popup-window, .popup-fullscreen').hide();
     if(office_admin_active){
         console.log("active");
         $("<div>", {id:"popup_background_2"}).appendTo("#popup_background").on('click', (e) => {
             if (e.target !== e.currentTarget) {
-                return;
-                
+                return;                
             }
             else {
                 $('#popup_background_2').remove();
@@ -1034,8 +1028,6 @@ function openPopupWindow(id) {
                 office_admin_active = false;
             }
         });
-
-        $("#popup_office_administration").show();
         $(`#${id}`).css({    
             "position": "absolute",
             "z-index": "90",
@@ -1048,6 +1040,7 @@ function openPopupWindow(id) {
                 "left": "14%"
             }); 
         }
+        $("#popup_office_administration").show();
     }
     $(`#${id}, #popup_background`).fadeIn(200);
     if (id == 'popup_search') {
@@ -2118,29 +2111,17 @@ function changeObjectReputation(elem) {
 }
 
 function initializeOfficeAdministration() {
-    const popupId = 'popup_office_administration';
-    $(`#${popupId}, #office_administration_icon`).remove();
-    const popupLayout = createPopupFullscreenLayout(`Делопроизводство: ${CURRENT_OBJECT_DATA.adress}`, popupId, {'display' : 'flex', 'justify-content' : 'space-around'});
-    popupLayout.appendTo('#popup_background');
-    const icon = $('<div>', {id: 'office_administration_icon', class: 'icon-with-count'}).append(
-                    $('<i>', {class: 'material-icons', title: 'Делопроизводство', text: 'description' }).on('click', () => {
-                        openPopupWindow(popupId);
-                    })
-                ).appendTo('#obj_ls_info .header-manipulation');
-        
-    const blockContent = popupLayout.find('.content');
-
     const registryUl = $('<ul>');
-
     const registryType = "constant";
     let calendarValue = getCalendarValue('registry_settings_calendar');
-
+    const uniqueClass = "_office"
+    createRegistrySettingsPopup(uniqueClass);
     registryUl.empty();
     $.post(`/base_func?val_param=ree_reestrs&val_param1=${registryType}&val_param2=${calendarValue}`, (data) => {
         const registryList = JSON.parse(data);
 
         if (!isEmpty(registryList)) {
-            createRegistrySettingsPopup();
+            
 
             for (const registry of registryList) {
                 let registryName = registry.name;
@@ -2169,6 +2150,22 @@ function initializeOfficeAdministration() {
             }
         }
     });
+    const popupId = 'popup_office_administration';
+    $(`#${popupId}, #office_administration_icon`).remove();
+    const popupLayout = createPopupFullscreenLayout(`Делопроизводство: ${CURRENT_OBJECT_DATA.adress}`, popupId, {'display' : 'flex', 'justify-content' : 'space-around'});
+    popupLayout.appendTo('#popup_background');
+    const icon = $('<div>', {id: 'office_administration_icon', class: 'icon-with-count'}).append(
+                    $('<i>', {class: 'material-icons', title: 'Делопроизводство', text: 'description' }).on('click', () => {
+                        openPopupWindow(popupId);
+                    })
+    ).appendTo('#obj_ls_info .header-manipulation');
+    
+    console.log(OBJECT_DATA.office_administration)
+    if(OBJECT_DATA.office_administration){
+        icon.append($("<span>", {class: "material-icons", text: "stars"})) 
+    }
+        
+    const blockContent = popupLayout.find('.content');
 
     $('<div>', {class: 'main-list'}).append(
         registryUl
@@ -5385,16 +5382,15 @@ function showPopupNotification(type , message) {
 }
 
 
-function createRegistrySettingsPopup() {
+function createRegistrySettingsPopup(uniqueClass = "") {
     if ($('#popup_registry_settings').length) {
         $('#popup_registry_settings').remove();
     }
-    
-    $('<div>', {id: 'popup_registry_settings', class: 'popup-window'}).append(
+    $('<div>', {id: `popup_registry_settings${uniqueClass}`, class: 'popup-window'}).append(
         $('<div>', {class: 'popup-header'}).append(
             $('<div>', {class: 'popup-name', text: 'Настройки реестра'}),
             $('<div>', {class: 'popup-close'}).append(
-                $('<i>',  {class: 'material-icons', text: 'close'}).on('click', () => {closePopupWindow('popup_registry_settings')})
+                $('<i>',  {class: 'material-icons', text: 'close'}).on('click', () => {closePopupWindow(`popup_registry_settings${uniqueClass}`)})
                 )
         ),
         $('<div>',  {class: 'popup-content'})
@@ -5567,7 +5563,6 @@ function deleteObjectsGroupUser(groupNumber, userName, userId) {
 
 function getRegistryList(callback) {
     const registryType = $('#registry_type_select').val();
-    console.log(registryType)
     $('#registy_add_entry_btn, #registry_print_icon, #registry_lock_icon, #registry_settings_icon, #registy_convert_to_excel_btn, #no_registries_div, #create_registry_div, #registry_printed_document_icon').remove();
     $('#registry_settings_content .block-content').empty();
     $('<span>', {class: 'text-center-small', text: 'Выберите реестр из списка или создайте новый'}).appendTo('#registry_settings_content .block-content');
@@ -5650,10 +5645,6 @@ function getRegistryList(callback) {
             }
 
             callback();
-
-            // const firstClildLi = registryUl.find('li:first-child');
-            // firstClildLi.addClass('active');
-            // firstClildLi.trigger('click');
         }
         else {
             $('<div>', { id: 'no_registries_div', style: 'text-align: center; padding-top: 5px'}).append(
@@ -5749,8 +5740,12 @@ function getRegistryList(callback) {
     }
 }
 
-function initializeRegistrySettings(registryId, theadData, rowsPerPage, documentType) {
-    $('#popup_registry_settings .popup-content').empty();
+function initializeRegistrySettings(registryId, theadData, rowsPerPage, documentType, parent = "false") {
+    let uniqueClass = "";
+    if(parent == "true"){
+        uniqueClass = "_office";
+    }
+    $(`#popup_registry_settings${uniqueClass} .popup-content`).empty();
     const blockNumberElements = createContentBlock('Количество записей на странице', {});
     const typesOfNumberElementsSetting = [20, 40, 50, 100];
     const numberElementsBlockContent = $('<div>', {style: 'display: flex'});
@@ -5818,13 +5813,13 @@ function initializeRegistrySettings(registryId, theadData, rowsPerPage, document
         div.append(blockColumnVisibility);
     }
 
-    div.appendTo('#popup_registry_settings .popup-content');
+    div.appendTo(`#popup_registry_settings${uniqueClass} .popup-content`);
 
     $(`input[name="registry_number_elements"][value="${rowsPerPage}"]`).prop('checked', true);
 
     $('<div>', {class: 'form-submit-btn'}).append(
         $('<button>', {id: 'registry_column_settings_btn', class: 'button-primary', text: 'Сохранить'})
-    ).appendTo('#popup_registry_settings .popup-content');
+    ).appendTo(`#popup_registry_settings${uniqueClass} .popup-content`);
 }
 
 function initializeAccountHistorySettings(tableData) {
@@ -6121,14 +6116,20 @@ function getRegistryData(registryId, registryName, registryType, documentType, s
         $('#registry_settings_content .block-content').empty();
         createContentLoader('#registry_settings_content .block-content');  
     }
-    
-    
-    const dataObj = {registry_id: registryId, doc_type: documentType};
+    let dataObj = {}
+    if(parent == "true"){
+        dataObj = {acc_id: CURRENT_OBJECT_DATA.accid, registry_id: registryId, doc_type: documentType};
+        console.log("true")
+    } else{
+        dataObj = {registry_id: registryId, doc_type: documentType};
+    }
+
     $.ajax({
         type: 'POST',
         url: '/base_func?fnk_name=get_registry',
         data: JSON.stringify(dataObj),
         success: (data) => {
+            console.log(data)
             registryData = JSON.parse(data);
             displayRegistry(registryData, registryId, registryName, registryType, documentType, parent);
             if(!(saveScroll == "false") && !(countSaveScroll == "false")){
@@ -6184,7 +6185,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
 
     const registryIsBlocked = (blocked == 'true');
 
-    initializeRegistrySettings(registryId, thead, rows_per_page, documentType);
+    initializeRegistrySettings(registryId, thead, rows_per_page, documentType, parent);
 
     let theadData = [];
 
@@ -6345,7 +6346,6 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                                         editEntryIcon.on('click', function (e) {
                                             const parentToogle = e.currentTarget.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement;
                                             if("registry_settings_content" !== parentToogle.id){
-                                                console.log(office_admin_active);
                                                 office_admin_active = true;
                                             }
                                             openEditRegistryEntryPopup(e,registryId, entry.id, registryName, registryType, documentType, registryData);
@@ -6456,14 +6456,24 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                 const addRegistryBtn = $('<button>', {id: `registy_add_entry_btn${actOffice}`, class: 'button-primary', title: 'Добавить запись в реестр', text: 'Добавить запись'}).appendTo(headerManipulation);
 
                 addRegistryBtn.off('click');
-                addRegistryBtn.on('click', () => {
+                addRegistryBtn.on('click', (e) => {
+                    const parentToogle = e.currentTarget.parentElement.parentElement.parentElement.parentElement;
+                    if("registry_settings_content" !== parentToogle.id){
+                        office_admin_active = true;
+                    }
                     openAddRegistryEntryPopup(registryId, registryName, registryType, documentType);
-                    console.log(registryId, registryName, registryType, documentType);
                 });
             }
         }
         $('<button>', {id: `registy_convert_to_excel_btn${actOffice}`, class: 'excel-button', title: 'Конвертировать реестр в Excel', text: 'Excel'}).appendTo(headerManipulation);
-        $('<i>', {id: `registry_settings_icon${actOffice}`, class: 'material-icons', title: 'Настройки реестра', text: 'settings'}).on('click', () => {openPopupWindow('popup_registry_settings')}).appendTo(headerManipulation);
+        $('<i>', {id: `registry_settings_icon${actOffice}`, class: 'material-icons', title: 'Настройки реестра', text: 'settings'}).on('click', (e) => {
+            const parentToogle = e.currentTarget.parentElement.parentElement.parentElement.parentElement;
+            if("registry_settings_content" !== parentToogle.id){
+                office_admin_active = true;
+                console.log("fllflff")
+            }
+            openPopupWindow(`popup_registry_settings${actOffice}`)
+        }).appendTo(headerManipulation);
         
         if (documentType == 'print_registry') {
             $('<i>', {id: `registry_printed_document_icon${actOffice}`, class: 'material-icons', title: 'Напечатанный документ', text: 'event_note'}).on('click', () => {
@@ -6533,9 +6543,16 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
         saveRegisrtrySettings(registryId, registryName, registryType, documentType);
     });
 
-    $('#registy_convert_to_excel_btn').off('click');
-    $('#registy_convert_to_excel_btn').on('click', () => {
-        const table = $('#registry_settings_content .block-content');
+    $(`#registy_convert_to_excel_btn${actOffice}`).off('click');
+    $(`#registy_convert_to_excel_btn${actOffice}`).on('click', (e) => {
+        const parentToogle = e.currentTarget.parentElement.parentElement.parentElement.parentElement;
+        let table;
+        if("registry_settings_content" !== parentToogle.id){         
+            table = $('#popup_office_administration .block-content');
+        } else {
+            table = $('#registry_settings_content .block-content');
+        }
+        
         let convertibleContent = table.clone();
         const hiddenTdCollection = convertibleContent.find('td, th');
         hiddenTdCollection.each(function() {

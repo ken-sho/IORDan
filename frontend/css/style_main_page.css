@@ -3925,6 +3925,10 @@ textarea {
     top: 44px;
 }
 
+#office_administration_icon span{
+    font-size: 21px;
+}
+
 #object_files_list {
     float: left;
     width: 55%;
