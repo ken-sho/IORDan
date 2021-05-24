@@ -1601,6 +1601,8 @@ function getObjectData() {
             createSelectWithPeople('add_contact_select');
 
             clickDropdownMenu();
+
+            resizeTreeDiv("obj_info", "obj_ls_info", "obj_additional_info", "obj_print_form", 100, "n")
         }
     });
 }
@@ -2114,6 +2116,7 @@ function changeObjectReputation(elem) {
 }
 
 function initializeOfficeAdministration() {
+
     $('#registy_add_entry_btn_office, #registry_print_icon_office, #registry_lock_icon_office, #registry_settings_icon_office, #registy_convert_to_excel_btn_office, #no_registries_div_office, #create_registry_div_office, #registry_printed_document_icon_office').remove();
     $('<span>', {class: 'text-center-small', text: 'Выберите реестр из списка или создайте новый'}).appendTo('#popup_office_administration .block-content');
 
@@ -4086,7 +4089,11 @@ function fillSelectFromCompanyArray(selectId, array) {
 }
 
 function initializationPopupControl() {
-    resizeTwoDiv('control_reports', `reports_list`, 'report_fast_access', '11');
+    resizeTwoDiv('control_reports', `reports_list`, 'report_fast_access', '11', "e");
+    $(`#control_files_top`).resizable({
+        "handles": "s"
+    });
+
 
     $('#report_fast_access_reports_list, #report_settings_select_menu ul, #proccess_file_company_select').empty();
     let reportsArr = getCurrentCompanyReportsArray();
@@ -4786,9 +4793,9 @@ function uploadFiles(files, fileTypes, parentNode, filesInfoNode, accid, callbac
     }
 }
 
-function resizeTwoDiv(parentDiv, firstDiv, SecondDiv, error) {
+function resizeTwoDiv(parentDiv, firstDiv, SecondDiv, error, handles) {
     $(`#${firstDiv}`).resizable({
-        "handles": "e"
+        "handles": handles
     });
 
     $(`#${firstDiv}`).resize(() => {
@@ -4806,6 +4813,29 @@ function resizeTwoDiv(parentDiv, firstDiv, SecondDiv, error) {
         $(`#${SecondDiv}`).width(modWidth);
     }
 }
+
+function resizeTreeDiv(parentDiv, firstDiv, SecondDiv,TreeDiv, error, handles) {
+    $(`#${firstDiv}`).resizable({
+        "handles": handles
+    });
+
+    $(`#${firstDiv}`).resize(() => {
+        resize();
+    });
+
+    $(window).resize(() => {
+        resize();
+    });
+
+    function resize() {
+        let parentWidth = $(`#${parentDiv}`).height();
+        let resizableElemWidth = $(`#${firstDiv}`).height();
+        let modWidth = parentWidth - resizableElemWidth - error;
+        $(`#${SecondDiv}`).height(modWidth);
+        $(`#${TreeDiv}`).height(modWidth);
+    }
+}
+
 
 function keyupSearch(inputId, menuId, searchBtnId) {
     let input = $(`#${inputId}`);

@@ -189,21 +189,6 @@
                                     </table>
                                 </div>                              
                             </div>
-                            <!-- <div id="obj_agreements_info">
-                                <div class="block-header-with-manipulation">
-                                    <div class="header">
-                                        <button id="obj_agreements_btn" class="button-primary" disabled>Договора</button>
-                                        <button id="obj_owners_btn" class="button-secondary" disabled>Прописанные</button>
-                                        </div>
-                                    <div class="header-manipulation">
-                                        <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-owners" title="Справка" onclick="">help_outline</i>
-                                        <i id="add_agreement_owner_icon" class="material-icons" title="Добавить">add</i>
-                                    </div>
-                                </div>
-                                <div class="block-content full-area">
-                                    <div id="agreements_owners_content"></div>
-                                </div>
-                            </div> --> 
                             <div id="obj_additional_info">
                                 <div class="block-header-with-manipulation">
                                     <div class="header">Дополнительная информация</div>
@@ -1061,37 +1046,24 @@
                         <div id="control_files" class="tab-content">
                             <div id="control_files_top">
                                 <div id="control_files_top_left">
-                                    <!-- <div id="control_files_upload" class="block">
+                                    <div id="control_files_list" class="block">
                                         <div class="block-header">
-                                            <div class="header">Загрузка файлов</div>
-                                        </div>
-                                        <div class="block-content">
-                                            <div id="files_upload_number">
-                                                <span id="number_of_uploaded_files">Выбрано файлов: 0</span>
+                                            <div class="header">Загруженные файлы</div>
+                                            <div class="header-manipulation-files">
+                                                <div class="icon-with-count">
+                                                    <label id="select_files" for="files_upload_input" class="material-icons" title="Выбрать файлы">folder_open</label>
+                                                    <div class='icon-count-control-files' id="count-files-icon" title='Файлы'>0</div>
+                                                </div>
+                                                <i id="files_upload_btn" class="material-icons" title="Загрузить файлы" onclick="uploadFiles($('#files_upload_input').prop('files'), {}, $('#control_files_upload .block-content'), $('#number_of_uploaded_files'), CURRENT_OBJECT_DATA.accid,getControlFilesList)">file_upload</i>                                                
+                                                <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-files-control"
+                                                title="Справка" onclick="">help_outline</i>
+                                                <form name="files_upload">
+                                                    <input id="files_upload_input" type="file" name="files" multiple>
+                                                </form>
                                             </div>
-                                            <div id="files_upload_buttons">
-                                                
-                                            </div>
                                         </div>
-                                    </div> -->
-    <div id="control_files_list" class="block">
-        <div class="block-header">
-            <div class="header">Загруженные файлы</div>
-            <div class="header-manipulation-files">
-                <div class="icon-with-count">
-                    <label id="select_files" for="files_upload_input" class="material-icons" title="Выбрать файлы">folder_open</label>
-                    <div class='icon-count-control-files' id="count-files-icon" title='Файлы'>0</div>
-                </div>
-                <i id="files_upload_btn" class="material-icons" title="Загрузить файлы" onclick="uploadFiles($('#files_upload_input').prop('files'), {}, $('#control_files_upload .block-content'), $('#number_of_uploaded_files'), CURRENT_OBJECT_DATA.accid,getControlFilesList)">file_upload</i>                                                
-                <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-files-control"
-                title="Справка" onclick="">help_outline</i>
-                <form name="files_upload">
-                    <input id="files_upload_input" type="file" name="files" multiple>
-                </form>
-            </div>
-        </div>
-        <div class="block-content full-area"></div>
-    </div>
+                                        <div class="block-content full-area"></div>
+                                    </div>
                                 </div>
                                 <div id="control_files_top_right">
                                     <div id="control_processed_files_list" class="block">
