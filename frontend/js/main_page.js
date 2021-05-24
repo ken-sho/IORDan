@@ -1063,6 +1063,9 @@ function closePopupWindow(popupId) {
         $("#popup_office_administration").fadeIn(200);
         office_admin_active = false;
         $(`#${popupId}`).fadeOut(200);
+        if(popupId == 'popup_object_files_registry'){
+            $('#popup_object_files_registry .file-block').remove();
+        } 
     } else{
         $(`#${popupId}, #popup_background`).fadeOut(200);   
         $('#popup_report .content').empty();
@@ -1326,7 +1329,7 @@ function createObjectsTree(objectsList) {
                 CURRENT_OBJECT_DATA.adress = $(this).parent().prev().text();
                 CURRENT_OBJECT_DATA.accid = accid;
 
-                $('#obj_ls_info .header').attr('did', accid);
+                $('#obj_ls_info .header-ls').attr('did', accid);
 
                 getObjectData();
 
@@ -1908,7 +1911,6 @@ function openFilesRegistryPopup(registryId, registryName, registryType, document
 
         for (const elem in fileTypesObj) {
             const type = fileTypesObj[elem];
-            console.log(type)
             if (type == null || type == '') {
                 typesCorrect = false;
                 break;
@@ -2003,16 +2005,17 @@ function openFilesRegistryPopup(registryId, registryName, registryType, document
                 )
             );
 
-            if (files.length == 1) {
-                fileDiv.hide();
-                fileDiv.prependTo(filesListBlock);
-                fileDiv.fadeIn(400);
+            // if (files.length == 1) {
+            //     console.log("чее???")
+            //     fileDiv.hide();
+            //     fileDiv.prependTo(filesListBlock);
+            //     fileDiv.fadeIn(400);
 
-            }
-            else {
+            // }
+            // else {
                 fileDiv.prependTo(filesListBlock);
                 
-            }
+            // }
         }
     }
     if(!isEmpty(filesRegistry)){
@@ -2111,6 +2114,9 @@ function changeObjectReputation(elem) {
 }
 
 function initializeOfficeAdministration() {
+    $('#registy_add_entry_btn_office, #registry_print_icon_office, #registry_lock_icon_office, #registry_settings_icon_office, #registy_convert_to_excel_btn_office, #no_registries_div_office, #create_registry_div_office, #registry_printed_document_icon_office').remove();
+    $('<span>', {class: 'text-center-small', text: 'Выберите реестр из списка или создайте новый'}).appendTo('#popup_office_administration .block-content');
+
     const registryUl = $('<ul>');
     const registryType = "constant";
     let calendarValue = getCalendarValue('registry_settings_calendar');
@@ -2587,11 +2593,13 @@ function getObjectRegistrationsData() {
 function getObjectInfoData() {
 
     let data = OBJECT_DATA.information;
+    console.log(data)
 
     const table = $('<table>', {id: 'obj_additional_info_table'});
 
     for (const prop in data) {
         $('#obj_ls_info .header-ls').text(`ЛС: ${prop.replace('ls','')}`);
+        
         $('#report_fast_access_ls').val(`${prop.replace('ls','')}`);
 
         let infoData = data[prop];
@@ -3393,11 +3401,13 @@ function addNewOwner() {
             inn: inn,
             snils: snils
         }
+        console.log(data)
         $.ajax({
             type: "POST",
             url: "/base_func?fnk_name=addchg_human",
             data: JSON.stringify(data),
             success: function (data) {
+                console.log(data)
                 if (data == 'success') {
                     closePopupWindow();
                     refreshObjectData([getObjectRegistrationsData, clickDropdownMenu]);
@@ -4107,8 +4117,35 @@ function initializationPopupControl() {
     $(`#proccess_file_company_select option[company_id=${currentCompanyId}]`).attr('selected','selected');
 
     $('#files_upload_input').change(function() {
-        $('#number_of_uploaded_files').text('Выбрано файлов: ' + $(this).prop('files').length);
+        const countValue = $('#files_upload_input').prop('files').length;
+        $("#count-files-icon").remove();
+        let counterIcon;
+        if(countValue < 10){
+            counterIcon = $("<div>", {class: "icon-count-control-files", id: "count-files-icon", text: countValue}).appendTo("#control_files_list .icon-with-count");
+        } else{
+            counterIcon = $("<span>", {class: "material-icons", text: "star", id: "count-files-icon"}).appendTo("#control_files_list .icon-with-count");
+            counterIcon.text("stars").css({"font-size": "21px", "left": "12px"}); 
+        }       
+
+        $("#files_upload_btn").fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+
+        const divHelp = $("<div>", { class: "dropdown", text: "Нажмите, для загрузки файлов"});
+        setTimeout(() => {
+            divHelp.appendTo($("#files_upload_btn"));
+            setTimeout(() => {
+                divHelp.fadeOut(100);               
+                setTimeout(() => {
+                   divHelp.remove(); 
+                }, 400);
+            }, 4000);
+        }, 400);
+        
     });
+
+    $("#files_upload_btn").on("click", () => {
+        $("#count-files-icon").text(0); 
+    })
+
 
     $('#report_fast_access_own_select').change(function() {
         if ($(this).val() == 'one') {
@@ -4683,7 +4720,6 @@ function DatepickerSetCurrentDate(inputId) {
 // загрузка файлов
 function uploadFiles(files, fileTypes, parentNode, filesInfoNode, accid, callback) {
     event.preventDefault();
-
     if (files.length > 0) {
         const progressBarDiv = $('<div>', {class: 'file-download-progress-bar'}).prependTo(parentNode);
 
@@ -4697,6 +4733,8 @@ function uploadFiles(files, fileTypes, parentNode, filesInfoNode, accid, callbac
                 formdata.append('type', fileTypes[files[index].name]);
                 formdata.append('accid', accid);
             }
+
+            console.log(formdata)
 
             $.ajax({
                 type: "POST",
@@ -4719,18 +4757,23 @@ function uploadFiles(files, fileTypes, parentNode, filesInfoNode, accid, callbac
                 },
                 success: (fileData) => {
                     console.log(fileData);
+                    if(fileData == "success"){
+                        showPopupNotification('notification', 'Файл успешно загружен!');
+                        if (index !== files.length - 1) {
+                            uploadFile(index + 1);
+                        }
+                        else {
+                            filesInfoNode.text(`Файлов загружено: ${uploadedFilesNum}/${files.length}`);
+                        }
 
+                        if (callback) {
+                            callback(fileData);
+                        }
+                    } else {
+                        showPopupNotification('alert', 'Данный файл уже существует!');
+                    }
                     
-                    if (index !== files.length - 1) {
-                        uploadFile(index + 1);
-                    }
-                    else {
-                        filesInfoNode.text(`Файлов загружено: ${uploadedFilesNum}/${files.length}`);
-                    }
-
-                    if (callback) {
-                        callback(fileData);
-                    }
+                    
                 }
             });
         }
@@ -5613,7 +5656,8 @@ function getRegistryList(callback) {
                         'pay_storno': 'Возврат',
                         'debit_act': 'Акт списания',
                         'm26archive': '26 макета',
-                        'm83archive': '83 макета'
+                        'm83archive': '83 макета',
+                        'register_of_state_duties': 'Госпошлина'
                     };
 
                     const type = registryTypes[registry.doc_type];
@@ -5689,7 +5733,8 @@ function getRegistryList(callback) {
                             $('<option>', {text: 'Перебросы', value: 'overgrown'}),
                             $('<option>', {text: 'Скидки', value: 'discounts'}),
                             $('<option>', {text: 'Возврат', value: 'pay_storno'}),
-                            $('<option>', {text: 'Акт списания', value: 'debit_act'})
+                            $('<option>', {text: 'Акт списания', value: 'debit_act'}),
+                            $('<option>', {text: 'Госпошлина', value: 'register_of_state_duties'})
 
                         )
                     )
@@ -5824,7 +5869,9 @@ function initializeRegistrySettings(registryId, theadData, rowsPerPage, document
 
 function initializeAccountHistorySettings(tableData) {
     console.log(tableData);
+
     $('#history_settings_content').empty();
+    $("#icon-table-history").remove();
 
     if (tableData !== null) {
         let changedSettingsObj = {};
@@ -5837,6 +5884,14 @@ function initializeAccountHistorySettings(tableData) {
             $('<th>', { text: 'Столбец' }),
             $('<th>', { text: 'Отображение' })
         ).appendTo(tableColumn);
+
+        const icon = $('<div>', {id: 'icon-table-history', class: 'icon-with-count'}).append(
+            $('<i>', {class: 'material-icons', title: 'Настройки таблицы истории', text: 'settings' })
+        ).on('click', () => {
+            openPopupWindow('popup_object_history_settings');
+        });
+        $("#help-icon").after(icon);
+        let changedSettings = false;
 
         for (const elem of tableData.header) {
             const isHidden = (elem.hidden == 'true');
@@ -5855,11 +5910,13 @@ function initializeAccountHistorySettings(tableData) {
                 const inputOff = $('<input>', { class: 'checkbox', type: 'checkbox', value: 'off', setting_type: 'column', setting_name: elem.name }).appendTo(labelOff);
                 $('<span>', { class: 'checkmark' }).appendTo(labelOff);
 
-                addSettingChangeToObj(changedSettingsObj, inputOff, `column_${elem.name}`, isHidden);
-
+                addSettingChangeToObj(changedSettingsObj, inputOff, `column_${elem.name}`, isHidden);            
 
                 if (isHidden) {
+                    changedSettings = true;
+                   
                     inputOff.prop('checked', true);
+                    console.log("даааа")
                 }
                 else {
                     inputOn.prop('checked', true);
@@ -5904,6 +5961,7 @@ function initializeAccountHistorySettings(tableData) {
             addSettingChangeToObj(changedSettingsObj, inputOff, `service_${elem.name}`, isHidden);
 
             if (isHidden) {
+                changedSettings = true;
                 inputOff.prop('checked', true);
             }
             else {
@@ -5913,6 +5971,10 @@ function initializeAccountHistorySettings(tableData) {
             addEventOnOffToggle(inputOn, inputOff);
 
             tr.appendTo(tableService);
+        }
+
+        if(changedSettings){
+            icon.append($("<span>", {class: "material-icons", text: "stars"})) 
         }
 
         tableService.appendTo(divService);
@@ -5926,7 +5988,6 @@ function initializeAccountHistorySettings(tableData) {
             for (const setting in changedSettingsObj) {
                 changedSettingsArr.push(changedSettingsObj[setting]);
             }
-
             sendAccountHistorySettings(changedSettingsArr);
         });
     }
@@ -5967,20 +6028,23 @@ function addSettingChangeToObj(obj, elem, objKey, hiddenCurrentState) {
     });
 }
 
-function operationRegistry (Obj, registryId, registryName, registryType, documentType, Operation, previosString) {
-    console.log(previosString);
-    console.dir(previosString)
-    if(previosString == undefined){
-        previosString = $("<tbody>").appendTo("#registry_table");
+function operationRegistry(Obj, registryId, registryName, registryType, documentType, operation, previosString, parent = "false", actOffice = ""){
+
+    const {thead, tbody, tfooter} = Obj;    
+    // узнаем откуда вызвалась функция из делопроизводства или из реестров
+    if(parent == "true"){
+        console.log("Делопроизводство")
+        actOffice = "_office";
+    } else{
+        console.log("Реестры")
     }
 
-    const {thead, tbody} = Obj;
-    if(Obj.tfooter){
-        $("#registry_table tbody tr:last").remove();
-    }
-
+    // создаем строку
+    
     const tr = $( "<tr>" );
     const tdOperation = $( "<td>" );
+    tdOperation.css("min-width", "85px");
+    const trFooter = $( "<tr>" );
    
     for (const entry of tbody) {
         for (const index in entry.data) {
@@ -5995,44 +6059,18 @@ function operationRegistry (Obj, registryId, registryName, registryType, documen
     }
     tdOperation.appendTo(tr);
 
-    if (Operation == "edit"){
-        $(previosString).after(tr);
-    } else if(Operation == "add"){
-        if($("#registry_table").find("tbody")){
-            tr.appendTo(previosString);
-        } else{
-            const tbody = $("<tbody>").appendTo("#registry_table")
-            tr.appendTo(tbody);
-        }
-        
-        console.log(previosString);
-        
-    }
-
-    if(Obj.tfooter){
-        for (const entry of Obj.tfooter) {
-            const tr = $( "<tr>" );
-            for (const index in entry) {
-                const td = $( '<td>', {class:"table-tfoot-td", text: entry[index] }).appendTo(tr);
-
-                const isHidden = (thead[index].hidden == 'true');
-                        
-                if (isHidden) {
-                    td.css({ 'display': 'none' });
-                    console.log("скрыть")
-                }
-            }           
-
-            tr.appendTo(previosString);
-        }
-    }
-
+    // создаем ячейку с операциями
 
     for(const action of Obj.thead){
         if(action.name == "Действие"){
             if(action.type_action.includes("edit")){
                 const editEntryIcon = $('<i>', { class: 'material-icons', text: 'edit', title: 'Изменить' }).appendTo(tdOperation);
                 editEntryIcon.on('click', function (e) {
+                    const parentToogle = e.currentTarget.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement;
+                    if("registry_settings_content" !== parentToogle.id){
+                        office_admin_active = true;
+                    }
+
                     openEditRegistryEntryPopup(e, registryId, Obj.tbody[0].id, registryName, registryType, documentType, Obj);
                 });
                 editEntryIcon.css("display", "inline-flex");
@@ -6049,6 +6087,12 @@ function operationRegistry (Obj, registryId, registryName, registryType, documen
             if(action.type_action.includes("addfile")){
                 const filesIcon = $('<i>', {id: 'obj_files_registry_icon', class: 'material-icons material_counts', title: 'Файлы', text: 'folder_open' });
                 filesIcon.on('click', function (e) { 
+                    const parentToogle = e.currentTarget.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement;
+                
+                    if("registry_settings_content" !== parentToogle.id){
+                        office_admin_active = true;
+                    }
+
                     IdRegStr = e.currentTarget.attributes.idRegStr.value;        
                     $(registryData.tbody).each(function(index, element){
                         if(element.id == IdRegStr){
@@ -6069,6 +6113,65 @@ function operationRegistry (Obj, registryId, registryName, registryType, documen
             }
         }       
     } 
+
+    // проверяем на наличие футера и создаем его
+    if(tfooter){
+        for (const entry of tfooter) {
+            
+            for (const index in entry) {
+                const td = $( '<td>', {class:"table-tfoot-td", text: entry[index] }).appendTo(trFooter);
+                const isHidden = (thead[index].hidden == 'true');                        
+                if (isHidden) {
+                    td.css({ 'display': 'none' });
+                    console.log("скрыть")
+                }
+            }           
+        }
+    }
+
+    // определяем тип операции и вставляем полученную строку
+    if (operation == "edit"){
+        // проверить есть ли соседняя строка сверху если есть вставить после нее если нет то вставить в начало
+        if (previosString == null){ // если соседней строки сверху нет то вставить в начало
+            if(tfooter){
+                $(`#registry_table${actOffice} tbody tr:last`).remove();
+                tr.prependTo($(`#registry_table${actOffice} .tbody-registry`));
+                trFooter.appendTo($(`#registry_table${actOffice} .tbody-registry`));
+            } else{
+                tr.prependTo($(`#registry_table${actOffice} .tbody-registry`));
+            }
+        } else{ // есть ли соседняя строка сверху если есть вставить после нее
+            if(tfooter){
+                $(`#registry_table${actOffice} tbody tr:last`).remove();
+                $(previosString).after(tr);
+                trFooter.appendTo($(`#registry_table${actOffice} .tbody-registry`));
+            } else {
+                $(previosString).after(tr);
+            }
+        }
+        console.log("edit")
+        
+    } else if (operation == "add"){
+        if($(`#registry_table${actOffice}`).children(".tbody-registry").length > 0){ // проверка на наличие элементов в tbody
+            console.log("заапендить в существующий tbody");
+            if(tfooter) { // проверка на футер если есть то удалить последнюю строку и вставить сначала строку с данными потом футер
+                $(`#registry_table${actOffice} tbody tr:last`).remove();
+                tr.appendTo(previosString);
+                trFooter.appendTo(previosString);
+            } else{
+                tr.appendTo(previosString);
+            }
+        } else {
+            console.log("создать tbody")
+            const tbody = $('<tbody>', {class: "tbody-registry"});
+            tbody.appendTo($(`#registry_table${actOffice}`));
+            tr.appendTo(tbody);
+            tfooter ? trFooter.appendTo(tbody) : trFooter;
+
+        }
+
+        console.log("add")
+    }
 }
 
 function postIdReccid() {
@@ -6094,6 +6197,7 @@ function postIdReccid() {
 
 // получить данные рееестра
 function getRegistryData(registryId, registryName, registryType, documentType, saveScroll = "false", countSaveScroll = "false", parent = "false") {
+    console.log(registryId);
     let actOffice = "";
     if(parent == "true"){
         actOffice = "_office";
@@ -6129,7 +6233,7 @@ function getRegistryData(registryId, registryName, registryType, documentType, s
         url: '/base_func?fnk_name=get_registry',
         data: JSON.stringify(dataObj),
         success: (data) => {
-            console.log(data)
+            // console.log(data)
             registryData = JSON.parse(data);
             displayRegistry(registryData, registryId, registryName, registryType, documentType, parent);
             if(!(saveScroll == "false") && !(countSaveScroll == "false")){
@@ -6144,19 +6248,26 @@ function getRegistryData(registryId, registryName, registryType, documentType, s
     });
 }
 
-function getAddRegistryEntry(Obj, registryId, registryName, registryType, documentType){
-    const previosString = $("#registry_table tbody");
+function getAddRegistryEntry(Obj, registryId, registryName, registryType, documentType, parent = "false", actOffice = ""){
+    let previosString = $("#registry_table tbody");
+    
+    if(parent == "true"){
+        console.log("true")
+        previosString = $("#registry_table_office tbody");
+    }
     const Operation = "add";
     COUNT_ID += Obj.tbody[0].id;    
-    operationRegistry (Obj, registryId, registryName, registryType, documentType, Operation, previosString);      
+    operationRegistry (Obj, registryId, registryName, registryType, documentType, Operation, previosString, parent, actOffice);      
 }
 
 function getEditRegistryEntry(e, Obj, registryId, registryName, registryType, documentType ){
     const previosString = e.currentTarget.parentElement.parentElement.previousElementSibling;    
-    const CurrentString = e.currentTarget.parentElement.parentElement.children;
-    $(CurrentString).remove();
-    const Operation = "edit";
-    operationRegistry (Obj, registryId, registryName, registryType, documentType, Operation, previosString);
+    const currentString = e.currentTarget.parentElement.parentElement.children;
+    console.log(previosString);
+    console.log(currentString);
+    $(currentString).remove();
+    const operation = "edit";
+    operationRegistry (Obj, registryId, registryName, registryType, documentType, operation, previosString);
 }
 
 function getDelRegistryEntry(e){
@@ -6166,20 +6277,22 @@ function getDelRegistryEntry(e){
          if(!CurrentString.lastChild){
              if($(elem.children).is(".material-icons")){
                 $(elem).text("");
-                $(elem).css("background-color", "#d1e1e8"); 
+                $(elem).addClass("delete-td"); 
              }else {              
                  $(elem).css("text-decoration","line-through");
-                if(localStorage.getItem('color_theme') =='dark'){
-                    $(elem).css("background-color", "#d1e1e8");
-                } else if(localStorage.getItem('color_theme') =='default'){
-                    $(elem).css("background-color", "#b3d5e3");
-                }
+                 $(elem).addClass("delete-td");
              }            
          }
      });
  }
 
 function displayRegistry(data, registryId, registryName, registryType, documentType, parent = "false") {
+   
+    let actOffice = "";
+    if(parent == "true"){        
+        actOffice = "_office";
+    }
+
     $("#add_container").remove();
     const {thead, tbody, tfooter, blocked, rows_per_page, upload_file_types} = data; // data.thead, data,tbody ...
 
@@ -6189,11 +6302,11 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
 
     let theadData = [];
 
-    const table = $('<table>', {id: 'registry_table', class: 'main-table'}).append(
+    const table = $('<table>', {id: `registry_table${actOffice}`, class: 'main-table'}).append(
         $('<thead>').append(
             $('<tr>')
         ),
-        $('<tbody>')
+        $('<tbody>', {class: "tbody-registry"})
     );
 
     const addEntryTable = $('<table>', { id: 'add_registry_entry_table', class: 'main-table' }).append(
@@ -6280,7 +6393,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
         
         if (!isEmpty(data)) {
 
-            let tbodyDiv = $('<tbody>');
+            let tbodyDiv = $('<tbody>', {class: "tbody-registry"});
 
             for (const entry of data) {
                 const tr = $('<tr>');
@@ -6365,9 +6478,8 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                                         const filesIcon = $('<i>', {id: 'obj_files_registry_icon', class: 'material-icons material_counts', title: 'Файлы', text: 'folder_open' });
                                         filesIcon.on('click', function (e) { 
                                             const parentToogle = e.currentTarget.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement;
+                                            
                                             if("registry_settings_content" !== parentToogle.id){
-                                                console.log(parentToogle.id)
-                                                console.log(office_admin_active);
                                                 office_admin_active = true;
                                             }
                                             
@@ -6441,15 +6553,14 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
     addEntryTable.prependTo('#popup_add_edit_registry_entry .popup-content #add_container');
 
     let headerManipulation;
-    let actOffice = "";
     if(parent == "true"){        
         headerManipulation = $('#popup_office_administration .header-manipulation');
-        actOffice = "_office";
+        headerManipulation.empty();
     } else{
         headerManipulation = $('#registry_settings_content .header-manipulation');
         headerManipulation.empty();
     }
-    if (!$(`#registy_add_entry_btn${actOffice}`).length) {
+    // if (!$(`#registy_add_entry_btn${actOffice}`).length) {
         $("<i>", {  class: "material-icons", data_jq_dropdown: "", title: "Справка", text: "help_outline"}).appendTo(headerManipulation);
         if (!registryIsBlocked) {
             if (documentType !== 'print_registry') {    
@@ -6457,11 +6568,26 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
 
                 addRegistryBtn.off('click');
                 addRegistryBtn.on('click', (e) => {
+                    let actOffice  = "";
+
                     const parentToogle = e.currentTarget.parentElement.parentElement.parentElement.parentElement;
                     if("registry_settings_content" !== parentToogle.id){
                         office_admin_active = true;
                     }
-                    openAddRegistryEntryPopup(registryId, registryName, registryType, documentType);
+                    console.log(registryId)
+                    $("#popup_add_edit_registry_entry .form-submit-btn").empty();
+                    openAddRegistryEntryPopup(registryId, registryName, registryType, documentType, parent);
+
+                    if(parent == "true"){  
+                        actOffice = "_office";  
+                        let dataInfo = OBJECT_DATA.information;
+                        for (const prop in dataInfo) {
+                            $("#add_registry_entry_table input[name='ЛС']").val(`${prop.replace('ls','')}`).attr("disabled", "true");
+                            console.log("true")
+                        }
+                    }
+                    
+            
                 });
             }
         }
@@ -6508,10 +6634,10 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
             $("<i>",{id: `registry_update_icon${actOffice}`, class: 'material-icons', title: 'Обновить реестр', text: 'autorenew'}).on("click", () =>{
                 const saveScroll =  $('#registry_settings_content .block-content');
                 let countSaveScroll = saveScroll.scrollTop()
+                console.log(registryId, registryName, registryType, documentType, saveScroll, countSaveScroll, parent)
                 getRegistryData(registryId, registryName, registryType, documentType, saveScroll, countSaveScroll, parent);
             }).appendTo(headerManipulation);
-            console.log(headerManipulation)
-        }
+        // }
 
     $('#add_registry_entry_table input').each(function() {
         const input = $(this);
@@ -6524,8 +6650,8 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
         }
     });
 
-    $("#add_registry_entry_table input[name='ЛС']").keyup(function() {
-        searchInputValue($(this), 'valueType');
+    $("#add_registry_entry_table input[name='ЛС']").keyup(function() {      
+           searchInputValue($(this), 'valueType'); 
     });
 
     if(parent == "true"){
@@ -6718,15 +6844,28 @@ function createAddRegistryEntryTable(data) {
     return table;
 }
 
-function openAddRegistryEntryPopup(registryId, registryName, registryType, documentType) {
+function openAddRegistryEntryPopup(registryId, registryName, registryType, documentType, parent = "false") {
+    console.log(registryId)
     $('#popup_add_edit_registry_entry .popup-name').text('Добавить запись в реестр');
-    $('#add_registry_entry_btn').text('Добавить');
+    let actOffice = "";
+    if(parent == "true"){
+        actOffice = "_office";
+    }
+
+    $('#popup_add_edit_registry_entry .popup-name').text('Изменить запись в реестре');
+    if(parent == "true"){
+        console.log("true openAddRegistryEntryPopu")
+        actOffice = "_office";
+        $("<button>", {class: "button-primary", text: "Добавить", id:`add_registry_entry_btn${actOffice}`}).appendTo("#popup_add_edit_registry_entry .form-submit-btn")
+    } else {
+        $("<button>", {class: "button-primary", text: "Добавить", id:`add_registry_entry_btn`}).appendTo("#popup_add_edit_registry_entry .form-submit-btn")
+    }
     $('#add_registry_entry_table input').val('');
     $('#add_entry_total_sum, #add_registry_entry_table tr:nth-child(4) input').attr('disabled', false);
 
-    $('#add_registry_entry_btn').off('click');
-    $('#add_registry_entry_btn').on('click', () => {
-        addRegistryEntry(registryId, registryName, registryType, documentType);
+    $(`#add_registry_entry_btn${actOffice}`).off('click');
+    $(`#add_registry_entry_btn${actOffice}`).on('click', () => {
+        addRegistryEntry(registryId, registryName, registryType, documentType, parent, actOffice);
     });
 
     const inputCollection = $('#add_registry_entry_table').find('tr:nth-child(4) input');
@@ -6776,12 +6915,18 @@ function openAddRegistryEntryPopup(registryId, registryName, registryType, docum
 
 function openEditRegistryEntryPopup(e, registryId, entryId, registryName, registryType, documentType, Obj) {
     $('#popup_add_edit_registry_entry .popup-name').text('Изменить запись в реестре');
-    $('#add_registry_entry_btn').text('Сохранить');
+    let actOffice = "";
+    if(parent == "true"){
+        console.log("true openAddRegistryEntryPopu")
+        actOffice = "_office";
+    }
+    $(`#add_registry_entry_btn`).attr("id", `add_registry_entry_btn${actOffice}`)
+    $(`#add_registry_entry_btn${actOffice}`).text('Сохранить');
     $('#add_registry_entry_table tr:nth-child(4) input').attr('disabled', false);
     $('#add_entry_total_sum').attr('disabled', true);
 
-    $('#add_registry_entry_btn').off('click');
-    $('#add_registry_entry_btn').on('click', () => {
+    $(`#add_registry_entry_btn${actOffice}`).off('click');
+    $(`#add_registry_entry_btn${actOffice}`).on('click', () => {
         editRegistryEntry(e, registryId, entryId, registryName, registryType, documentType);
     });
 
@@ -6894,7 +7039,7 @@ function saveRegisrtrySettings(registryId, registryName, registryType, documentT
     });
 } 
 
-function addRegistryEntry(registryId, registryName, registryType, documentType) {
+function addRegistryEntry(registryId, registryName, registryType, documentType, parent = "false", actOffice = "") {
 
     const validateinputsArray = [];
     const valuesObj = {};
@@ -6911,6 +7056,7 @@ function addRegistryEntry(registryId, registryName, registryType, documentType) 
             operation: 'add',
             values: valuesObj
         }
+        console.log(data)
         $.ajax({
             type: 'POST',
             url: '/base_func?fnk_name=addchg_ree_recodrs',
@@ -6923,7 +7069,7 @@ function addRegistryEntry(registryId, registryName, registryType, documentType) 
                 else {
                     console.log(JSON.parse(data));
                     closePopupWindow('popup_add_edit_registry_entry');
-                    getAddRegistryEntry(JSON.parse(data), registryId, registryName, registryType, documentType);
+                    getAddRegistryEntry(JSON.parse(data), registryId, registryName, registryType, documentType, parent, actOffice);
                     showPopupNotification('notification', 'Запись в реестр успешно добавлена!');
                 }
             }
