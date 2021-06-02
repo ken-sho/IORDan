@@ -39,18 +39,19 @@ $(document).ready(function() {
 
     const objectNumDiv = $('#print_mode_object_num');
     objectNumDiv.text('Выбрано: 0');
+    const selectAll = $("#print_mode_select_all");
     
-    objectNumDiv.on('click', () => {
+    selectAll.on('click', () => {
         const objectNum = $('.object-tree-apartament-input:checked').length;
         
         if (objectNum > 0) {
             $('.object-list-tree input').prop('checked', false);
-            objectNumDiv.attr('title', 'Нажмите, чтобы выбрать все');
+            selectAll.text('Выбрать все');
             $('#objects_list_reports').hide();
         }
         else {
             $('.object-list-tree input').prop('checked', true);
-            objectNumDiv.attr('title', 'Нажмите, чтобы отменить выбор');
+            selectAll.text('Оменить выбор');
             if ($('#objects_list_reports').is(':hidden')) {
                 $('#objects_list_reports').fadeOut(200).fadeIn(200).fadeOut(200).fadeIn(200);
             }
@@ -189,7 +190,7 @@ $(document).ready(function() {
         }
     });
 
-    postIdReccid ();
+    postIdReccid();
 
     setInterval(() => {
         checkSession();
@@ -1108,11 +1109,11 @@ function openCloseObjectList() {
     });
     const popup = $('#popup_object_list');
     if (popup.attr('state') == 'close') {
-        popup.css({'display': 'block'});
-        popup.animate({ width: '35%' }, 200, function() {
+        popup.css({'display': 'grid'});
+        popup.animate({ width: '475px' }, 200, function() {
             $('#popup_object_content').show();
             popup.attr('state', 'open');
-            // if ( $('.object-list-tree').children().length == 0 ) getObjectsTreeData();
+            popup.css("grid-template-columns", "100%")
         });
     }
     else if (popup.attr('state') == 'open') {
@@ -1120,15 +1121,53 @@ function openCloseObjectList() {
     }
 }
 
+function openCloseObjectListSetting() {
+    $('.popup-with-menu').each(function() {
+        if ($(this).attr('id') !== 'popup_control') {
+            $(this).hide();
+        }
+    });
+    const popup = $('#popup_object_list_settings');
+    if (popup.attr('state') == 'close') {
+        $('#popup_object_list').animate({ width: '980px' }, 200, function() {
+            popup.css({'display': 'block'});
+            $('#popup_object_list').css("grid-template-columns", "49% 51%")
+            popup.attr('state', 'open');
+        });
+       
+    }
+    else if (popup.attr('state') == 'open') {
+        if(sessionStorage.getItem('printMode') == 'on'){
+            switchToggle('object_list_toggle');
+        }
+        closeObjectListSetting(); 
+    }
+}
+
 function closeObjectList() {
     const popup = $('#popup_object_list');
+    const popupsetting = $('#popup_object_list_settings');
     $('#popup_object_content').hide();
     popup.animate({ width: '0' }, 200, function () {
-        popup.css({ 'display': 'none' });
+        popup.hide();
+        popupsetting.hide();
         popup.attr('state', 'close');
+        popupsetting.attr('state', 'close');
     });
     $('.main-menu li').removeClass('active');
     $('#home_page').addClass('active');
+}
+
+function closeObjectListSetting() {
+    if(sessionStorage.getItem('printMode') == 'on'){
+        switchToggle('object_list_toggle');
+    }
+    const popup = $('#popup_object_list_settings');
+    popup.css({ 'display': 'none' });
+    popup.attr('state', 'close');
+    $('#popup_object_list').animate({ width: '475px' }, 200, () => {
+        $('#popup_object_list').css("grid-template-columns", "100%");       
+    });
 }
 
 function getObjectsTreeData(callback) {
@@ -1483,7 +1522,7 @@ function initializeObjectsTreeFilters() {
     const lS = localStorage;
 
     const submitBtn = $('<button>', {class: 'button-primary', text: 'Применить'}).on('click', () => {
-        
+        openCloseObjectListSetting();
         const data = {};
 
         if(lS.hasOwnProperty('debt_less_1000') && lS.getItem('debt_less_1000') == 'off'){
@@ -1602,7 +1641,7 @@ function getObjectData() {
 
             clickDropdownMenu();
 
-            resizeTreeDiv("obj_info", "obj_ls_info", "obj_additional_info", "obj_print_form", 100, "n")
+            resizeTreeDiv("obj_info", "obj_ls_info", "obj_additional_info", "obj_print_form", 10, "n", 600)
         }
     });
 }
@@ -2235,6 +2274,7 @@ function getPackage(repName, repNum, repType) {
         data: JSON.stringify({operation: "check", report_data: reportData}),
         success: (data) => {
             const periodsData = JSON.parse(data);
+            console.log(periodsData)
             if (data !== 'error' && !isEmpty(periodsData)) {
                 const ownershipPeriodsRepository = [];
 
@@ -2283,8 +2323,8 @@ function getPackage(repName, repNum, repType) {
                             }                            
                         });
 
-                        const data = { operation: 'get_report', report_data: reportData, ownership_periods: ownershipPeriodsData, checkbox: isCheked};
-
+                        const data = { operation: 'get_report', report_data: reportData, ownership_periods: ownershipPeriodsData, checkbox: isCheked,  type : repType};
+                        
                         if (!isEmpty(ownershipPeriodsData)) {
                             const callback = (data) => {
                                 initializeReportNewWindow(data, repName, reportId);
@@ -2392,7 +2432,8 @@ function clickDropdownMenu() {
                         $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
                     }
                 });
-            } else {
+            } else if(repType == "certificate"){
+                console.log(repType)
                 $.get(`/report?rnum=${repNum}&rtype=${repType}&accid=${accid}&humanid=${humanId}&fio=${personName}`, function (data) {
                     if (repNum == '2' || repNum == '3') {
                         $('#popup_report table').addClass('export-table-border');
@@ -2400,18 +2441,36 @@ function clickDropdownMenu() {
                     initializeReportNewWindow(data, repName, reportId, personName);
                     $(".input-fio").val("");
                 });
+            } else if(repType == "reportnew"){
+                const reportData = {
+                    number: repNum, 
+                    type : repType, 
+                    accid: accid,
+                    humanid: humanId,
+                    fio: personName
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: '/report',
+                    data: JSON.stringify({operation: "check", report_data: reportData}),
+                    success: (data) => {
+                        console.log(data)
+                    }
+                });
             }
         });
     });
 }
 
 function getReportContent(data, callback) {
+    console.log(data)
     $.ajax({
         type: 'POST',
         url: '/report',
         data: JSON.stringify(data),
         success: (data) => {
             if (callback) {
+                console.log(JSON.parse(data))
                 callback(data);
             }
         }
@@ -2474,7 +2533,38 @@ function getPrintForm(){
 
             createDropdownMenuForPerson(DROPDOWN_NUM, Unique(arrPersonUn), report.rep_name,report.rep_num, report.rep_type);
             DROPDOWN_NUM++;
-        } else {
+        } else if(report.rep_type == "reportnew"){
+            console.log(report.rep_type)
+            $("<tr>").append(
+                $("<td>").append($('<i>', {'data-jq-dropdown': `#jq-dropdown-${DROPDOWN_NUM}`, class: 'material-icons', text: 'person', title: 'Выбрать собственника' })),
+                $("<td>", {text: report.rep_name})
+            ).appendTo("#obj_cerfiticat_report tbody");
+
+            const arrPerson = [];
+            const arrPersonUn = [];
+            let i = 0;
+
+            for( const person in OBJECT_DATA.agreements){
+                arrPerson[i] = person;
+                i++;
+            }
+            for( const person in OBJECT_DATA.registrations){
+                arrPerson[i] = person;
+                i++;
+            }
+            arrPerson.map( (element, index) => {
+                let arr = element.split('&');
+                if(arr.length > 3){
+                    arr.pop();
+                }
+                arrPersonUn[index] = arr;
+
+            });
+
+            createDropdownMenuForPerson(DROPDOWN_NUM, Unique(arrPersonUn), report.rep_name,report.rep_num, report.rep_type);
+            DROPDOWN_NUM++;
+        }
+        else {
             $("<tr>", {class: "tr-btn"}).append(
                 $("<td>", {text: report.rep_name})
             ).on("click", () => {
@@ -3068,6 +3158,20 @@ function openTab(tabsId, elem, tabId) {
         $(`#${tabsId}_content .tab-content-prof`).css("display", "none"); 
         $(`#${tabId}`).css('display', 'flex');       
     }    
+    if(tabId == 'control_files'){
+        $("#select_files").fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+        const divHelp = $("<div>", { class: "dropdown", text: "Нажмите для выбора файлов"}).css("width", "256px");
+        setTimeout(() => {
+            divHelp.appendTo($("#select_files"));
+            setTimeout(() => {
+                divHelp.fadeOut(100);               
+                setTimeout(() => {
+                   divHelp.remove(); 
+                }, 600);
+            }, 4000);
+        }, 500);
+       
+    }
 }
 
 
@@ -3241,6 +3345,16 @@ function clearObjectSearchInput() {
 }
 
 function switchToggle(toggleId) {
+    // openCloseObjectListSetting()
+    const popup = $('#popup_object_list_settings');
+    if (popup.attr('state') == 'close') {
+        $('#popup_object_list').animate({ width: '980px' }, 200, function() {
+            popup.css({'display': 'block'});
+            $('#popup_object_list').css("grid-template-columns", "49% 51%")
+            popup.attr('state', 'open');
+        });
+       
+    } 
 
     let toggle = $(`#${toggleId}`);
     let state = toggle.attr('state');
@@ -3252,7 +3366,7 @@ function switchToggle(toggleId) {
         toggle.attr('state', 'on');
         toggle.css({'color': '#0091EA'});
 
-        $('#print_mode_object_num, .object-tree-apartament-input, .object-tree-parent-li-input').show();
+        $('#print_mode_object_num, .object-tree-apartament-input, .object-tree-parent-li-input, #print_mode_select_all').show();
     }
     else {
         sessionStorage.setItem('printMode', 'off');
@@ -3261,7 +3375,7 @@ function switchToggle(toggleId) {
         toggle.text('radio_button_unchecked');
         toggle.attr('state', 'off');
         toggle.css({'color': '#263238'});
-        $('#objects_list_reports, #print_mode_object_num, .object-tree-apartament-input, .object-tree-parent-li-input').hide();
+        $('#objects_list_reports, #print_mode_object_num, .object-tree-apartament-input, .object-tree-parent-li-input, #print_mode_select_all').hide();
     }
 }
 
@@ -4090,9 +4204,7 @@ function fillSelectFromCompanyArray(selectId, array) {
 
 function initializationPopupControl() {
     resizeTwoDiv('control_reports', `reports_list`, 'report_fast_access', '11', "e");
-    $(`#control_files_top`).resizable({
-        "handles": "s"
-    });
+    resizeTwoDiv('control_files', `control_files_top`, 'control_files_bottom', '11', "s", 700, 100);
 
 
     $('#report_fast_access_reports_list, #report_settings_select_menu ul, #proccess_file_company_select').empty();
@@ -4136,7 +4248,7 @@ function initializationPopupControl() {
 
         $("#files_upload_btn").fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
 
-        const divHelp = $("<div>", { class: "dropdown", text: "Нажмите, для загрузки файлов"});
+        const divHelp = $("<div>", { class: "dropdown", text: "Нажмите для загрузки файлов"});
         setTimeout(() => {
             divHelp.appendTo($("#files_upload_btn"));
             setTimeout(() => {
@@ -4765,7 +4877,7 @@ function uploadFiles(files, fileTypes, parentNode, filesInfoNode, accid, callbac
                 success: (fileData) => {
                     console.log(fileData);
                     if(fileData == "success"){
-                        showPopupNotification('notification', 'Файл успешно загружен!');
+                        showPopupNotification('notification', 'Файл успешно загружен');
                         if (index !== files.length - 1) {
                             uploadFile(index + 1);
                         }
@@ -4777,7 +4889,7 @@ function uploadFiles(files, fileTypes, parentNode, filesInfoNode, accid, callbac
                             callback(fileData);
                         }
                     } else {
-                        showPopupNotification('alert', 'Данный файл уже существует!');
+                        showPopupNotification('alert', 'Ошибка загрузки!');
                     }
                     
                     
@@ -4793,46 +4905,91 @@ function uploadFiles(files, fileTypes, parentNode, filesInfoNode, accid, callbac
     }
 }
 
-function resizeTwoDiv(parentDiv, firstDiv, SecondDiv, error, handles) {
+function resizeTwoDiv(parentDiv, firstDiv, SecondDiv, error, handles, maxHeight = "auto", minHeight = "auto") {
+    if(handles == "e"){
+        if(localStorage.hasOwnProperty(`width_${firstDiv}`)){
+            const heightFirstDiv = localStorage.getItem(`width_${firstDiv}`);
+            const heightSecondDiv = localStorage.getItem(`width_${SecondDiv}`);
+            $(`#${firstDiv}`).width(heightFirstDiv);
+            $(`#${SecondDiv}`).width(heightSecondDiv);
+        }
+    } else{
+        if (localStorage.hasOwnProperty(`height_${firstDiv}`)){
+            const heightFirstDiv = localStorage.getItem(`height_${firstDiv}`);
+            const heightSecondDiv = localStorage.getItem(`height_${SecondDiv}`);
+            $(`#${firstDiv}`).height(heightFirstDiv);
+            $(`#${SecondDiv}`).height(heightSecondDiv);
+        }
+    }
+
     $(`#${firstDiv}`).resizable({
-        "handles": handles
+        "handles": handles,
+        "maxHeight": maxHeight,
+        "minHeight": minHeight
     });
 
     $(`#${firstDiv}`).resize(() => {
         resize();
     });
 
-    $(window).resize(() => {
-        resize();
-    });
-
+    let parent = $(`#${parentDiv}`).width();
+    let resizableElem = $(`#${firstDiv}`).width();
+    
     function resize() {
-        let parentWidth = $(`#${parentDiv}`).width();
-        let resizableElemWidth = $(`#${firstDiv}`).width();
-        let modWidth = parentWidth - resizableElemWidth - error;
-        $(`#${SecondDiv}`).width(modWidth);
+        if(handles == "e"){
+            parent = $(`#${parentDiv}`).width();
+            resizableElem = $(`#${firstDiv}`).width();
+            let modWidth = parent - resizableElem - error;
+            $(`#${SecondDiv}`).width(modWidth);
+            localStorage.setItem(`width_${firstDiv}`, resizableElem);
+            localStorage.setItem(`width_${SecondDiv}`, modWidth);
+        } else {
+            parent = $(`#${parentDiv}`).height();
+            resizableElem = $(`#${firstDiv}`).height();
+            let modWidth = parent - resizableElem - error;
+            $(`#${SecondDiv}`).height(modWidth);
+            localStorage.setItem(`height_${firstDiv}`, resizableElem);
+            localStorage.setItem(`height_${SecondDiv}`, modWidth);
+        }
+        
     }
 }
 
-function resizeTreeDiv(parentDiv, firstDiv, SecondDiv,TreeDiv, error, handles) {
+function resizeTreeDiv(parentDiv, firstDiv, SecondDiv,TreeDiv, error, handles, maxHeight) {
+    if (localStorage.hasOwnProperty(`height_${firstDiv}`)){
+        const heightFirstDiv = localStorage.getItem(`height_${firstDiv}`);
+        const topFirstDiv = localStorage.getItem(`top_${firstDiv}`);
+        const heightSecondDiv = localStorage.getItem(`height_${SecondDiv}`);
+        const heightTreeDiv = localStorage.getItem(`height_${TreeDiv}`);
+        $(`#${firstDiv}`).height(heightFirstDiv);
+        $(`#${firstDiv}`).css("top", topFirstDiv);
+        $(`#${SecondDiv}`).height(heightSecondDiv);
+        $(`#${TreeDiv}`).height(heightTreeDiv);
+    }
+
+
     $(`#${firstDiv}`).resizable({
-        "handles": handles
+        "handles": handles,
+         "maxHeight": maxHeight,
+         "minHeight": 50
     });
 
     $(`#${firstDiv}`).resize(() => {
-        resize();
-    });
-
-    $(window).resize(() => {
         resize();
     });
 
     function resize() {
         let parentWidth = $(`#${parentDiv}`).height();
-        let resizableElemWidth = $(`#${firstDiv}`).height();
-        let modWidth = parentWidth - resizableElemWidth - error;
+        let resizableElemHeight = $(`#${firstDiv}`).height();
+        let resizableElementTop = $(`#${firstDiv}`).css("top");
+        let modWidth = parentWidth - resizableElemHeight - error;
+
         $(`#${SecondDiv}`).height(modWidth);
         $(`#${TreeDiv}`).height(modWidth);
+        localStorage.setItem(`height_${firstDiv}`, resizableElemHeight);
+        localStorage.setItem(`top_${firstDiv}`, resizableElementTop);
+        localStorage.setItem(`height_${SecondDiv}`, modWidth);
+        localStorage.setItem(`height_${TreeDiv}`, modWidth);
     }
 }
 

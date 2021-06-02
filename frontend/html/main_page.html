@@ -109,14 +109,10 @@
                                     close
                                 </i>
                                 <div class="icon-with-count" id="icon-setting">
-                                    <i class="material-icons object-search-icon" title="Настройки списка объектов" onclick="openPopupWindow('popup_object_list_settings')">
+                                    <i class="material-icons object-search-icon" title="Настройки списка объектов" onclick="openCloseObjectListSetting()">
                                     settings_applications
                                     </i>                                 
                                 </div>
-                                
-                                <i id="objects_list_reports" data-jq-dropdown="#jq-dropdown-objects-list"
-                                    class="material-icons object-search-icon" title="Печать">print</i>
-                                <div id="print_mode_object_num" title="Нажмите, чтобы выбрать все"></div>
                             </div>
                         </div>
                     <div id="object_list_header">
@@ -131,8 +127,59 @@
                         <ul class="object-list-tree"></ul>
                     </div>
                 </div>
+                <div id="popup_object_list_settings" state="close">
+                    <div class="popup-header">
+                        <div class="popup-close" onclick="closeObjectListSetting()"><i class="material-icons">close</i></div>
+                    </div>
+                    <div class="popup-content">
+                        <div class="popup-tabs" id="object_list_settings_tabs">
+                            <button class="tab-button active" onclick="openTab('object_list_settings_tabs', this,'object_list_print')">Режим печати</button>
+                            <button class="tab-button " onclick="openTab('object_list_settings_tabs', this,'object_list_settings_tab')">Настройки</button>
+                            <button class="tab-button" onclick="openTab('object_list_settings_tabs', this,'object_list_template')">Фильтры</button>
+                        </div>
+                        <div id="object_list_settings_tabs_content" class="popup-tabs-content">
+                            <div id="object_list_print" class="tab-content active">
+                                <div>
+                                    <div id="print_mode_object_num" title="Выбрано адресов"></div>
+                                    <button class="button-secondary" id="print_mode_select_all" title="Нажмите, чтобы выбрать все">Выбрать все</button>
+                                    <button class="button-primary"  id="objects_list_reports" data-jq-dropdown="#jq-dropdown-objects-list"
+                                    title="Печать">Печать</i>
+                                </div>
+                            </div>
+                            <div id="object_list_settings_tab" class="tab-content"></div>
+                            <div id="object_list_template" class="tab-content">
+                                <!-- <form name="choose_template_form">
+                                    <table class="table-form">
+                                        <tbody>
+                                            <tr>
+                                                <td class="table-input-name">Текущий:</td>
+                                                <td id="current_template_name">Отсутствует</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="table-input-name">Шаблон</td>
+                                                <td>
+                                                    <select id="choose_template_select" class="input-main" onchange="changeTemplateSelect()"></select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="table-input-name">Описание</td>
+                                                <td>
+                                                    <textarea id="choose_template_description" class="fixed-textarea" rows="3" disabled></textarea>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="content-center">
+                                        <button id="change_template_btn" class="button-primary" style="margin-top: 10px" onclick="applyTemplateObjectList()">Применить</button>
+                                        <button id="clear_template_btn" class="button-primary" style="margin-top: 10px" onclick="clearTemplateObjectList()" disabled>Сбросить</button>
+                                    </div>
+                                </form> -->
+                            </div>
+                        </div>
+                    </div>                   
+                </div>
             </div>
-        
+            
             <div id="main_content">
                 <div id="head_bar">
                     <div id="main_search_content">
@@ -273,49 +320,7 @@
     </div>
 
     <div id="popup_background">
-        <div id="popup_object_list_settings" class="popup-window">
-            <div class="popup-header">
-                <div class="popup-name">Список объектов</div>
-                <div class="popup-close" onclick="closePopupWindow('popup_object_list_settings')"><i class="material-icons">close</i></div>
-            </div>
-            <div class="popup-content">
-                <div class="popup-tabs" id="object_list_settings_tabs">
-                    <button class="tab-button active" onclick="openTab('object_list_settings_tabs', this,'object_list_settings_tab')">Настройки</button>
-                    <button class="tab-button" onclick="openTab('object_list_settings_tabs', this,'object_list_template')">Фильтры</button>
-                </div>
-                <div id="object_list_settings_tabs_content" class="popup-tabs-content">
-                    <div id="object_list_settings_tab" class="tab-content active"></div>
-                    <div id="object_list_template" class="tab-content">
-                        <!-- <form name="choose_template_form">
-                            <table class="table-form">
-                                <tbody>
-                                    <tr>
-                                        <td class="table-input-name">Текущий:</td>
-                                        <td id="current_template_name">Отсутствует</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="table-input-name">Шаблон</td>
-                                        <td>
-                                            <select id="choose_template_select" class="input-main" onchange="changeTemplateSelect()"></select>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="table-input-name">Описание</td>
-                                        <td>
-                                            <textarea id="choose_template_description" class="fixed-textarea" rows="3" disabled></textarea>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div class="content-center">
-                                <button id="change_template_btn" class="button-primary" style="margin-top: 10px" onclick="applyTemplateObjectList()">Применить</button>
-                                <button id="clear_template_btn" class="button-primary" style="margin-top: 10px" onclick="clearTemplateObjectList()" disabled>Сбросить</button>
-                            </div>
-                        </form> -->
-                    </div>
-                </div>
-            </div>
-        </div>
+        
 
         <div id="popup_add_task" class="popup-window">
             <div class="popup-header">
@@ -1052,7 +1057,7 @@
                                             <div class="header-manipulation-files">
                                                 <div class="icon-with-count">
                                                     <label id="select_files" for="files_upload_input" class="material-icons" title="Выбрать файлы">folder_open</label>
-                                                    <div class='icon-count-control-files' id="count-files-icon" title='Файлы'>0</div>
+                                                    <div for="files_upload_input" class='icon-count-control-files' id="count-files-icon" title='Файлы'>0</div>
                                                 </div>
                                                 <i id="files_upload_btn" class="material-icons" title="Загрузить файлы" onclick="uploadFiles($('#files_upload_input').prop('files'), {}, $('#control_files_upload .block-content'), $('#number_of_uploaded_files'), CURRENT_OBJECT_DATA.accid,getControlFilesList)">file_upload</i>                                                
                                                 <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-files-control"
