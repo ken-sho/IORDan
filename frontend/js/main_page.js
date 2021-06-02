@@ -51,7 +51,7 @@ $(document).ready(function() {
         }
         else {
             $('.object-list-tree input').prop('checked', true);
-            selectAll.text('Оменить выбор');
+            selectAll.text('Отменить выбор');
             if ($('#objects_list_reports').is(':hidden')) {
                 $('#objects_list_reports').fadeOut(200).fadeIn(200).fadeOut(200).fadeIn(200);
             }
@@ -3346,6 +3346,8 @@ function clearObjectSearchInput() {
 
 function switchToggle(toggleId) {
     // openCloseObjectListSetting()
+    $("#print_mode_select_all").text('Выбрать все');
+
     const popup = $('#popup_object_list_settings');
     if (popup.attr('state') == 'close') {
         $('#popup_object_list').animate({ width: '980px' }, 200, function() {
@@ -3354,7 +3356,9 @@ function switchToggle(toggleId) {
             popup.attr('state', 'open');
         });
        
-    } 
+    } else{
+        $("#print_mode_object_num").text("Выбрано: 0");
+    }
 
     let toggle = $(`#${toggleId}`);
     let state = toggle.attr('state');
@@ -3395,13 +3399,16 @@ function showSelectedObjectNum() {
         $(this).on('click', function() {
             const objectNum = $('.object-tree-apartament-input:checked').length;
             showPrintingObjectsNum();
-
+            
             if (objectNum > 0) {
+                $("#print_mode_select_all").text('Отменить выбор');
                 if ($('#objects_list_reports').is(':hidden')) {
                     $('#objects_list_reports').fadeOut(200).fadeIn(200).fadeOut(200).fadeIn(200);
                 }
             }
             else {
+                $("#print_mode_object_num").text("Выбрано: 0")
+                $("#print_mode_select_all").text('Выбрать все');
                 $('#objects_list_reports').hide();
             }
         });
