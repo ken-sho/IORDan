@@ -74,8 +74,9 @@ $(document).ready(function() {
         // $('#update_info_content').show();
         $('#home_page').addClass('active');
         $('#obj_content').show();
+        localStorage.removeItem('currentCompanyId');
     }
-    else {
+    else {       
         $('#home_page').addClass('active');
     }
 
@@ -995,6 +996,7 @@ function chooseCompany(li, companyName, companyId) {
         getObjectsTreeData([initializeObjectsTreeFilters]);
         localStorage.setItem('currentCompanyId', companyId);
         localStorage.setItem('currentCompany', companyName);
+        
     }
 }
 
@@ -1109,11 +1111,11 @@ function openCloseObjectList() {
     });
     const popup = $('#popup_object_list');
     if (popup.attr('state') == 'close') {
-        popup.css({'display': 'grid'});
+        popup.css({'display': 'block'});
         popup.animate({ width: '475px' }, 200, function() {
             $('#popup_object_content').show();
             popup.attr('state', 'open');
-            popup.css("grid-template-columns", "100%")
+            popup.css("height", "100%")
         });
     }
     else if (popup.attr('state') == 'open') {
@@ -1130,8 +1132,8 @@ function openCloseObjectListSetting() {
     const popup = $('#popup_object_list_settings');
     if (popup.attr('state') == 'close') {
         $('#popup_object_list').animate({ width: '980px' }, 200, function() {
-            popup.css({'display': 'block'});
-            $('#popup_object_list').css("grid-template-columns", "49% 51%")
+            popup.css({'display': 'inline-block'});
+            $("#popup_object_content").css({'display': 'inline-block'});
             popup.attr('state', 'open');
         });
        
@@ -2173,7 +2175,7 @@ function initializeOfficeAdministration() {
 
             for (const registry of registryList) {
                 let registryName = registry.name;
-
+                console.log(registry)
                 const li = $('<li>', {registry_id: registry.id}).append(
                     $('<a>').append(
                         $('<span>', {text: registryName})
@@ -3351,8 +3353,8 @@ function switchToggle(toggleId) {
     const popup = $('#popup_object_list_settings');
     if (popup.attr('state') == 'close') {
         $('#popup_object_list').animate({ width: '980px' }, 200, function() {
-            popup.css({'display': 'block'});
-            $('#popup_object_list').css("grid-template-columns", "49% 51%")
+            popup.css({'display': 'inline-block'});
+            $("#popup_object_content").css({'display': 'inline-block'});
             popup.attr('state', 'open');
         });
        
@@ -5861,6 +5863,7 @@ function getRegistryList(callback) {
                 else {
                     registryName = registry.name;
                 }      
+                
                 const li = $('<li>', {registry_id: registry.id}).append(
                     $('<a>').append(
                         $('<span>', {text: registryName})

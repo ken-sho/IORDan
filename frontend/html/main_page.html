@@ -128,14 +128,12 @@
                     </div>
                 </div>
                 <div id="popup_object_list_settings" state="close">
-                    <div class="popup-header">
-                        <div class="popup-close" onclick="closeObjectListSetting()"><i class="material-icons">close</i></div>
-                    </div>
                     <div class="popup-content">
                         <div class="popup-tabs" id="object_list_settings_tabs">
                             <button class="tab-button active" onclick="openTab('object_list_settings_tabs', this,'object_list_print')">Режим печати</button>
                             <button class="tab-button " onclick="openTab('object_list_settings_tabs', this,'object_list_settings_tab')">Настройки</button>
                             <button class="tab-button" onclick="openTab('object_list_settings_tabs', this,'object_list_template')">Фильтры</button>
+                            <div class="popup-close" onclick="closeObjectListSetting()"><i class="material-icons">close</i></div>
                         </div>
                         <div id="object_list_settings_tabs_content" class="popup-tabs-content">
                             <div id="object_list_print" class="tab-content active">
@@ -877,11 +875,6 @@
                     <div id="chat_content">
                         <div id="users-block">
                             <div><i class="material-icons">person</i> Система <i class="material-icons"></i></div>
-                            <div><i class="material-icons">person</i> Николай <i class="material-icons" onclick="$(this.parentElement).remove()">close</i></div>
-                            <div><i class="material-icons">person</i> Алексей <i class="material-icons" onclick="$(this.parentElement).remove()">close</i></div>
-                            <div><i class="material-icons">person</i> Кирилл <i class="material-icons" onclick="$(this.parentElement).remove()">close</i></div>
-                            <div><i class="material-icons">person</i> Александр <i class="material-icons" onclick="$(this.parentElement).remove()">close</i></div>
-                            <div><i class="material-icons">person</i> Тимур <i class="material-icons" onclick="$(this.parentElement).remove()">close</i></div>
                         </div>
                         <div id="dialogs-block">
                             
