@@ -1458,10 +1458,11 @@ div {
     padding: 5px;
     z-index: 6;
     box-shadow: 0px 4px 4px rgba(58, 58, 58, 0.3);
-    grid-template-columns: 50% 50%;
+    flex-direction: column;
 }
 
 #popup_object_list_settings {
+    vertical-align: top;
     width: 500px;
     height: 100%;
     /* position: absolute;
