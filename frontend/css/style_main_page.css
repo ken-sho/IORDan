@@ -943,35 +943,41 @@ form {
 }
 
 #obj_agreements_info {
-    display: grid;
+    /* display: grid;
     grid-template-columns: 5fr 7fr;
     grid-template-rows: 50% 50%;
     grid-gap: 7px;
     grid-template-areas:
         "contract list-group"
-        "pasport list-group";
+        "pasport list-group"; */
     width: calc(100% - 13px);
     height: calc(100% - 56px);
     margin: 7px;
 }
 
+.block-left{
+    display: inline-block;
+    width: 40%;
+    height: 54%;
+}
+
 #block-contract{
-    grid-area: contract;
+    display: block;
     border: 1px solid #D9E0E3;
     border-radius: 5px;
 }
 
 #block-pasport{
-    grid-area: pasport;
+    display: block;
     border: 1px solid #D9E0E3;
     border-radius: 5px;
 }
 #obj_list_group{
-    grid-area: list-group;
+    display: inline-block;
     border: 1px solid #D9E0E3;
     border-radius: 5px;
-    width: 100%;
     height: 100%;
+    width: 59.6%;
 }
 
 .obj_list_item{
@@ -985,13 +991,16 @@ form {
 }
 
 #obj_print_form{
-    grid-area: document;
+    /* grid-area: document;
     display: grid;
     grid-template-columns: 50% 50%;
     grid-template-rows: 35px 82%;
     grid-template-areas:
         "printHeader printHeader"
-        "printLeft printRight";
+        "printLeft printRight"; */
+    display: inline-block;
+    height: 30%;
+    width: 54.5%
 }
 
 #obj_print_form .block-header-with-manipulation{
@@ -1035,14 +1044,19 @@ form {
     color: #263238;    
 }
 
-#obj_print_form .block-header-with-manipulation{
-    grid-area: printHeader;   
+#obj_print_form .block-header-with-manipulation{   
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
 }
 
 #obj_print_form .block-content{
     text-align: center;
+    display: inline-block;
+    width: 49.8%;
+}
+
+#block-left{
+    width: 49.9%;
 }
 
 #obj_cerfiticat_report, #obj_package{
@@ -1066,13 +1080,16 @@ form {
 }
 
 #obj_additional_info {
-    grid-area: additional;
+    /* grid-area: additional; */
+    display: inline-block;
     border: 1px solid #D9E0E3;
     border-radius: 5px;
+    height: 35%;
+    width: 45%;
 }
 
 #obj_ls_info {
-    grid-area: ls;
+    height: 69%;
     border: 1px solid #D9E0E3;
     border-radius: 5px;
 }
@@ -1272,13 +1289,13 @@ div {
 }
 
 #obj_info {
-    display: grid;
+    /* display: grid;
     grid-template-columns: 61% 38%;
     grid-template-rows: 26% 74%;
     grid-gap: 16px;
     grid-template-areas: 
     "document additional"
-    "ls ls";
+    "ls ls"; */
     padding: 16px;
     width: 100%;
     height: calc(100% - 60px);
@@ -1743,7 +1760,7 @@ div {
 }
 
 #obj_agreements_info .block-content {
-    height: 100%;
+    height: 92%;
 }
 
 .block-content {

@@ -1643,7 +1643,7 @@ function getObjectData() {
 
             clickDropdownMenu();
 
-            resizeTreeDiv("obj_info", "obj_ls_info", "obj_additional_info", "obj_print_form", 10, "n", 600)
+            // resizeTreeDiv("obj_info", "obj_ls_info", "obj_additional_info", "obj_print_form", 10, "n", 600)
         }
     });
 }
@@ -2249,6 +2249,7 @@ function refreshObjectData(callback) {
 }
 
 function getPackage(repName, repNum, repType) {
+    console.log(repName, repNum, repType)
     const reportId = `${repType}_${repNum}`;
     setPrintNotation(reportId);
 
@@ -2326,12 +2327,12 @@ function getPackage(repName, repNum, repType) {
                         });
 
                         const data = { operation: 'get_report', report_data: reportData, ownership_periods: ownershipPeriodsData, checkbox: isCheked,  type : repType};
-                        
+                        console.log(data)
                         if (!isEmpty(ownershipPeriodsData)) {
                             const callback = (data) => {
                                 initializeReportNewWindow(data, repName, reportId);
                             }
-
+                            console.log("это")
                             getReportContent(data, callback);
                         }
                         else {
@@ -2472,7 +2473,7 @@ function getReportContent(data, callback) {
         data: JSON.stringify(data),
         success: (data) => {
             if (callback) {
-                console.log(JSON.parse(data))
+                console.log(data)
                 callback(data);
             }
         }
@@ -2570,6 +2571,7 @@ function getPrintForm(){
             $("<tr>", {class: "tr-btn"}).append(
                 $("<td>", {text: report.rep_name})
             ).on("click", () => {
+                console.log("Пакеты")
                 $("#jq-dropdown-additional-block input").prop("checked", false);
                 getPackage(report.rep_name, report.rep_num, report.rep_type);
             }).appendTo("#obj_package tbody");
