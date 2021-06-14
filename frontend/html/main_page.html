@@ -209,41 +209,44 @@
                     <div id="obj_content_background">
                         <div id="obj_adress"></div>
                         <div id="obj_info">
-                            <div id="obj_print_form">
-                                <div class="block-header-with-manipulation">
-                                    <div class="header">Печатные формы</div>
-                                </div>
-                                <div class="block-content full-area" id="block-left">
-                                    <table id="obj_cerfiticat_report">
-                                        <thead>
-                                            <tr><th colspan="2">Справки и отчеты</th></tr>
-                                        </thead>
-                                        <tbody>
-                                         </tbody>
-                                    </table>
-                                </div>
-                                <div class="block-content full-area" id="block-right">
-                                    <table  id="obj_package">
-                                        <thead>
-                                            <tr>
-                                                <th>Пакетные формы</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                         </tbody>
-                                    </table>
-                                </div>                              
-                            </div>
-                            <div id="obj_additional_info">
-                                <div class="block-header-with-manipulation">
-                                    <div class="header">Дополнительная информация</div>
-                                    <div class="header-manipulation">
+                            <div id="top-block">
+                                <div id="obj_print_form">
+                                    <div class="block-header-with-manipulation">
+                                        <div class="header">Печатные формы</div>
                                     </div>
+                                    <div class="block-content full-area" id="block-left">
+                                        <table id="obj_cerfiticat_report">
+                                            <thead>
+                                                <tr><th colspan="2">Справки и отчеты</th></tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="block-content full-area" id="block-right">
+                                        <table  id="obj_package">
+                                            <thead>
+                                                <tr>
+                                                    <th>Пакетные формы</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>                              
                                 </div>
-                                <div class="block-content full-area">
-                                    <table id="obj_additional_info_table"></table>
-                                </div>
+                                <div id="obj_additional_info">
+                                    <div class="block-header-with-manipulation">
+                                        <div class="header">Дополнительная информация</div>
+                                        <div class="header-manipulation">
+                                        </div>
+                                    </div>
+                                    <div class="block-content full-area">
+                                        <table id="obj_additional_info_table"></table>
+                                    </div>
+                                </div> 
                             </div>
+                            
                             <div id="obj_ls_info">
                                 <div class="block-header-with-manipulation">
                                     <div class="header-ls">ЛС</div>
@@ -439,6 +442,21 @@
                         <div class="block-content"></div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div id='popup_info_debt' class="popup-window">
+            <div class="popup-header">
+                <div class="popup-name">Долговая задолженность</div>
+                <div class="popup-close" onclick="closePopupWindow('popup_object_files_registry')"><i class="material-icons">close</i></div>
+            </div>
+            <div class="popup-content">
+                <div class="form-submit-btn">
+                    <button id="btn-update-debt" class="button-primary">Запросить обновить информацию</button>
+                </div>
+                <div class="block-content" id="block-content-debt">
+                    
+                </div>    
             </div>
         </div>
 

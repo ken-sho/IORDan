@@ -1643,7 +1643,10 @@ function getObjectData() {
 
             clickDropdownMenu();
 
-            // resizeTreeDiv("obj_info", "obj_ls_info", "obj_additional_info", "obj_print_form", 10, "n", 600)
+            getInfoDebt();
+
+            resizeTreeDiv("obj_info", "obj_ls_info", "obj_additional_info", "obj_print_form", 10, "n", 600);
+            // resizeTwoDiv("obj_info", "top-block", "obj_ls_info", '11', "s")
         }
     });
 }
@@ -2602,6 +2605,61 @@ function downloadAgreementsErgp(){
             }
         });
     });
+
+    
+}
+
+function getInfoDebt() {
+
+    $("#request-info-debt").remove(
+
+    )
+    const popupId = "popup_info_debt";
+
+    const btnInfoDebt = $("<div>", {id: "request-info-debt", class:"icon-with-count"}).append(
+        $('<i>', {class: 'material-icons', text: 'gavel', title: 'Долговая нагрузка'})
+    )
+
+    $("#object_reputation_indicator").before(btnInfoDebt);
+
+    btnInfoDebt.on("click", () => {
+        openPopupWindow(popupId);
+
+        $.ajax({
+            type: "POST",
+            url: "/base_func?fnk_name=get_fssp_rec",
+            data: JSON.stringify({accid: CURRENT_OBJECT_DATA.accid,  param: "get"}),
+            success: function (data) {
+                console.log(data)
+                $("#block-content-debt").empty();
+                $("#block-content-debt").text(data)
+            }
+        });
+    })
+
+    $("#btn-update-debt").on("click", () => {
+        $.ajax({
+            type: "POST",
+            url: "/base_func?fnk_name=get_fssp_rec",
+            data: JSON.stringify({accid: CURRENT_OBJECT_DATA.accid,  param: "check"}),
+            success: function (data) {
+                console.log(data)
+                if(data == "success"){
+                    $.ajax({
+                        type: "POST",
+                        url: "/base_func?fnk_name=get_fssp_rec",
+                        data: JSON.stringify({accid: CURRENT_OBJECT_DATA.accid,  param: "get"}),
+                        success: function (data) {
+                            console.log(data)
+                            $("#block-content-debt").empty();
+                            $("#block-content-debt").text(data)
+                        }
+                    });
+                }
+                
+            }
+        }); 
+    })
 
     
 }
@@ -4966,7 +5024,13 @@ function resizeTwoDiv(parentDiv, firstDiv, SecondDiv, error, handles, maxHeight 
     }
 }
 
+
+
 function resizeTreeDiv(parentDiv, firstDiv, SecondDiv,TreeDiv, error, handles, maxHeight) {
+    if (!sessionStorage.noFirstVisit) {
+        localStorage.clear();
+    }
+
     if (localStorage.hasOwnProperty(`height_${firstDiv}`)){
         const heightFirstDiv = localStorage.getItem(`height_${firstDiv}`);
         const topFirstDiv = localStorage.getItem(`top_${firstDiv}`);
@@ -4982,7 +5046,7 @@ function resizeTreeDiv(parentDiv, firstDiv, SecondDiv,TreeDiv, error, handles, m
     $(`#${firstDiv}`).resizable({
         "handles": handles,
          "maxHeight": maxHeight,
-         "minHeight": 50
+         "minHeight": 300
     });
 
     $(`#${firstDiv}`).resize(() => {
@@ -4996,14 +5060,14 @@ function resizeTreeDiv(parentDiv, firstDiv, SecondDiv,TreeDiv, error, handles, m
         let modWidth = parentWidth - resizableElemHeight - error;
 
         $(`#${SecondDiv}`).height(modWidth);
-        $(`#${TreeDiv}`).height(modWidth);
+        $(`#${TreeDiv}`).height(modWidth - 34);
+        // $("#obj_agreements_info").height(resizableElemHeight - error)
         localStorage.setItem(`height_${firstDiv}`, resizableElemHeight);
         localStorage.setItem(`top_${firstDiv}`, resizableElementTop);
         localStorage.setItem(`height_${SecondDiv}`, modWidth);
         localStorage.setItem(`height_${TreeDiv}`, modWidth);
     }
 }
-
 
 function keyupSearch(inputId, menuId, searchBtnId) {
     let input = $(`#${inputId}`);

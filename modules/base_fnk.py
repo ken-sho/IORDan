@@ -48,6 +48,7 @@ import modules.tracert as tracert
 #office_administration_add_entry
 #log_views
 #get_egrp_rec
+#get_fssp_rec
 
 def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10):
     conn = db_conn.db_connect('web_receivables')
@@ -284,6 +285,14 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Добавление собственников из ЕГРП')
+    elif fnk_name=='get_fssp_rec':
+        q_sql = 'main.get_fssp_rec' + str([asid,orgid,adate])
+        print(q_sql)
+        cur.callproc('main.get_fssp_rec',[asid,orgid,adate])
+        for row in cur:
+            res=(row[0])
+        encoded = base64.b64encode(q_sql.encode()).decode()
+        logg_web.add_log(asid,encoded,'Запрос истории ФССП')
 
     conn.commit()
     cur.close()

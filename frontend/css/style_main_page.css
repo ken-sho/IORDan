@@ -942,6 +942,12 @@ form {
     border-bottom: 1px solid gray;
 }
 
+#top-block{
+    display: flex;
+    margin-bottom: 5px;
+    height: 220px;
+}
+
 #obj_agreements_info {
     /* display: grid;
     grid-template-columns: 5fr 7fr;
@@ -956,7 +962,7 @@ form {
 }
 
 .block-left{
-    display: inline-block;
+    float: left;
     width: 40%;
     height: 54%;
 }
@@ -973,11 +979,16 @@ form {
     border-radius: 5px;
 }
 #obj_list_group{
+    margin-left: 5px;
     display: inline-block;
     border: 1px solid #D9E0E3;
     border-radius: 5px;
     height: 100%;
     width: 59.6%;
+}
+
+#popup_info_debt{
+    height: 100%;
 }
 
 .obj_list_item{
@@ -991,16 +1002,9 @@ form {
 }
 
 #obj_print_form{
-    /* grid-area: document;
-    display: grid;
-    grid-template-columns: 50% 50%;
-    grid-template-rows: 35px 82%;
-    grid-template-areas:
-        "printHeader printHeader"
-        "printLeft printRight"; */
-    display: inline-block;
-    height: 30%;
-    width: 54.5%
+    float: left;
+    height: calc(100% - 30px);
+    width: 54.5%;
 }
 
 #obj_print_form .block-header-with-manipulation{
@@ -1080,11 +1084,11 @@ form {
 }
 
 #obj_additional_info {
-    /* grid-area: additional; */
-    display: inline-block;
+    margin-left: 5px;
+    float: right;
     border: 1px solid #D9E0E3;
     border-radius: 5px;
-    height: 35%;
+    height: 226px;
     width: 45%;
 }
 
@@ -1092,6 +1096,7 @@ form {
     height: 69%;
     border: 1px solid #D9E0E3;
     border-radius: 5px;
+    margin-top: 13px;
 }
 
 div {
