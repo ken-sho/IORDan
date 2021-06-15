@@ -961,6 +961,11 @@ form {
     margin: 7px;
 }
 
+.finished{
+    background-color:rgb(230, 230, 230);
+    color: rgb(122, 122, 122);
+}
+
 .block-left{
     float: left;
     width: 40%;
