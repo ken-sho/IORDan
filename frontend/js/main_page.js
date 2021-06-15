@@ -1230,29 +1230,34 @@ function createObjectsTree(objectsList) {
     // const objectList = objectTree.object_list;
     const controlUl = $('<ul>', {id: 'create_object_group_ul'});
     console.log(objectsList);
-    for (const object of objectsList) {
-        let objectAdress = `${object.city} ${object.street} ${object.house}`;
-        
-        if (localStorage.hasOwnProperty('display_city') && localStorage.getItem('display_city') == 'off') {
-            objectAdress = `${object.street} ${object.house}`;
-        }
-
-        const li = $('<li>', { text: objectAdress, class: 'parent-li' }).appendTo('.object-list-tree');
-        $('<input>', {type: 'checkbox', class: 'object-tree-parent-li-input'}).prependTo(li);
-        const parentUl = $('<ul>', { class: 'object-tree-ul hide' }).insertAfter(li);
-
-        const controlLi = $('<li>', {class: 'parent-li', text: `${object.city} ${object.street} ${object.house}`}).appendTo(controlUl);
-        $('<input>', {type: 'checkbox', id: `object_${object.id}`, object_id: object.id}).prependTo(controlLi);
-
-        for (const apartment of object.apartments) {
-            const apartData = apartment.split('&');
-            const li = $('<li>', { class: 'object-tree-li', text: apartData[0], accid: apartData[1] }).appendTo(parentUl);
-            $('<input>', {type: 'checkbox', class: 'object-tree-apartament-input'}).prependTo(li);
-            if (apartData[2] !== 'white') {
-                li.css({ 'color': apartData[2]});
+    if(objectsList !== null){
+       for (const object of objectsList) {
+            let objectAdress = `${object.city} ${object.street} ${object.house}`;
+            
+            if (localStorage.hasOwnProperty('display_city') && localStorage.getItem('display_city') == 'off') {
+                objectAdress = `${object.street} ${object.house}`;
             }
-        }
+
+            const li = $('<li>', { text: objectAdress, class: 'parent-li' }).appendTo('.object-list-tree');
+            $('<input>', {type: 'checkbox', class: 'object-tree-parent-li-input'}).prependTo(li);
+            const parentUl = $('<ul>', { class: 'object-tree-ul hide' }).insertAfter(li);
+
+            const controlLi = $('<li>', {class: 'parent-li', text: `${object.city} ${object.street} ${object.house}`}).appendTo(controlUl);
+            $('<input>', {type: 'checkbox', id: `object_${object.id}`, object_id: object.id}).prependTo(controlLi);
+
+            for (const apartment of object.apartments) {
+                const apartData = apartment.split('&');
+                const li = $('<li>', { class: 'object-tree-li', text: apartData[0], accid: apartData[1] }).appendTo(parentUl);
+                $('<input>', {type: 'checkbox', class: 'object-tree-apartament-input'}).prependTo(li);
+                if (apartData[2] !== 'white') {
+                    li.css({ 'color': apartData[2]});
+                }
+            }
+        } 
+    } else {
+        console.log("object list is null")
     }
+    
 
     $('#create_object_group_objects_list').html(controlUl);
 
@@ -2632,7 +2637,7 @@ function getInfoDebt() {
             success: function (data) {
                 console.log(data)
                 $("#block-content-debt").empty();
-                $("#block-content-debt").text(data)
+                $("#block-content-debt").html(data)
             }
         });
     })
@@ -2652,7 +2657,7 @@ function getInfoDebt() {
                         success: function (data) {
                             console.log(data)
                             $("#block-content-debt").empty();
-                            $("#block-content-debt").text(data)
+                            $("#block-content-debt").html(data)
                         }
                     });
                 }
