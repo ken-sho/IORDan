@@ -965,7 +965,7 @@
                     <button id="control_files_tab" class="tab-button default-hidden" onclick="openTab('control_tabs', this,'control_files')">Работа с файлами</button>
                     <button class="tab-button" onclick="openTab('control_tabs', this,'control_documents')">Отчеты</button>
                     <button class="tab-button" onclick="openTab('control_tabs', this,'control_object_groups')">Группы объектов</button>
-
+                    <button class="tab-button" onclick="openTab('control_tabs', this,'control_business_card')">Карточка предприятия</button>
                 </div>
                 <div class="background">
                     <div id="control_tabs_content" class="tabs-content">
@@ -1154,6 +1154,90 @@
                                     </div>
                                 </div>
                                 <div class="block-content full-area">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="control_business_card" class="tab-content">
+                            <div class="block">
+                                <div class="block-header-with-manipulation">
+                                    <div class="header">Карточка предприятия</div>
+                                    <div class="header-manipulation">            
+                                        <i class="material-icons" id="edit-business-card" title="Редактировать">edit</i>
+                                        <i class="material-icons" id="save-business-card" title="Сохранить">save</i>
+                                        <i class="material-icons" id="cancel-business-card" title="Отменить">cancel</i>
+                                    </div>
+                                </div>
+                                <div class="block-content full-area">
+                                    <table class="block-table">
+                                     <tr>
+                                         <th>Полное наименование</th>
+                                         <td><input type="text" id="full-name" class="edit-td"></input></td>
+                                     </tr>
+                                     <tr>
+                                        <th>Сокращенное наименование</th>
+                                        <td><input type="text" id="abbreviated-name" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Юридический адрес организации</th>
+                                        <td><input type="text" id="logal-address" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Фактический адрес организации</th>
+                                        <td><input type="text" id="actual-address" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Телефон/факс</th>
+                                        <td><input type="text" id="tell-company" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Адрес электронной почты</th>
+                                        <td><input type="text" id="email-company" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>ОГРН</th>
+                                        <td><input type="text" id="ogrn-company" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>ИНН</th>
+                                        <td><input type="text" id="inn-company" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>КПП</th>
+                                        <td><input type="text" id="cpp-company" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Платежные реквизиты:</th>
+                                        <td><input type="text" id="payment-company" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Наименование банка</th>
+                                        <td><input type="text" id="name-bank" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Расчетный счет</th>
+                                        <td><input type="text" id="payment-account" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Корреспондентский счет</th>
+                                        <td><input type="text" id="korr-account" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>БИК</th>
+                                        <td><input type="text" id="bik-company" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Генеральный директор</th>
+                                        <td><input type="text" id="gen-company" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Срок и основания полномочий</th>
+                                        <td><input type="text" id="term-company" class="edit-td"></input></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Лицензии</th>
+                                        <td><input type="text" id="licenses-company" class="edit-td"></input></td>
+                                    </tr>
+                                    </table>
                                 </div>
                             </div>
                         </div>

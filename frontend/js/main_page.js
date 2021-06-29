@@ -2460,12 +2460,21 @@ function clickDropdownMenu() {
                     humanid: humanId,
                     fio: personName
                 };
+                console.log(reportData);
                 $.ajax({
                     type: 'POST',
                     url: '/report',
                     data: JSON.stringify({operation: "check", report_data: reportData}),
                     success: (data) => {
-                        console.log(data)
+                       
+                        const content = JSON.parse(data);
+                        console.log(typeof content);
+                        if(!Array.isArray(content)){
+                            initializeReportNewWindow(content.html, repName, reportId, personName);     
+                        } else if (Array.isArray(content)){
+                            console.log("форма")
+                        }
+                       
                     }
                 });
             }
@@ -2657,7 +2666,11 @@ function getInfoDebt() {
                         success: function (data) {
                             console.log(data)
                             $("#block-content-debt").empty();
-                            $("#block-content-debt").html(data)
+                            if(data == "success"){
+                            $("#block-content-debt").html("Данные отсутствуют").css({"text-align": "center"})
+                            } else {
+                                $("#block-content-debt").html(data)
+                            }
                         }
                     });
                 }
@@ -3238,6 +3251,10 @@ function openTab(tabsId, elem, tabId) {
             }, 4000);
         }, 500);
        
+    }
+
+    if(tabId == 'control_business_card'){
+        getBusinessCard();
     }
 }
 
@@ -7972,4 +7989,61 @@ function initializeLogData() {
         showPopupNotification('notification', 'Произведен сброс фильтров!');
         PgNum.val("1");  
     })
+}
+
+function getBusinessCard() {
+
+    const data = [];
+
+    const editInputs = $(".edit-td");
+    editInputs.attr('disabled', true);
+    
+    const btnEdit = $("#edit-business-card");
+    const btnSave = $("#save-business-card");
+    const btnCancel = $("#cancel-business-card");
+    btnSave.hide();
+    btnCancel.hide();
+
+    btnEdit.on("click", () => {
+        editInputs.attr('disabled', false);
+        btnSave.show();
+        btnCancel.show();
+    })
+
+    btnSave.on("click", () => {
+        editInputs.each((i, inputData) => {
+            console.log($(inputData).val());
+            data[i] = $(inputData).val();
+        });
+
+        editInputs.attr('disabled', true);
+        btnSave.hide();
+        btnCancel.hide();
+    })
+
+    btnCancel.on("click", () => {
+
+        $.each(data, (i, inputData) => {
+            $(editInputs[i]).val(inputData)
+            console.log($(editInputs[i]).val(inputData))
+        })
+
+        console.log(editInputs[1])
+
+        editInputs.attr('disabled', true);
+        btnSave.hide();
+        btnCancel.hide();
+    })
+
+    function maskInputs() {
+
+        $("#abbreviated-name").css("text-transform", "uppercase");
+        $("#ogrn-company").inputmask('9999999999999');
+        $("#inn-company").inputmask('999999999999');
+        $("#cpp-company").inputmask('999999999');
+        $("#payment-account").mask('99999 999 9 9999 9999999');
+        $("#bik-company").inputmask('049999999');
+    }
+    
+    maskInputs();
 }
