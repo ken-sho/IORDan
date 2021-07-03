@@ -1197,10 +1197,26 @@ div {
     float: left;
 }
 
+#file_search_content{
+    margin: 0 auto;
+    width: 392px;
+    margin-top: 12px;
+}
+
+
+
 #main_search_icon {
     float: left;
     height: 38px;
     background: var(--fourth-color);
+    border-bottom-left-radius: 5px;
+    border-top-left-radius: 5px;
+    padding-left: 12px;
+}
+#file_search_icon {
+    float: left;
+    height: 38px;
+    background: white;
     border-bottom-left-radius: 5px;
     border-top-left-radius: 5px;
     padding-left: 12px;
@@ -1212,7 +1228,13 @@ div {
     cursor: default;
 }
 
-#main_search_input_content {
+.file-search-icon {
+    color: black;
+    padding-top: 8px;
+    cursor: default;
+}
+
+#main_search_input_content, #file_search_input_content {
     width: calc(100% - 36px);
     height: 38px;
     float: left;
@@ -1227,6 +1249,20 @@ div {
     outline: none;
     border: 0;
     color: white;
+    font-size: 16px;
+    padding: 0;
+    padding-left: 5px;
+}
+
+#file_search_input {
+    height: 100%;
+    width: 100%;
+    background: white;
+    border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
+    outline: none;
+    border: 0;
+    color: black;
     font-size: 16px;
     padding: 0;
     padding-left: 5px;
@@ -2051,11 +2087,16 @@ div {
     margin: auto;
 }
 
-#container-div{
+#container-log_data, #container-file_ls{
     overflow-y: auto;
     height: 100%;
     width: 100%;
+}
 
+.search-block{
+    width: 100%;
+    height: 50px;
+    text-align: center;
 }
 
 #profile_log_data{
@@ -3219,7 +3260,7 @@ textarea {
     z-index: 1;
 }
 
-#main_search_menu {
+#main_search_menu, #file_search_menu {
     max-height: 250px;
     width: 392px;
     position: absolute;

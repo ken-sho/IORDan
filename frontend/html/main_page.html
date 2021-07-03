@@ -102,7 +102,6 @@
                 <div id="popup_object_content">
                         <div id="object_list_settings">
                             <div id="object_list_settings_left">
-                                <span class="object-tree-btn" onclick="switchToggle('object_list_toggle')"><i id="object_list_toggle" class="material-icons object-search-icon" state="off">radio_button_unchecked</i>Режим печати</span>
                             </div>
                             <div id="object_list_settings_right">
                                 <i class="material-icons object-search-icon" title="Закрыть" onclick="closeObjectList()">
@@ -138,6 +137,7 @@
                         <div id="object_list_settings_tabs_content" class="popup-tabs-content">
                             <div id="object_list_print" class="tab-content active">
                                 <div>
+                                    <span class="object-tree-btn" onclick="switchToggle('object_list_toggle')"><i id="object_list_toggle" class="material-icons object-search-icon" state="off">radio_button_unchecked</i>Включить режим печати</span>
                                     <div id="print_mode_object_num" title="Выбрано адресов"></div>
                                     <button class="button-secondary" id="print_mode_select_all" title="Нажмите, чтобы выбрать все">Выбрать все</button>
                                     <button class="button-primary"  id="objects_list_reports" data-jq-dropdown="#jq-dropdown-objects-list"
@@ -850,6 +850,8 @@
             <div class="tabs" id="profile_tabs">                
                 <button class="tab-button active" onclick="openTab('profile_tabs', this, 'profile_settings')">Настройки</button>
                 <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_log_data')">Лог</button>
+                <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_file_ls')">Загруженно</button>
+                <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_file_upload')">Список файлов(Выгрузки)</button>
             </div>   
 
             <div id="profile_tabs_content">
@@ -861,7 +863,7 @@
                         <label for="to">До</label>
                         <input type="text" id="to" name="to">
                     </div>
-                    <div id="container-div">
+                    <div id="container-log_data">
                         
                     </div>
                     <div id="log_pagination">
@@ -885,6 +887,28 @@
                         </div>
                     </div>
                 </div>
+                <div  class="tab-content-prof" id="profile_file_ls">
+                    <div id="datapicker-in-log">
+                        <label for="from">Выбрать диапозон дат С</label>
+                        <input type="text" id="from" name="from">
+                        <label for="to">До</label>
+                        <input type="text" id="to" name="to">
+                    </div>
+                    <div id="container-file_ls">
+                        <div id="file_search_content">
+                            <div id="file_search_icon">
+                                <i class="file-search-icon material-icons">search</i>
+                            </div>
+                            <div id="file_search_input_content">
+                                <input id="file_search_input" type="text" onkeyup="mainSearchKeyup('file_search_input', 'file_search_menu')">
+                            </div>
+                            <div id="file_search_menu">
+                                <ul class="obj-search-ul"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div  class="tab-content-prof" id="profile_file_upload">Список файлов(Выгрузки)</div>
             </div>
             
             <div id="profile_chat_area">

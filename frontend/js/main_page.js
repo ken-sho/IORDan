@@ -2256,6 +2256,75 @@ function refreshObjectData(callback) {
     });
 }
 
+function getReportNew(reportId, repName, repNum, repType, interfaceData, popupContent) {
+    popupContent.empty();
+
+    const reportData = {number: repNum, type : repType, accid: CURRENT_OBJECT_DATA.accid};
+    
+    const div = $('<div>', {class: 'company-document-div'});
+    for (const elem of interfaceData) {
+        
+        console.log(elem)
+        if (elem.type == 'input') {
+            const input = $('<input>', {class: elem.parameter_name, parameter_name: elem.parameter_name, date_type: elem.date_type});
+            if (elem.date_type == 'full') {
+                input.attr('type', elem.input_type);
+            }
+            else if (elem.date_type == 'short') {
+                input.attr('type', 'text');
+                input.datepicker({
+                    dateFormat: "mm.yy",
+                    changeMonth: true,
+                    changeYear: true,
+                    showButtonPanel: true,
+                    yearRange: '2005:2021',
+                    beforeShow: function(input, inst) {
+                        $('#ui-datepicker-div').addClass('input-datepicker');
+                    },
+
+                    onClose: function (dateText, inst) {
+                        $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+                    }
+                });
+            }
+            input.appendTo(div);
+            input.before($('<span>', {text: elem.interface_name}));
+        }
+        ;
+    }
+    div.appendTo(popupContent)
+
+    $('<div>', {class: 'form-submit-btn'}).append(
+        $('<button>', {class: 'button-primary', text: 'Выполнить'}).on('click', function() {
+            const ownershipPeriodsData = {
+                dateb: RemakeDateFormatFromInput($(".dateb").val()),
+                datee: RemakeDateFormatFromInput($(".datee").val())
+            };
+  
+            const data = { 
+                operation: 'get_report', 
+                report_data: reportData, 
+                ownership_periods: ownershipPeriodsData,  
+                type : repType
+            };
+
+            if (!isEmpty(ownershipPeriodsData)) {
+                const callback = (data) => {
+                    initializeReportNewWindow(JSON.parse(data).html, repName, reportId);
+                }
+                console.log("это оно")
+                getReportContent(data, callback);
+            }
+            else {
+                showPopupNotification('alert', 'Выберите хотя бы один период!')
+            }
+
+        })
+    ).appendTo(popupContent);
+
+    
+}
+
 function getPackage(repName, repNum, repType) {
     console.log(repName, repNum, repType)
     const reportId = `${repType}_${repNum}`;
@@ -2327,6 +2396,7 @@ function getPackage(repName, repNum, repType) {
                                 ownershipPeriodsData.push({ name: period.name, start_date: RemakeDateFormatFromInput(period.start_date.val()), end_date: RemakeDateFormatFromInput(period.end_date.val()) });
                             }
                         }
+
                         const isCheked = [];
                         $('input[name="action_radio"]').each((index, elem) => {
                             if($(elem).prop('checked') == true){
@@ -2334,7 +2404,13 @@ function getPackage(repName, repNum, repType) {
                             }                            
                         });
 
-                        const data = { operation: 'get_report', report_data: reportData, ownership_periods: ownershipPeriodsData, checkbox: isCheked,  type : repType};
+                        const data = { 
+                            operation: 'get_report', 
+                            report_data: reportData, 
+                            ownership_periods: ownershipPeriodsData, 
+                            checkbox: isCheked,  
+                            type : repType
+                        };
                         console.log(data)
                         if (!isEmpty(ownershipPeriodsData)) {
                             const callback = (data) => {
@@ -2469,10 +2545,32 @@ function clickDropdownMenu() {
                        
                         const content = JSON.parse(data);
                         console.log(typeof content);
-                        if(!Array.isArray(content)){
-                            initializeReportNewWindow(content.html, repName, reportId, personName);     
-                        } else if (Array.isArray(content)){
+                        if(content.html){
+                            initializeReportNewWindow(content.html, repName, reportId, personName);
+                            console.log('объект')     
+                        } else {
                             console.log("форма")
+                            console.log(content);
+
+                            const reportId = `${repType}_${repNum}`;
+                            setPrintNotation(reportId);
+                        
+                            const windowId = `popup_ownership_periods_${reportId}`;
+                        
+                            if (!$('div').is(`#${windowId}`)) {
+                                const popup = createPopupLayout(repName, windowId);
+                                popup.css({'width': '70%'});
+                                popup.appendTo('#popup_background');
+                            }
+                        
+                            const popupContent = $(`#${windowId}`).find('.popup-content');
+                            popupContent.empty();
+                            const loaderDiv = $('<div>', {style: 'height: 150px'});
+                            popupContent.append(loaderDiv);
+                            createContentLoader(loaderDiv);
+                            openPopupWindow(windowId);
+
+                            getReportNew(reportId, repName, repNum, repType, content.interface, popupContent);
                         }
                        
                     }
@@ -3255,6 +3353,10 @@ function openTab(tabsId, elem, tabId) {
 
     if(tabId == 'control_business_card'){
         getBusinessCard();
+    }
+
+    if(tabId == 'profile_file_ls'){
+        fileList();
     }
 }
 
@@ -5202,6 +5304,64 @@ function InputListOfOptions(input, optionsList) {
 }
 
 function mainSearchKeyup(inputId, menuId) {
+    let input = $(`#${inputId}`);
+    let valueLength = input.val().length;
+    let parentDiv = $(`#${menuId} ul`);
+
+    if (valueLength >= 3) {
+        parentDiv.empty();
+        let searchValue = input.val();
+        let currentCompanyId = getCookie('companyId');
+        encodeURIstring = encodeURI(`/base_func?val_param=fast_find&val_param1=${searchValue}&val_param2=${currentCompanyId}`);
+        $.post(encodeURIstring, function (data) {
+            if (data !== '') {
+                let searchListArray = JSON.parse(data);
+                console.log(searchListArray)
+                for (const elem of searchListArray) {
+                    const dataArray = elem.split('&');
+                    const name = dataArray[0];
+                    const accid = dataArray[1];
+                    const adress = dataArray[2];
+                    const ls = dataArray[3];
+                    $('<li>', {text: `${ls} ${name}`, accid: accid, adress: adress}).appendTo(parentDiv);
+                }
+
+                $(`#${menuId} ul li`).each(function() {
+                    $(this).on('click', function() {
+                        $(".header-toggle, .header-title").css("display","inline-flex");
+                        $("#obj_content .header-manipulation-agr").css("display","block");
+
+                        let adress = $(this).attr('adress');
+                        let accid = $(this).attr('accid');
+                        input.val('');
+                        openHomePage();
+
+                        CURRENT_OBJECT_DATA.accid = accid;
+                        CURRENT_OBJECT_DATA.adress = adress;
+                        getObjectData();
+                        $('#obj_adress').text(adress);
+                        if ($('#obj_info .header-manipulation').is(':hidden')) {
+                            $('#obj_info .header-manipulation').show();
+                        }
+
+                        $(`#${menuId}`).hide();
+                    });
+                })
+
+                $(`#${menuId}`).show();
+            }
+            else {
+                $(`#${menuId}`).hide();
+            }
+        });
+    }
+    else {
+        parentDiv.empty();
+        $(`#${menuId}`).hide();
+    }
+}
+
+function fileSearchKeyup(inputId, menuId) {
     let input = $(`#${inputId}`);
     let valueLength = input.val().length;
     let parentDiv = $(`#${menuId} ul`);
@@ -7582,6 +7742,7 @@ function initializeCompanyDocumentPopupWindow(documentName, interfaceData, funcN
     const parentDiv = $('<div>', {class: 'content-center'});
 
     for (const line in interfaceData) {
+        console.log(interfaceData);
         const div = $('<div>', {class: 'company-document-div'});
         for (const elem of interfaceData[line]) {
             console.log(elem)
@@ -7891,7 +8052,7 @@ function initializeLogData() {
 
     $("ui-datepicker-calendar").css("display","block");
 
-    const parentTablediv = $("#container-div")
+    const parentTablediv = $("#container-log_data")
     const table = $('<table>', {class:"main-table"}).appendTo(parentTablediv);
     const thead = $('<thead>').appendTo(table);
     table.find('tbody').empty();
@@ -8036,7 +8197,6 @@ function getBusinessCard() {
     })
 
     function maskInputs() {
-
         $("#abbreviated-name").css("text-transform", "uppercase");
         $("#ogrn-company").inputmask('9999999999999');
         $("#inn-company").inputmask('999999999999');
@@ -8046,4 +8206,32 @@ function getBusinessCard() {
     }
     
     maskInputs();
+}
+
+function fileList(){
+
+    const parentTablediv = $("#container-file_ls");
+    const table = $('<table>', {class:"main-table"}).prependTo(parentTablediv);
+    const thead = $('<thead>').appendTo(table);
+    table.find('tbody').empty();
+
+    $('<tr>').append(
+        $('<th>', {text: '№ п/п'}),
+        $('<th>', {text: 'Наименование'}),
+        $('<th>', {text: 'Дата'}),
+        $('<th>', {text: 'Действия'})
+    ).appendTo(thead);
+
+    const tbody = $('<tbody>', {style: 'overflow-y: auto'}).appendTo(table);
+    
+    function searchFileAddress() {
+        const searchFileBlock = $("<div>", {class: "search-block"});
+        searchFileBlock.appendTo(parentTablediv);
+
+        // const input
+
+    }
+    
+    
+    searchFileAddress();
 }
