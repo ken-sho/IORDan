@@ -1844,6 +1844,7 @@ function initializeObjectFiles() {
                                     responseType: 'blob'
                                 },
                                 success: (data) => {
+                                    console.log(data)
                                     var a = document.createElement('a');
                                     var url = window.URL.createObjectURL(data);
                                     a.href = url;
@@ -3356,6 +3357,7 @@ function openTab(tabsId, elem, tabId) {
     }
 
     if(tabId == 'profile_file_ls'){
+        $(`#${tabId}`).css('height', 'calc(100% - 61px'); 
         fileList();
     }
 }
@@ -8211,27 +8213,100 @@ function getBusinessCard() {
 function fileList(){
 
     const parentTablediv = $("#container-file_ls");
-    const table = $('<table>', {class:"main-table"}).prependTo(parentTablediv);
+    parentTablediv.find(".main-table").remove();
+    const table = $('<table>', {class:"main-table"}).appendTo(parentTablediv);
     const thead = $('<thead>').appendTo(table);
-    table.find('tbody').empty();
 
     $('<tr>').append(
         $('<th>', {text: '№ п/п'}),
-        $('<th>', {text: 'Наименование'}),
+        $('<th>', {text: 'Адрес'}),
         $('<th>', {text: 'Дата'}),
-        $('<th>', {text: 'Действия'})
+        $('<th>', {text: 'Название'}),
+        $("<th>", {text: 'Действия'})
     ).appendTo(thead);
+
+    $.ajax({
+        url: '/base_func?fnk_name=pfile_lst',
+        type: 'POST',
+        contentType: 'application/json',
+        success: function(data) {
+            console.log(JSON.parse(data).file_lst)
+            const filesList = JSON.parse(data).file_lst;
+            let i = 0;
+
+            for(const fileItem of filesList){
+                i++;
+
+                console.log(fileItem.path)
+                const tr = $("<tr>").append(
+                    $("<td>", {text: i}),
+                    $("<td>", {text: fileItem.adr}),
+                    $("<td>", {text: fileItem.date}),
+                    $("<td>", {text: fileItem.fname}),
+                    $("<td>").append(
+                        $("<i>", {class:"material-icons", title:"Скачать файл", text:'file_upload'}).on("click", () => {
+                            $.ajax({
+                                type: 'GET',
+                                url: fileItem.path,
+                                xhrFields: {
+                                    responseType: 'blob'
+                                },
+                                success: (data) => {
+                                    console.log(data)
+                                    var a = document.createElement('a');
+                                    var url = window.URL.createObjectURL(data);
+                                    a.href = url;
+                                    console.log(data);
+                                    a.download = fileItem.fname;
+                                    document.body.append(a);
+                                    a.click();
+                                    a.remove();
+                                    window.URL.revokeObjectURL(url);
+                                }
+                            });
+                        })
+                    )
+                );
+
+                console.log(fileItem)
+
+
+                tr.appendTo(tbody);
+            }
+        }
+    });
+
+    $("#btn-rar").on("click", () => {
+        $.ajax({
+            type: "POST",
+            url: "/base_func?fnk_name=pfile_arh_cre",
+            success: function (data) {
+                console.log(data);
+                const fileName = data.split("/")[3];
+                console.log(fileName);
+
+                $.ajax({
+                    type: 'GET',
+                    url: data,
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: (data2) => {
+                        var a = document.createElement('a');
+                        var url = window.URL.createObjectURL(data2);
+                        a.href = url;
+                        console.log(data2);
+                        a.download = fileName;
+                        document.body.append(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(url);
+                    }
+                });
+            }
+        });
+    });
 
     const tbody = $('<tbody>', {style: 'overflow-y: auto'}).appendTo(table);
     
-    function searchFileAddress() {
-        const searchFileBlock = $("<div>", {class: "search-block"});
-        searchFileBlock.appendTo(parentTablediv);
-
-        // const input
-
-    }
-    
-    
-    searchFileAddress();
 }

@@ -114,6 +114,9 @@ h5 {
     cursor: pointer;
     font-size: 24px;
 }
+#btn-rar{
+    margin: 0 auto;
+}
 
 .header-toggle{
     display: none;
@@ -1200,10 +1203,12 @@ div {
 #file_search_content{
     margin: 0 auto;
     width: 392px;
-    margin-top: 12px;
+    margin-bottom: 12px;
 }
 
-
+#profile_file_ls button{
+    margin-left: 10px;
+}
 
 #main_search_icon {
     float: left;
@@ -1238,6 +1243,7 @@ div {
     width: calc(100% - 36px);
     height: 38px;
     float: left;
+    margin-bottom: 12px;
 }
 
 #main_search_input {
@@ -2060,7 +2066,7 @@ div {
     margin-right: 5px
 }
 
-#datapicker-in-log{
+#datapicker-in-log, #datapicker-in-file{
     display: inline-flex;
     background-color: #D9E0E3;
     padding: 10px;
@@ -2072,7 +2078,7 @@ div {
     width: auto;
 }
 
-#datapicker-in-log label{
+#datapicker-in-log label, #datapicker-in-file label{
     padding: 5px;
 }
 
@@ -2089,7 +2095,7 @@ div {
 
 #container-log_data, #container-file_ls{
     overflow-y: auto;
-    height: 100%;
+    height: calc(100% - 40px);
     width: 100%;
 }
 

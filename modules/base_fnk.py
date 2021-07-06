@@ -12,6 +12,7 @@ import time
 import modules.db_conn as db_conn
 import modules.logg_web as logg_web
 import modules.tracert as tracert
+import modules.pfile_arh_cre as pfilearh
 
 
 #objects_tree_filters
@@ -49,6 +50,7 @@ import modules.tracert as tracert
 #log_views
 #get_egrp_rec
 #get_fssp_rec
+#pfile_lst
 
 def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10):
     conn = db_conn.db_connect('web_receivables')
@@ -273,13 +275,11 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Разбивка оплаты')
     elif fnk_name=='log_views':
-        q_sql = 'log.log_views' + str([asid,adate])
         cur.callproc('log.log_views',[asid,adate])
         for row in cur:
             res=(row[0])
     elif fnk_name=='get_egrp_rec':
         q_sql = 'main.get_egrp_rec' + str([asid,orgid,adate])
-        print(q_sql)
         cur.callproc('main.get_egrp_rec',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
@@ -287,12 +287,22 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         logg_web.add_log(asid,encoded,'Добавление собственников из ЕГРП')
     elif fnk_name=='get_fssp_rec':
         q_sql = 'main.get_fssp_rec' + str([asid,orgid,adate])
-        print(q_sql)
         cur.callproc('main.get_fssp_rec',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Запрос истории ФССП')
+    elif fnk_name=='pfile_lst':
+        q_sql = 'loader.get_pfile_lst' + str([asid,adate])
+        cur.callproc('loader.get_pfile_lst',[asid,adate])
+        for row in cur:
+            res=(row[0])
+    elif fnk_name=='pfile_arh_cre':
+        cur.callproc('main.webrqst',[asid,'uname'])
+        for row in cur:
+            res=(row[0])
+        pfilearh.run(asid,res)
+        res=("/personal/" + res + "/pfile.zip")
 
     conn.commit()
     cur.close()

@@ -507,6 +507,7 @@ application = tornado.web.Application([
     (r"/images/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/frontend/images'}),
     (r"/download/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/download'}),
     (r"/privat_file/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/privat_file'}),
+    (r"/personal/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/personal'}),
 ], **settings)
 
 if __name__ == "__main__":

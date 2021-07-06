@@ -19,7 +19,7 @@ import modules.login_db as login_db
 import modules.loadxls as loadxls
 import modules.unloadxls as unloadxls
 import modules.loadxml as loadxml
-
+import modules.tracert as tracert
 
 class chck_sid(tornado.web.RequestHandler):
     def post(self):
@@ -260,12 +260,14 @@ class ReportHandler(BaseHandler):
         conn = db_conn.db_connect('web_receivables')
         cur = conn.cursor()
         q_sql = 'report.proxy_srv' + str([asid,orgid,adate])
+        tracert.tprint('proxy_srv',q_sql)
         cur.callproc('report.proxy_srv',[asid,orgid,adate])
         for row in cur:
             res=(row[0])
             self.write(res)
         encoded = base64.b64encode(q_sql.encode()).decode()
         logg_web.add_log(asid,encoded,'Выполнение пакетного документа')
+
         conn.commit()
         cur.close()
         conn.close()
@@ -506,6 +508,7 @@ application = tornado.web.Application([
     (r"/images/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/frontend/images'}),
     (r"/download/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/download'}),
     (r"/privat_file/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/privat_file'}),
+    (r"/personal/(.*)", tornado.web.StaticFileHandler, {'path': '/opt/IORDan/personal'}),
 ], **settings, debug=True)
 
 if __name__ == "__main__":
