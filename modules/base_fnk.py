@@ -51,6 +51,7 @@ import modules.pfile_arh_cre as pfilearh
 #get_egrp_rec
 #get_fssp_rec
 #pfile_lst
+#personal_file
 
 def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param3,val_param4,val_param5,val_param6,val_param7,val_param8,val_param9,val_param10):
     conn = db_conn.db_connect('web_receivables')
@@ -303,7 +304,21 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
             res=(row[0])
         pfilearh.run(asid,res)
         res=("/personal/" + res + "/pfile.zip")
-
+    elif fnk_name=='unloading_constructor':
+        q_sql = 'loader.unloading_constructor_cre' + str([asid,orgid,adate])
+        cur.callproc('loader.unloading_constructor_cre',[asid,orgid,adate])
+        for row in cur:
+            res=(row[0])
+        encoded = base64.b64encode(q_sql.encode()).decode()
+        logg_web.add_log(asid,encoded,'Формирование выгрузки в конструкторе')
+    elif fnk_name=='personal_file':
+        cur.callproc('main.get_personalfile_lst',[asid,adate])
+        for row in cur:
+            res=(row[0])
+    elif fnk_name=='unloading_requests_lst':
+        cur.callproc('main.unloading_requests_lst',[asid,adate])
+        for row in cur:
+            res=(row[0])
     conn.commit()
     cur.close()
     conn.close()

@@ -968,6 +968,7 @@ function createCompanyDropdownMenu() {
         const li = $('<li>', {id: companyId, class: 'dropdown-menu-item'}).appendTo('#jq-dropdown-company-list .jq-dropdown-menu');
         li.on('click', function() {
             chooseCompany($(this), companyName, companyId);
+            console.log($(this), companyName, companyId);
             $('#jq-dropdown-company-list .dropdown-menu-item').removeClass('active');
             $(this).addClass('active');
         })
@@ -1131,7 +1132,7 @@ function openCloseObjectListSetting() {
     });
     const popup = $('#popup_object_list_settings');
     if (popup.attr('state') == 'close') {
-        $('#popup_object_list').animate({ width: '980px' }, 200, function() {
+        $('#popup_object_list').animate({ width: '1120px' }, 200, function() {
             popup.css({'display': 'inline-block'});
             $("#popup_object_content").css({'display': 'inline-block'});
             popup.attr('state', 'open');
@@ -3360,6 +3361,15 @@ function openTab(tabsId, elem, tabId) {
         $(`#${tabId}`).css('height', 'calc(100% - 61px'); 
         fileList();
     }
+
+    if(tabId == 'profile_file_upload'){
+        $(`#${tabId}`).css('height', '100%'); 
+        fileUpload();
+    }
+
+    if(tabId == 'object_list_upload_gen'){
+        generatorUpload();
+    }
 }
 
 
@@ -3538,7 +3548,7 @@ function switchToggle(toggleId) {
 
     const popup = $('#popup_object_list_settings');
     if (popup.attr('state') == 'close') {
-        $('#popup_object_list').animate({ width: '980px' }, 200, function() {
+        $('#popup_object_list').animate({ width: '1120px' }, 200, function() {
             popup.css({'display': 'inline-block'});
             $("#popup_object_content").css({'display': 'inline-block'});
             popup.attr('state', 'open');
@@ -8219,6 +8229,7 @@ function fileList(){
 
     $('<tr>').append(
         $('<th>', {text: '№ п/п'}),
+        $('<th>', {text: 'Организация'}),
         $('<th>', {text: 'Адрес'}),
         $('<th>', {text: 'Дата'}),
         $('<th>', {text: 'Название'}),
@@ -8237,10 +8248,17 @@ function fileList(){
             for(const fileItem of filesList){
                 i++;
 
-                console.log(fileItem.path)
                 const tr = $("<tr>").append(
                     $("<td>", {text: i}),
-                    $("<td>", {text: fileItem.adr}),
+                    $("<td>", {text: fileItem.org_name}),
+                    $("<td>", {text: fileItem.adr, accid: fileItem.accid, class: "link-td"}).on("click", () => {
+                        CURRENT_OBJECT_DATA.accid = fileItem.accid;
+                        $('#obj_ls_info .header-ls').attr('did', fileItem.accid);
+                        getObjectData();
+                        openHomePage();
+                        chooseCompany($(`#${fileItem.id}`), fileItem.org_name, fileItem.companyId);
+                        
+                    }),
                     $("<td>", {text: fileItem.date}),
                     $("<td>", {text: fileItem.fname}),
                     $("<td>").append(
@@ -8267,8 +8285,6 @@ function fileList(){
                         })
                     )
                 );
-
-                console.log(fileItem)
 
 
                 tr.appendTo(tbody);
@@ -8309,4 +8325,199 @@ function fileList(){
 
     const tbody = $('<tbody>', {style: 'overflow-y: auto'}).appendTo(table);
     
+}
+
+function fileUpload(){
+
+    const parentTablediv = $("#container-file_upload");
+    parentTablediv.find(".main-table").remove();
+    const table = $('<table>', {class:"main-table"}).appendTo(parentTablediv);
+    const thead = $('<thead>').appendTo(table);
+
+    $('<tr>').append(
+        $('<th>', {text: '№ п/п'}),
+        $('<th>', {text: 'Дата'}),
+        $('<th>', {text: 'Название'}),
+        $("<th>", {text: 'Действия'})
+    ).appendTo(thead);
+
+    $.ajax({
+        url: '/base_func?fnk_name=personal_file',
+        type: 'POST',
+        contentType: 'application/json',
+        success: function(data) {
+            console.log(JSON.parse(data))
+
+            const filesList = JSON.parse(data).file_lst;
+            let i = 0;
+
+            for(const fileItem of filesList){
+                i++;
+                console.log(fileItem.path)
+                const tr = $("<tr>").append(
+                    $("<td>", {text: i}),
+                    $("<td>", {text: fileItem.date}),
+                    $("<td>", {text: fileItem.fname}),
+                    $("<td>").append(
+                        $("<i>", {class:"material-icons", title:"Скачать файл", text:'file_upload'}).on("click", () => {
+                            $.ajax({
+                                type: 'GET',
+                                url: fileItem.path,
+                                xhrFields: {
+                                    responseType: 'blob'
+                                },
+                                success: (data) => {
+                                    console.log(data)
+                                    var a = document.createElement('a');
+                                    var url = window.URL.createObjectURL(data);
+                                    a.href = url;
+                                    console.log(data);
+                                    a.download = fileItem.fname;
+                                    document.body.append(a);
+                                    a.click();
+                                    a.remove();
+                                    window.URL.revokeObjectURL(url);
+                                }
+                            });
+                        })
+                    )
+                );
+                tr.appendTo(tbody);
+            }
+        }
+    });
+
+    $("#btn-rar_upload").on("click", () => {
+        $.ajax({
+            type: "POST",
+            url: "/base_func?fnk_name=pfile_arh_cre",
+            success: function (data) {
+                console.log(data);
+                const fileName = data.split("/")[3];
+                console.log(fileName);
+
+                $.ajax({
+                    type: 'GET',
+                    url: data,
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: (data2) => {
+                        var a = document.createElement('a');
+                        var url = window.URL.createObjectURL(data2);
+                        a.href = url;
+                        console.log(data2);
+                        a.download = fileName;
+                        document.body.append(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(url);
+                    }
+                });
+            }
+        });
+    });
+
+    const tbody = $('<tbody>', {style: 'overflow-y: auto'}).appendTo(table);
+    
+}
+
+function generatorUpload() {
+    console.log()
+    const data = USER_DATA["unloading constructor"];
+    const parentLeft = $("#data_upload-gen");
+    parentLeft.empty();
+    const parentRight = $("#constructor_upload-gen");
+    parentRight.empty();
+    
+    $.each(data, (index, select) => {
+        console.log(index, select)
+
+        const input = $('<input>', { type: 'checkbox', class: 'checkbox generator-btn' });
+        const span = $('<span>', { class: 'checkmark' });
+        const label = $('<label>', { class: 'checkbox-container', text: select.display_name, name: select.name, type: select.type, style: 'font-size: 16px' }).append(input, span);
+        const div = $('<div>', {class: 'checkbox-upload'}).append(label).appendTo(parentLeft);
+
+        input.on("change", (e) => {
+            const leftSelect = e.currentTarget;
+
+            if(leftSelect.checked == true){
+                const selectGen = $("<div>", {class: "select-gen", text: `${select.display_name}`, name: select.name}).appendTo(parentRight);
+                const tool = $("<div>").appendTo(selectGen);
+
+                const levelUp = $("<span>", {class: "material-icons", text: "expand_less"}).appendTo(tool);
+                levelUp.on("click", (e) => {
+                    const currentBtn = e.currentTarget.parentElement.parentElement;
+                    const nextBtn = e.currentTarget.parentElement.parentElement.previousSibling;
+                    nextBtn.className == "select-gen" ? currentBtn.after(nextBtn) : null
+                    console.dir(currentBtn.firstElementChild)
+                })
+
+                const levelDown = $("<span>", {class: "material-icons", text: "expand_more"}).appendTo(tool);
+                levelDown.on("click", (e) => {
+                    const currentBtn = e.currentTarget.parentElement.parentElement;
+                    const nextBtn = e.currentTarget.parentElement.parentElement.nextSibling;
+
+                    nextBtn != null && nextBtn.className == "select-gen" ? currentBtn.before(nextBtn) : null;               
+                })
+
+                const btnDel = $('<i>',  {class: 'material-icons', text: 'close'}).appendTo(tool);
+                btnDel.on("click", (e) => {
+                    const currentBtn = e.currentTarget.parentElement.parentElement;
+                    currentBtn.remove();
+                    $(".checkbox-upload").each((j, divInput) => {
+                        const selectLeft  = divInput.firstChild.firstElementChild;
+                        if(divInput.innerText == currentBtn.firstChild.data){
+                           $(divInput.firstChild.firstElementChild).prop("checked", false); 
+                        }
+                    })
+                })
+            } else {
+                $(".select-gen").each((i, selectGen) => {
+                    if(selectGen.firstChild.data == leftSelect.offsetParent.innerText){
+                        selectGen.remove();
+                    }
+                })
+            }
+        })
+    })
+    let dataFields = {};
+    let fields = [];
+    const btnSubmit = $("#upload-gen-submit");
+    btnSubmit.off("click");
+    btnSubmit.on("click", () => {
+        const fields = [];
+        $(".select-gen").each((i, selectGen) => {
+            fields[i] = $(selectGen).attr("name");
+        })
+        dataFields = {
+            fields: fields
+        }
+
+        console.log(dataFields);
+        console.log(JSON.stringify(dataFields));
+        console.log(dataFields)
+        if(dataFields){
+          $.ajax({
+            type: "POST",
+            url: "/base_func?fnk_name=unloading_constructor",
+            data: JSON.stringify(dataFields),
+            success: function (data) {
+                console.log(data)
+                showPopupNotification('notification', 'Документ добавлен в очередь на формирование');
+            }
+        });  
+        } else {
+            showPopupNotification('alert', 'Выберите хотя бы один файл!');
+        }
+        
+    });
+
+    const btnClear = $("#upload-gen-clear");
+    btnClear.on("click", () => {
+        dataFields = {};
+        fields = [];
+        $("#constructor_upload-gen").empty();
+        $(".generator-btn").prop('checked', false)
+    })
 }

@@ -132,6 +132,7 @@
                             <button class="tab-button active" onclick="openTab('object_list_settings_tabs', this,'object_list_print')">Режим печати</button>
                             <button class="tab-button " onclick="openTab('object_list_settings_tabs', this,'object_list_settings_tab')">Настройки</button>
                             <button class="tab-button" onclick="openTab('object_list_settings_tabs', this,'object_list_template')">Фильтры</button>
+                            <button class="tab-button" onclick="openTab('object_list_settings_tabs', this,'object_list_upload_gen')">Генератор выгрузок</button>
                             <div class="popup-close" onclick="closeObjectListSetting()"><i class="material-icons">close</i></div>
                         </div>
                         <div id="object_list_settings_tabs_content" class="popup-tabs-content">
@@ -172,6 +173,16 @@
                                         <button id="clear_template_btn" class="button-primary" style="margin-top: 10px" onclick="clearTemplateObjectList()" disabled>Сбросить</button>
                                     </div>
                                 </form> -->
+                            </div>
+                            <div id="object_list_upload_gen" class="tab-content">
+                                <div class="contaner_upload">
+                                    <div id="data_upload-gen"></div>
+                                    <div id="constructor_upload-gen"></div> 
+                                </div>    
+                                <div class="form-upload-gen">
+                                    <button type="button" id="upload-gen-submit" class="button-primary">Создать документ</button>
+                                    <button type="button" id="upload-gen-clear" class="button-secondary">Очистить</button>
+                                </div>
                             </div>
                         </div>
                     </div>                   
@@ -850,8 +861,15 @@
             <div class="tabs" id="profile_tabs">                
                 <button class="tab-button active" onclick="openTab('profile_tabs', this, 'profile_settings')">Настройки</button>
                 <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_log_data')">Лог</button>
-                <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_file_ls')">Загруженно</button>
-                <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_file_upload')">Список файлов(Выгрузки)</button>
+                <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_file_ls')">Входящие файлы</button>
+                <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_file_upload')">
+                    Очередь выгрузок
+                    <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-upload_files" title="Справка" onclick="">help_outline</i>
+                </button>
+                <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_file_upload')">
+                    Исходящие файлы 
+                    <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-upload_files" title="Справка" onclick="">help_outline</i>
+                </button>             
             </div>   
 
             <div id="profile_tabs_content">
@@ -888,15 +906,8 @@
                     </div>
                 </div>
                 <div  class="tab-content-prof" id="profile_file_ls">
-                    <div id="datapicker-in-file">
-                        <label for="from-file">Выбрать диапозон дат С</label>
-                        <input type="text" id="from-file" name="from-file">
-                        <label for="to-file">До</label>
-                        <input type="text" id="to-file" name="to-file">
-                        <button type="text" class="button-primary">Применить</button>
-                    </div>
                     <div id="container-file_ls">
-                        <div id="file_search_content">
+                        <!-- <div id="file_search_content">
                             <div id="file_search_icon">
                                 <i class="file-search-icon material-icons">search</i>
                             </div>
@@ -906,11 +917,14 @@
                             <div id="file_search_menu">
                                 <ul class="obj-search-ul"></ul>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                     <button type="text" id="btn-rar" class="button-primary">Скачать одним архивом</button>
                 </div>
-                <div  class="tab-content-prof" id="profile_file_upload">Список файлов(Выгрузки)</div>
+                    <div  class="tab-content-prof" id="profile_file_upload">
+                        <div id="container-file_upload">
+                        </div>
+                    </div>
             </div>
             
             <div id="profile_chat_area">
@@ -1427,6 +1441,16 @@
                 <ol>
                     <li>Нажмите на кнопку <i class="material-icons" >folder_open</i> чтобы выбрать файл</li>
                     <li>Нажмите на кнопку <i class="material-icons" >file_upload</i> чтобы загрузить файл</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div id="jq-dropdown-help-upload_files" class="jq-dropdown jq-dropdown-tip jq-dropdown-anchor-right">
+        <div class="jq-dropdown-panel">
+            <div class="help-text" style="padding-right: 22px;">
+                <ol>
+                    По истечении 6 месяцев загруженные файлы будут автоматически удаленны
                 </ol>
             </div>
         </div>

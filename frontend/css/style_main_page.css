@@ -114,7 +114,7 @@ h5 {
     cursor: pointer;
     font-size: 24px;
 }
-#btn-rar{
+#btn-rar, #btn-rar_upload{
     margin: 0 auto;
 }
 
@@ -1200,13 +1200,17 @@ div {
     float: left;
 }
 
-#file_search_content{
+#file_search_content, #file_search_content_upload{
     margin: 0 auto;
     width: 392px;
     margin-bottom: 12px;
 }
 
-#profile_file_ls button{
+#profile_file_ls, #profile_file_upload{
+    display: none;
+}
+
+#profile_file_ls #btn-submit{
     margin-left: 10px;
 }
 
@@ -1218,7 +1222,7 @@ div {
     border-top-left-radius: 5px;
     padding-left: 12px;
 }
-#file_search_icon {
+#file_search_icon,#file_search_icon_upload {
     float: left;
     height: 38px;
     background: white;
@@ -1239,7 +1243,7 @@ div {
     cursor: default;
 }
 
-#main_search_input_content, #file_search_input_content {
+#main_search_input_content, #file_search_input_content, #file_search_input_content_upload {
     width: calc(100% - 36px);
     height: 38px;
     float: left;
@@ -1260,7 +1264,7 @@ div {
     padding-left: 5px;
 }
 
-#file_search_input {
+#file_search_input, #file_search_input_upload {
     height: 100%;
     width: 100%;
     background: white;
@@ -1511,9 +1515,43 @@ div {
     height: 30px;
 } */
 
+.form-upload-gen{
+    text-align: center;
+    margin-top: 11px;
+}
+
 #export_button {
     background-color: #1d6f42;
     color: white;
+}
+
+#data_upload-gen{
+    display: inline-block;
+    width: 49%;
+    height: 100%;
+}
+
+#constructor_upload-gen{
+    display: inline-block;
+    width: 49%;
+    height: 100%;
+    vertical-align: top;
+}
+
+.select-gen{
+    display: flex;
+    border: 1px solid #D9E0E3;
+    border-radius: 5px;
+    padding: 3px;
+    padding-left: 10px;
+    align-items: center;
+    margin-bottom: 4px;
+    justify-content: space-between;
+}
+
+.upload-gen_number{
+    position: absolute;
+    right: 317px;
 }
 
 #popup_object_list {
@@ -1530,12 +1568,11 @@ div {
     flex-direction: column;
 }
 
+
 #popup_object_list_settings {
     vertical-align: top;
-    width: 500px;
+    width: 643px;
     height: 100%;
-    /* position: absolute;
-    left: 672px; */
     top: 0;
     background-color: white;
     display: none;
@@ -1945,6 +1982,8 @@ div {
 }
 
 .tab-button {
+    display: flex;
+    align-items: center;
     height: 100%;
     background-color: white;
     float: left;
@@ -2005,7 +2044,11 @@ div {
     box-sizing: border-box;
     width: 100%;
     height: 100%;
-    max-height: calc(100vh - 260px);
+}
+
+.contaner_upload{
+    overflow: auto;
+    height: 700px;
 }
 
 .tab-content {
@@ -2093,9 +2136,15 @@ div {
     margin: auto;
 }
 
-#container-log_data, #container-file_ls{
+#container-log_data, #container-file_ls, #container-file_upload{
     overflow-y: auto;
     height: calc(100% - 40px);
+    width: 100%;
+}
+
+#container-file_upload{
+    overflow-y: auto;
+    height: 100%;
     width: 100%;
 }
 
@@ -2143,6 +2192,11 @@ div {
     text-align: center;
 }
 
+.link-td{
+    cursor: pointer;
+    color: var(--first-color);
+    text-decoration: underline;
+}
 
 .profile-info-row {
     display: flex;
@@ -3266,7 +3320,7 @@ textarea {
     z-index: 1;
 }
 
-#main_search_menu, #file_search_menu {
+#main_search_menu, #file_search_menu, #file_search_menu_upload {
     max-height: 250px;
     width: 392px;
     position: absolute;
@@ -3564,6 +3618,10 @@ textarea {
 
 .checkbox-container.active {
     color: #263238;
+}
+
+.checkbox-upload{
+    margin-bottom: 23px;
 }
   
 /* Hide the browser's default checkbox */

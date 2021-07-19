@@ -473,11 +473,12 @@ class ReportsrvHandler(BaseHandler):
 
 class ConverHandler(BaseHandler):
     def post(self):
+        asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
         html_body = ((self.request.body).decode('UTF8'))
         ftype = self.get_argument('type')
         file_name = self.get_argument('file_name')
         if ftype=='xls':
-            res=unloadxls.UnloadFile(html_body,file_name)
+            res=unloadxls.UnloadFile(html_body,file_name,asid)
         self.write(res)
 
 settings = {
