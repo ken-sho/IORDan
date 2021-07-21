@@ -2136,7 +2136,7 @@ div {
     margin: auto;
 }
 
-#container-log_data, #container-file_ls, #container-file_upload{
+#container-log_data, #container-file_ls, #container-file_upload, #container-unloading_queue{
     overflow-y: auto;
     height: calc(100% - 40px);
     width: 100%;

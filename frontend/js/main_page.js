@@ -3224,6 +3224,24 @@ function createDropdownMenuForFile(menuNum, liArr, fileId, orgId) {
     }
 }
 
+function createDropdownMenuForQueue(menuNum, fileName) {
+    $(`#jq-dropdown-queue${menuNum}`).remove();
+    $('<div>', {id: `jq-dropdown-queue${menuNum}`, class: 'jq-dropdown jq-dropdown-tip jq-dropdown-anchor-right'}).append(
+        $('<ul>', {class: 'jq-dropdown-menu'})
+    ).appendTo($('body'));
+    let regex = /\[([^\]]+)/g;
+    let arr;
+    $('<li>', {class: 'dropdown-menu-item', id: `dropdown-menu-item${menuNum}` }).appendTo($(`#jq-dropdown-queue${menuNum} ul`));
+    fileName = fileName.replace(/[\[\]']+/g, '');
+    arr = fileName.split(",")
+    console.log(arr)
+    arr.map((string) => {
+        return $("<div>", {text: string}).appendTo(`#dropdown-menu-item${menuNum}`).css("padding","3px 10px");
+    });
+    console.log(arr)
+    
+}
+
 function createDropdownMenuReportTree(index, reportsArr) {
     $('<div>', {id: `jq-dropdown-${index}`, class: 'jq-dropdown dropdown-report jq-dropdown-tip'}).append(
         $('<ul>', {class: 'jq-dropdown-menu'})
@@ -3370,6 +3388,11 @@ function openTab(tabsId, elem, tabId) {
     if(tabId == 'object_list_upload_gen'){
         generatorUpload();
     }
+    if(tabId == 'profile_unloading_queue'){
+        $(`#${tabId}`).css('height', 'calc(100% - 61px'); 
+        fileQueue();
+    }
+
 }
 
 
@@ -8327,6 +8350,78 @@ function fileList(){
     
 }
 
+function fileQueue(){
+
+    const parentTablediv = $("#container-unloading_queue");
+    parentTablediv.find(".main-table").remove();
+    const table = $('<table>', {class:"main-table"}).appendTo(parentTablediv);
+    const thead = $('<thead>').appendTo(table);
+
+    $('<tr>').append(
+        $('<th>', {text: 'Номер запроса'}),
+        $('<th>', {text: 'Организация'}),
+        $('<th>', {text: 'Дата запроса'}),
+        $('<th>', {text: 'До выполнения'}),
+        $("<th>", {text: 'Действия'})
+    ).appendTo(thead);
+
+    $.ajax({
+        url: '/base_func?fnk_name=unloading_requests_lst',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({}),
+        success: function(data) {
+            console.log(JSON.parse(data))
+            const filesList = JSON.parse(data).requests_lst;
+            let i = 0; 
+            
+            function createTable(array) {
+                for(const fileItem of array){
+                    i++;
+
+                    const tr = $("<tr>").append(
+                        $("<td>", {text: i}),
+                        $("<td>", {text: fileItem.org_name}),
+                        $("<td>", {text: fileItem.date}),
+                        $("<td>", {text: fileItem.left}),
+                        $("<td>").append(
+                            $("<i>", {class:"material-icons", title:"Удалить задание", text:'delete'}).on("click", () => {
+                                $.ajax({
+                                    url: '/base_func?fnk_name=unloading_requests_lst',
+                                    type: 'POST',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify({param: "del", rn: fileItem.rn}),
+                                    success: function(data) {
+                                        tbody.empty();
+                                        console.log(JSON.parse(data).requests_lst);
+                                        i = 0;
+                                        createTable(JSON.parse(data).requests_lst);
+                                    }
+                                });
+                                showPopupNotification('notification', 'Задание успешно удалено!')
+                            }),
+                            $("<i>", {  class: "material-icons", title: "Справка", text: "help_outline", id: `help-upload_queue_${i}`}).on("click", () => {
+                                $("<div>", {class: "dropdown-upload", text: fileItem.note}).appendTo(`help-upload_queue_${i}`)
+                                console.log("help")
+                                $("<div>", {class: "dropdown-upload", text: "help help help"}).appendTo(`help-upload_queue_${i}`)
+                            }).attr("data-jq-dropdown",`#jq-dropdown-queue${i}`) 
+                        )
+                    );
+                    createDropdownMenuForQueue(i, fileItem.note)
+
+
+                    tr.appendTo(tbody);
+                }    
+            }
+            createTable(filesList);
+
+        }
+    });
+
+    const tbody = $('<tbody>', {style: 'overflow-y: auto'}).appendTo(table);
+    
+}
+
 function fileUpload(){
 
     const parentTablediv = $("#container-file_upload");
@@ -8387,37 +8482,6 @@ function fileUpload(){
         }
     });
 
-    $("#btn-rar_upload").on("click", () => {
-        $.ajax({
-            type: "POST",
-            url: "/base_func?fnk_name=pfile_arh_cre",
-            success: function (data) {
-                console.log(data);
-                const fileName = data.split("/")[3];
-                console.log(fileName);
-
-                $.ajax({
-                    type: 'GET',
-                    url: data,
-                    xhrFields: {
-                        responseType: 'blob'
-                    },
-                    success: (data2) => {
-                        var a = document.createElement('a');
-                        var url = window.URL.createObjectURL(data2);
-                        a.href = url;
-                        console.log(data2);
-                        a.download = fileName;
-                        document.body.append(a);
-                        a.click();
-                        a.remove();
-                        window.URL.revokeObjectURL(url);
-                    }
-                });
-            }
-        });
-    });
-
     const tbody = $('<tbody>', {style: 'overflow-y: auto'}).appendTo(table);
     
 }
@@ -8431,7 +8495,6 @@ function generatorUpload() {
     parentRight.empty();
     
     $.each(data, (index, select) => {
-        console.log(index, select)
 
         const input = $('<input>', { type: 'checkbox', class: 'checkbox generator-btn' });
         const span = $('<span>', { class: 'checkmark' });
@@ -8442,7 +8505,7 @@ function generatorUpload() {
             const leftSelect = e.currentTarget;
 
             if(leftSelect.checked == true){
-                const selectGen = $("<div>", {class: "select-gen", text: `${select.display_name}`, name: select.name}).appendTo(parentRight);
+                const selectGen = $("<div>", {class: "select-gen", text: `${select.display_name}`, name: select.name, fullname: select.display_name}).appendTo(parentRight);
                 const tool = $("<div>").appendTo(selectGen);
 
                 const levelUp = $("<span>", {class: "material-icons", text: "expand_less"}).appendTo(tool);
@@ -8450,7 +8513,6 @@ function generatorUpload() {
                     const currentBtn = e.currentTarget.parentElement.parentElement;
                     const nextBtn = e.currentTarget.parentElement.parentElement.previousSibling;
                     nextBtn.className == "select-gen" ? currentBtn.after(nextBtn) : null
-                    console.dir(currentBtn.firstElementChild)
                 })
 
                 const levelDown = $("<span>", {class: "material-icons", text: "expand_more"}).appendTo(tool);
@@ -8487,11 +8549,14 @@ function generatorUpload() {
     btnSubmit.off("click");
     btnSubmit.on("click", () => {
         const fields = [];
+        const header = [];
         $(".select-gen").each((i, selectGen) => {
             fields[i] = $(selectGen).attr("name");
+            header[i] = $(selectGen).attr("fullname");
         })
         dataFields = {
-            fields: fields
+            fields: fields,
+            header: header
         }
 
         console.log(dataFields);

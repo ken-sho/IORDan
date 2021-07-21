@@ -862,9 +862,9 @@
                 <button class="tab-button active" onclick="openTab('profile_tabs', this, 'profile_settings')">Настройки</button>
                 <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_log_data')">Лог</button>
                 <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_file_ls')">Входящие файлы</button>
-                <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_file_upload')">
+                <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_unloading_queue')">
                     Очередь выгрузок
-                    <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-upload_files" title="Справка" onclick="">help_outline</i>
+                    <i class="material-icons" data-jq-dropdown="#jq-dropdown-help-unloading_queue" title="Справка" onclick="">help_outline</i>
                 </button>
                 <button class="tab-button" onclick="openTab('profile_tabs', this, 'profile_file_upload')">
                     Исходящие файлы 
@@ -921,10 +921,13 @@
                     </div>
                     <button type="text" id="btn-rar" class="button-primary">Скачать одним архивом</button>
                 </div>
-                    <div  class="tab-content-prof" id="profile_file_upload">
-                        <div id="container-file_upload">
-                        </div>
+                <div  class="tab-content-prof" id="profile_unloading_queue">
+                    <div id="container-unloading_queue"></div>
+                </div>
+                <div  class="tab-content-prof" id="profile_file_upload">
+                    <div id="container-file_upload">
                     </div>
+                </div>
             </div>
             
             <div id="profile_chat_area">

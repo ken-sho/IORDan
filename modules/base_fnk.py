@@ -316,7 +316,9 @@ def fnk_lst (asid,orgid,fnk_name,adate,val_param,val_param1,val_param2,val_param
         for row in cur:
             res=(row[0])
     elif fnk_name=='unloading_requests_lst':
-        cur.callproc('main.unloading_requests_lst',[asid,adate])
+        q_sql = 'main.chgget_unloading_requests_lst' + str([asid,adate])
+        tracert.tprint('chgget_unloading_requests_lst',q_sql)
+        cur.callproc('main.chgget_unloading_requests_lst',[asid,adate])
         for row in cur:
             res=(row[0])
     conn.commit()
