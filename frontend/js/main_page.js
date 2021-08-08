@@ -2725,9 +2725,7 @@ function downloadAgreementsErgp(){
 
 function getInfoDebt() {
 
-    $("#request-info-debt").remove(
-
-    )
+    $("#request-info-debt").remove()
     const popupId = "popup_info_debt";
 
     const btnInfoDebt = $("<div>", {id: "request-info-debt", class:"icon-with-count"}).append(
@@ -2786,12 +2784,30 @@ function getInfoDebt() {
 function getObjectAgreementsData() {
     getPrintForm();
 
+    $("#judg").remove();
+
     let dataInfo = OBJECT_DATA.information;
 
     for(let object in dataInfo){
         for(let string in dataInfo[object]){
             if(string == "Кадастровый номер" && dataInfo[object][string] !== ""){
                 downloadAgreementsErgp();
+            }
+            if(string == "Дата подачи в суд" && dataInfo[object][string] !== ""){
+                const parent = $("<div>", {class: "icon-with-count", id: "judg"});
+                
+                parent.append(
+                    $("<i>", {class:"material-icons icon-green", title:"Заведено судебное дело", text: "local_library"}).on("click", () => {
+                        const divHelp = $("<div>", {class: "dropdown", text: `По данному адресу дата подачи в суд ${dataInfo[object][string]}`}).css({"width": "241px","left": "3px","top": "35px"}).appendTo(parent);  
+                        setTimeout(() => {
+                            setTimeout(() => {
+                                divHelp.remove(); 
+                             }, 600);  
+                        }, 4000)
+                        
+                    })
+                )
+                parent.appendTo("#obj_ls_info .header-manipulation");
             }
         }
     }
@@ -7718,14 +7734,44 @@ function changeRegistryLock(registryId) {
 
 function convertContentToExcel(content, fileName) {
     showPopupNotification('notification', 'Загрузка файла начнется автоматически!');
+    
     $.ajax({
         url: encodeURI(`/conver?type=xls&file_name=${fileName}`),
         type: 'POST',
         data: content,
         contentType: 'application/json',
         success: function(data) {
-            console.log(data);
-            window.location = data;
+            const exel = JSON.parse(data);
+            $.ajax({
+                type: 'GET',
+                url: exel.url,
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: (data) => {
+                    console.log(data)
+                    var a = document.createElement('a');
+                    var url = window.URL.createObjectURL(data);
+                    a.href = url;
+                    console.log(data);
+                    a.download = exel.name;
+                    document.body.append(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                }
+            });
+
+            // console.log(exel.url);
+            // console.log(exel.name);
+            // var a = document.createElement('a');
+            // var url = window.URL.createObjectURL(exel.url);
+            // a.href = url;
+            // a.download = exel.name;
+            // document.body.append(a);
+            // a.click();
+            // a.remove();
+            // window.URL.revokeObjectURL(url);
         }
     });
 }
@@ -8294,6 +8340,7 @@ function fileList(){
                                 },
                                 success: (data) => {
                                     console.log(data)
+                                    console.log(fileItem.fname)
                                     var a = document.createElement('a');
                                     var url = window.URL.createObjectURL(data);
                                     a.href = url;
@@ -8463,6 +8510,7 @@ function fileUpload(){
                                 },
                                 success: (data) => {
                                     console.log(data)
+                                    console.log(fileItem.fname)
                                     var a = document.createElement('a');
                                     var url = window.URL.createObjectURL(data);
                                     a.href = url;
@@ -8550,13 +8598,18 @@ function generatorUpload() {
     btnSubmit.on("click", () => {
         const fields = [];
         const header = [];
+        const accId = [];
+        
+        $(".object-tree-li").each((i, item) => accId[i] = $(item).attr("accid"))
+
         $(".select-gen").each((i, selectGen) => {
             fields[i] = $(selectGen).attr("name");
             header[i] = $(selectGen).attr("fullname");
         })
         dataFields = {
             fields: fields,
-            header: header
+            header: header,
+            accId: accId
         }
 
         console.log(dataFields);

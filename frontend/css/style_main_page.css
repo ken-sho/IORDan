@@ -3171,6 +3171,10 @@ form[name="add_objects_group_user"] td:first-child {
     margin: 0px 5px;
 }
 
+.icon-green{
+    color: rgb(0, 172, 0) !important;
+}
+
 .block-table td, .block-table th {
     border: 1px solid #D9E0E3;
     height: 30px;
