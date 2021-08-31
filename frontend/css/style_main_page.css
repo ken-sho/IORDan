@@ -948,7 +948,7 @@ form {
 #top-block{
     display: flex;
     margin-bottom: 5px;
-    height: 220px;
+    height: 30%;
 }
 
 #obj_agreements_info {
@@ -1021,7 +1021,6 @@ form {
 
 #block-left{
     grid-area: printLeft;
-    height: 100%;
     border-left: 1px solid #D9E0E3;
     border-bottom: 1px solid #D9E0E3;
     border-bottom-left-radius: 5px;
@@ -1029,7 +1028,6 @@ form {
 
 #block-right{
     grid-area: printRight;
-    height: 100%;
     margin-left: -2px;
     border-right: 1px solid #D9E0E3;
     border-bottom: 1px solid #D9E0E3;
@@ -1096,7 +1094,7 @@ form {
     float: right;
     border: 1px solid #D9E0E3;
     border-radius: 5px;
-    height: 226px;
+    height: calc(100% - 30px);
     width: 45%;
 }
 

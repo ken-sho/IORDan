@@ -1652,7 +1652,8 @@ function getObjectData() {
             getInfoDebt();
 
             resizeTreeDiv("obj_info", "obj_ls_info", "obj_additional_info", "obj_print_form", 10, "n", 600);
-            // resizeTwoDiv("obj_info", "top-block", "obj_ls_info", '11', "s")
+            
+            helper();
         }
     });
 }
@@ -2793,7 +2794,7 @@ function getObjectAgreementsData() {
             if(string == "Кадастровый номер" && dataInfo[object][string] !== ""){
                 downloadAgreementsErgp();
             }
-            if(string == "Дата подачи в суд" && dataInfo[object][string] !== ""){
+            if(string == "Признак подачи в суд" && dataInfo[object][string] !== ""){
                 const parent = $("<div>", {class: "icon-with-count", id: "judg"});
                 
                 parent.append(
@@ -3456,39 +3457,39 @@ function deleteCookie(name) {
     })
   }
 
-// function getProjectTaskList(projectId) {
-//     $('#tasks_list').empty();
-//     // createContentLoader('#redmine_content .info-block-content');
-//     $.get(`/redmine?request=/issues.json?project_id=${projectId}`, function (data) {
-//         let taskList = JSON.parse(data);
-//         for (const elem in taskList.issues) {
-//             let task = taskList.issues[elem];
-//             let id = task.id, tracker = task.tracker, name = task.subject, description = task.description, priority = task.priority, author = task.author;
+function getProjectTaskList(projectId) {
+    $('#tasks_list').empty();
+    createContentLoader('#redmine_content .info-block-content');
+    $.get(`/redmine?request=/issues.json?project_id=${projectId}`, function (data) {
+        let taskList = JSON.parse(data);
+        for (const elem in taskList.issues) {
+            let task = taskList.issues[elem];
+            let id = task.id, tracker = task.tracker, name = task.subject, description = task.description, priority = task.priority, author = task.author;
             
-//             $('<div>', {class: 'news-block'}).append(
-//                 $('<div>', {class: 'news-header', text: name}),
-//                 $('<div>', {class: 'task-content-table'}).append(
-//                     $('<table>', {id: `task_${id}`, class: 'task-table'}).append(
-//                         $('<tr>', {class: 'task-thead'}).append(
-//                             $('<th>', {text: 'Тип'}),
-//                             $('<th>', {text: 'Приоритет'}),
-//                             $('<th>', {text: 'Автор'})
-//                         ),
-//                         $('<tr>').append(
-//                             $('<td>', {text: tracker.name}),
-//                             $('<td>', {text: priority.name}),
-//                             $('<td>', {text: author.name})
-//                         ),
-//                         $('<tr>').append(
-//                             $('<td>', {class: 'task-description', text: description, colspan: 3})
-//                         )
-//                     )
-//                 )
-//             ).appendTo('#tasks_list');
-//         }
-//         // removeContentLoader('#redmine_content .info-block-content', '#tasks_list');
-//     });
-// }
+            $('<div>', {class: 'news-block'}).append(
+                $('<div>', {class: 'news-header', text: name}),
+                $('<div>', {class: 'task-content-table'}).append(
+                    $('<table>', {id: `task_${id}`, class: 'task-table'}).append(
+                        $('<tr>', {class: 'task-thead'}).append(
+                            $('<th>', {text: 'Тип'}),
+                            $('<th>', {text: 'Приоритет'}),
+                            $('<th>', {text: 'Автор'})
+                        ),
+                        $('<tr>').append(
+                            $('<td>', {text: tracker.name}),
+                            $('<td>', {text: priority.name}),
+                            $('<td>', {text: author.name})
+                        ),
+                        $('<tr>').append(
+                            $('<td>', {class: 'task-description', text: description, colspan: 3})
+                        )
+                    )
+                )
+            ).appendTo('#tasks_list');
+        }
+        // removeContentLoader('#redmine_content .info-block-content', '#tasks_list');
+    });
+}
 
 function createContentLoader(parentDivSelector) {
     $('<div>', {class: 'center-content', parent_div: parentDivSelector}).append(
@@ -5235,7 +5236,7 @@ function resizeTreeDiv(parentDiv, firstDiv, SecondDiv,TreeDiv, error, handles, m
         let modWidth = parentWidth - resizableElemHeight - error;
 
         $(`#${SecondDiv}`).height(modWidth);
-        $(`#${TreeDiv}`).height(modWidth - 34);
+        $(`#${TreeDiv}`).height(modWidth);
         // $("#obj_agreements_info").height(resizableElemHeight - error)
         localStorage.setItem(`height_${firstDiv}`, resizableElemHeight);
         localStorage.setItem(`top_${firstDiv}`, resizableElementTop);
@@ -8638,4 +8639,26 @@ function generatorUpload() {
         $("#constructor_upload-gen").empty();
         $(".generator-btn").prop('checked', false)
     })
+}
+function helper() {
+    const projectId = "knowledge_base";
+    $("#example-btn").on("click", () => {
+        $.get(`https://cors-anywhere.herokuapp.com/http://95.129.150.146:10443/issues.json`, (data) => {
+            console.log(data)
+        })
+
+        // $.get(`http://webdeb.ru:10443/projects/knowledge_base`, (data) => {
+        //     console.log(data)
+        // })
+
+        // $.ajax({
+        //     url: `/redmine?request=/projects/knowledge_base/wiki/index.xml`,
+        //     type: 'GET',
+        //     contentType: "text/xml",
+        //     success: function(data) {
+        //        console.log(data)
+        //     }
+        // });
+    })
+
 }
