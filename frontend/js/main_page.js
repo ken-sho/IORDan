@@ -7191,6 +7191,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
 
         const fileName = `реестр_${registryName}_${localStorage['currentCompany']}`.replace(/ /g, '_');
         console.log(fileName)
+        console.log(convertibleContent)
 
         convertContentToExcel(convertibleContent.html(), fileName);
     });
@@ -7742,7 +7743,9 @@ function convertContentToExcel(content, fileName) {
         data: content,
         contentType: 'application/json',
         success: function(data) {
+            console.log(data)
             const exel = JSON.parse(data);
+            console.log(exel)
             $.ajax({
                 type: 'GET',
                 url: exel.url,
@@ -7756,7 +7759,7 @@ function convertContentToExcel(content, fileName) {
                     a.href = url;
                     console.log(data);
                     a.download = exel.name;
-                    document.body.append(a);
+                    $("body").append(a);
                     a.click();
                     a.remove();
                     window.URL.revokeObjectURL(url);
