@@ -7057,8 +7057,41 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
         headerManipulation = $('#registry_settings_content .header-manipulation');
         headerManipulation.empty();
     }
+
     // if (!$(`#registy_add_entry_btn${actOffice}`).length) {
-        $("<i>", {  class: "material-icons", data_jq_dropdown: "", title: "Справка", text: "help_outline"}).appendTo(headerManipulation);
+        function helper(link) {
+            $.ajax({
+                url: `http://webdeb.ru:10443/projects/knowledge_base/wiki/Registers#Ежемесячные-реестры`,
+                type: 'GET',
+                contentType: "text/xml",
+                success: function(data) {
+                    console.log(data)
+                    console.log(data)
+                    console.log($(data).find("#Постоянные-реестры"))
+                }
+        });
+            $.ajax({
+                    url: `https://cors-anywhere.herokuapp.com/http://webdeb.ru:10443/projects/knowledge_base/wiki/Registers#Ежемесячные-реестры`,
+                    type: 'GET',
+                    contentType: "text/xml",
+                    success: function(data) {
+                        console.log(data)
+                        console.log(data)
+                        console.log($(data).find("#Постоянные-реестры"))
+                    }
+            });
+            $("#link-spec").load( "http://webdeb.ru:10443/projects/knowledge_base/wiki/Registers#Ежемесячные-реестры", function(e) {
+                alert( "The last 25 entries in the feed have been loaded" );
+                console.log(e)
+              });
+        }
+
+        $("<i>", {  class: "material-icons", title: "Справка", text: "help_outline", id:"helphelp"})
+            .appendTo(headerManipulation)
+            .on("click", (e) => {
+                helper("#helphelp");
+        });
+
         if (!registryIsBlocked) {
             if (documentType !== 'print_registry') {    
                 const addRegistryBtn = $('<button>', {id: `registy_add_entry_btn${actOffice}`, class: 'button-primary', title: 'Добавить запись в реестр', text: 'Добавить запись'}).appendTo(headerManipulation);
@@ -8643,25 +8676,26 @@ function generatorUpload() {
         $(".generator-btn").prop('checked', false)
     })
 }
-function helper() {
-    const projectId = "knowledge_base";
-    $("#example-btn").on("click", () => {
-        $.get(`https://cors-anywhere.herokuapp.com/http://95.129.150.146:10443/issues.json`, (data) => {
-            console.log(data)
-        })
+// function helper() {
+//     const projectId = "knowledge_base";
+//     $("#example-btn").on("click", () => {
+//         $.get(`https://cors-anywhere.herokuapp.com/http://95.129.150.146:10443/issues.json`, (data) => {
+//             console.log(data)
+//         })
 
-        // $.get(`http://webdeb.ru:10443/projects/knowledge_base`, (data) => {
-        //     console.log(data)
-        // })
+//         // $.get(`http://webdeb.ru:10443/projects/knowledge_base`, (data) => {
+//         //     console.log(data)
+//         // })
 
-        // $.ajax({
-        //     url: `/redmine?request=/projects/knowledge_base/wiki/index.xml`,
-        //     type: 'GET',
-        //     contentType: "text/xml",
-        //     success: function(data) {
-        //        console.log(data)
-        //     }
-        // });
-    })
+//         // $.ajax({
+//         //     url: `/redmine?request=/projects/knowledge_base/wiki/index.xml`,
+//         //     type: 'GET',
+//         //     contentType: "text/xml",
+//         //     success: function(data) {
+//         //        console.log(data)
+//         //     }
+//         // });
+//     })
 
-}
+// }
+
