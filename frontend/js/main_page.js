@@ -7074,6 +7074,10 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                     url: `https://cors-anywhere.herokuapp.com/http://webdeb.ru:10443/projects/knowledge_base/wiki/Registers#Ежемесячные-реестры`,
                     type: 'GET',
                     contentType: "text/xml",
+                    Host: "Prod",
+                    HostName: "95.129.150.146",
+                    Port: "60000",
+                    User: "root",
                     success: function(data) {
                         console.log(data)
                         console.log(data)
