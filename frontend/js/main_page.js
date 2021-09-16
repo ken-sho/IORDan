@@ -5,6 +5,7 @@ var OBJECT_DATA;
 var DROPDOWN_NUM = 1; 
 var CURRENT_OBJECT_DATA = {};
 var OBJECTS_TREE_DATA;
+var OBJECT_JSON = {};
 var IdRegStr;
 var IDAccid;
 var registryData;
@@ -12,6 +13,7 @@ var filesRegistry;
 var COUNT_ID = 0;
 var C_REG_DATA = {};
 var office_admin_active = false;
+
 
 $(document).ready(function() {  
     sessionStorage.setItem('printMode', 'off');
@@ -190,6 +192,16 @@ $(document).ready(function() {
             $('#object_communication_textarea_tr').hide();
         }
     });
+
+    $.get( '/reference/communication.json', function( data ) {
+        console.log(data.communication)
+        OBJECT_JSON.communication  = data.communication
+        console.log(OBJECT_JSON)
+    });    
+
+    
+    
+
 
     postIdReccid();
 
@@ -1653,7 +1665,7 @@ function getObjectData() {
 
             resizeTreeDiv("obj_info", "obj_ls_info", "obj_additional_info", "obj_print_form", 10, "n", 600);
             
-            helper();
+            // helper();
         }
     });
 }
@@ -3086,6 +3098,13 @@ function getObjectCommunicationsData() {
 
     let communicationsData = OBJECT_DATA.communications;
 
+    console.log(OBJECT_JSON.communication)
+
+    $(OBJECT_JSON.communication).each((index, elem) => {
+        console.log(elem)
+        $("<option>", {value: elem, text: elem}).appendTo("#object_communication_select")
+    })
+
     if (!isEmpty(communicationsData)) {
         for (const elem in communicationsData) {
             const communication = communicationsData[elem];
@@ -3102,8 +3121,7 @@ function getObjectCommunicationsData() {
 
     const counterIcons = $('<div>', {class: 'icon-count', text: Object.keys(communicationsData).length}).appendTo('#obj_communications_icon');
         addEventListenersToCounterIcons(counterIcons);
-
-    }
+    }   
     else {
         $('<div>', {class: 'notification', text: 'Коммуникации отсутствуют'}).appendTo('#object_communications_list');
     }
@@ -7074,10 +7092,6 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                     url: `https://cors-anywhere.herokuapp.com/http://webdeb.ru:10443/projects/knowledge_base/wiki/Registers#Ежемесячные-реестры`,
                     type: 'GET',
                     contentType: "text/xml",
-                    Host: "Prod",
-                    HostName: "95.129.150.146",
-                    Port: "60000",
-                    User: "root",
                     success: function(data) {
                         console.log(data)
                         console.log(data)
