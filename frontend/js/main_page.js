@@ -3099,9 +3099,9 @@ function getObjectCommunicationsData() {
     let communicationsData = OBJECT_DATA.communications;
 
     console.log(OBJECT_JSON.communication)
-
+    $("#object_communication_select").empty();
     $(OBJECT_JSON.communication).each((index, elem) => {
-        console.log(elem)
+        console.log(elem)       
         $("<option>", {value: elem, text: elem}).appendTo("#object_communication_select")
     })
 
