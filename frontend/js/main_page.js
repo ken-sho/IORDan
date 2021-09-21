@@ -199,8 +199,17 @@ $(document).ready(function() {
         console.log(OBJECT_JSON)
     });    
 
-    
-    
+    $.get( '/reference/registry-types.json', function( data ) {
+        console.log(data)
+        OBJECT_JSON.registryTypes  = data
+        console.log(OBJECT_JSON)
+        // $("#create_registry_type").empty();
+            for (let key in OBJECT_JSON.registryTypes){
+                console.log(OBJECT_JSON.registryTypes[key]);
+                console.log(key);
+             $('<option>', {text: OBJECT_JSON.registryTypes[key], value: key}).appendTo("#create_registry_type")   
+            }
+    });    
 
 
     postIdReccid();
@@ -6159,20 +6168,9 @@ function getRegistryList(callback) {
             for (const registry of registryList) {
                 let registryName;
 
-                if (showType) {
+                if (showType) { 
 
-                    const registryTypes = {
-                        'bank_manual': 'Банки',
-                        'bailiffs_manual': 'Приставы',
-                        'overgrown': 'Перебросы',
-                        'discounts': 'Скидки',
-                        'print_registry': 'Реестр массовой печати',
-                        'pay_storno': 'Возврат',
-                        'debit_act': 'Акт списания',
-                        'm26archive': '26 макета',
-                        'm83archive': '83 макета',
-                        'register_of_state_duties': 'Госпошлина'
-                    };
+                    const registryTypes = OBJECT_JSON.registryTypes;
 
                     const type = registryTypes[registry.doc_type];
 
@@ -6242,19 +6240,14 @@ function getRegistryList(callback) {
                 $('<tr>').append(
                     $('<td>', {class: 'table-input-name', text: 'Тип'}),
                     $('<td>').append(
-                        $('<select>', {id: 'create_registry_type', class: 'input-main'}).append(
-                            $('<option>', {text: 'Банки', value: 'bank_manual'}),
-                            $('<option>', {text: 'Приставы', value: 'bailiffs_manual'}),
-                            $('<option>', {text: 'Перебросы', value: 'overgrown'}),
-                            $('<option>', {text: 'Скидки', value: 'discounts'}),
-                            $('<option>', {text: 'Возврат', value: 'pay_storno'}),
-                            $('<option>', {text: 'Акт списания', value: 'debit_act'}),
-                            $('<option>', {text: 'Госпошлина', value: 'register_of_state_duties'})
-
-                        )
+                        $('<select>', {id: 'create_registry_type', class: 'input-main'})
+                       
                     )
                 )
             ).appendTo(popup.find('.popup-content'));
+            // $("#create_registry_type").empty();
+            
+            
 
             $('<div>', {class: 'notification', text: 'Поля, отмеченные звездочкой (*), обязательны для заполнения'}).appendTo(popup.find('.popup-content'));
 
@@ -6296,6 +6289,12 @@ function getRegistryList(callback) {
                     });
                 }
             }
+            for (let key in OBJECT_JSON.registryTypes){
+                console.log(OBJECT_JSON.registryTypes[key]);
+                console.log(key);
+                $("#create_registry_type").append($('<option>', {text: OBJECT_JSON.registryTypes[key], value: key}))  
+            }
+            console.dir($("#create_registry_type"))
         }
     }
 }
