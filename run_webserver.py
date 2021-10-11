@@ -77,26 +77,20 @@ class MainHandler(BaseHandler):
         self.render("frontend/html/main_page.html")
         #self.write('Нет прав доступа')
 
-class AnminHandler(BaseHandler):
+class Base_ADMINHandler(tornado.web.RequestHandler):
+    def post(self):
+        #autor = tornado.escape.native_str(self.get_secure_cookie('user'))
+        #asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
+        #orgid = str(self.get_cookie('companyId'))
+        fnk_name = self.get_argument('fnk_name')
+        if fnk_name=='test':
+            res = 'hello'
+        self.write(res)
     def get(self):
-        if not self.current_user:
-            self.redirect("/")
-            return
-        asid = tornado.escape.native_str(self.get_secure_cookie("sid"))
-        conn = db_conn.db_connect('web_receivables')
-        cur = conn.cursor()
-        q_sql = "select access.user_rights('"+asid +"')"
-        cur.execute(q_sql)
-        for row in cur:
-            res=json.loads(row[0])
-        try:
-            utupe = res["u_type"]
-        except:
-            utupe = ''
-        if utupe=='admin':
-            self.render("frontend/html/admin_page.html")
-        else:
-            self.write('Нет прав доступа')
+        fnk_name = self.get_argument('fnk_name')
+        if fnk_name=='test':
+            res = 'hello world'
+        self.write(res)
 
 class Base_FNCHandler(BaseHandler):
     def post(self):
