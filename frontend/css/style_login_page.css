@@ -280,7 +280,6 @@ body{
     display: flex;
     justify-content: space-between;
     width: 1030px;
-    height: 406px;
     align-items: start;
     margin: 0 auto;
     background-color: #FAFBFE;
@@ -288,6 +287,16 @@ body{
     border-radius: 16px;
     box-sizing: border-box;
     padding: 0px 178px;
+}
+
+.browser_title{
+    font-size: 18px;
+    text-align: center;
+}
+
+.browser_content{
+    text-align: center;
+    margin: 15px 0;
 }
 
 .cont_data {

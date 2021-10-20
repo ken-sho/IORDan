@@ -1104,6 +1104,32 @@ form {
     border-radius: 5px;
     margin-top: 13px;
 }
+#editor{
+    cursor: pointer;
+}
+
+#editor-container{
+    height: 100px;
+}
+
+.background_editor{
+    display: none;
+    width: 100%;
+    height: 100%;
+    background: rgba(17,28,41,0.7);
+    padding: 16px;
+    z-index: 999;
+}
+
+#popup_editor{
+    z-index: 1000;
+    height: 300px;
+}
+
+#popup_editor .popup-content{
+    padding-left: 30px;
+    padding-right: 30px;
+}
 
 div {
     box-sizing: border-box;
@@ -1806,6 +1832,59 @@ div {
     height: 35px;
     background: #D9E0E3;
 }
+
+.block-header-with-tab {
+    background-color: #F4F6F8;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.block-header-with-tab .active{
+    background-color: white;
+    z-index: 1;
+}
+.block-header-with-tab .active:after{
+    content: '';
+    height: 4px;
+    width: calc(100% + 2px);
+    top: -1px;
+    left: -1px;
+    position: absolute;
+    background: var(--element-color);
+    border-radius: 5px 5px 0px 0px;
+}
+    
+.block-header-with-tab div{    
+    position: relative;
+    cursor: pointer;
+    text-align: center;
+    padding: 9px;
+    box-sizing: border-box;
+    width: 50%;
+    white-space: nowrap;
+    display: flex;   
+    flex-wrap: nowrap;
+    background: #F4F6F8;
+    color: #263238;
+    border-radius: 5px 5px 0px 0px;
+    border: 1px solid #D9E0E3;
+    border-bottom: none;
+}
+
+
+.block-header-with-tab div:first-child{
+    margin-right: 3px;
+    border-top-left-radius: 5px;
+    border-left: none;
+}
+
+.block-header-with-tab div:nth-child(2){
+    margin-left: 3px;
+    border-top-right-radius: 5px;
+    border-right: none;
+}
+
 
 #obj_agreements_info .block-header-with-manipulation{
     background: #F4F6F8;
@@ -2811,6 +2890,7 @@ td.add-template-adress {
 
 #obj_list_group .table-input-name{
     text-align: center;
+    width: 20%;
 }
 
 #obj_list_group .form-submit-btn{
@@ -4156,6 +4236,10 @@ textarea {
     padding-left: 5px;
 }
 
+#object_files_list .block{
+    border-top: none;
+}
+
 .file-block {
     padding: 5px; 
     background-color: #F4F6F8; 
@@ -4327,4 +4411,12 @@ tr:not(:last-child).border-bottom td {
 
 .input-border-bold {
     border: 2px solid var(--element-color) !important;
+}
+
+.hide {
+    display: none;
+}
+
+.show{
+    display: block;
 }

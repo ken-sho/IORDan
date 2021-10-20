@@ -38,6 +38,7 @@ $(document).ready(function() {
             }
         }
     });
+    
 
     const objectNumDiv = $('#print_mode_object_num');
     objectNumDiv.text('Выбрано: 0');
@@ -174,7 +175,7 @@ $(document).ready(function() {
 
         $("#owner_creation_time").hide();
 
-        $('#owner_name, #owner_birth_date, #owner_subscribe_date, #owner_unsubscribe_date, #owner_birth_place, #owner_snils, #owner_inn').removeAttr("disabled"); // разблокировать инпуты
+        $('#owner_name, #owner_birth_date, #owner_subscribe_date, #owner_unsubscribe_date, #owner_birth_place, #owner_snils, #owner_inn, #owner_passport').removeAttr("disabled"); // разблокировать инпуты
 
         const saveBtn = $("<i>", {id:"add_owner_btn", class:"material-icons", text:"person_add", title: "Создать пользователя"}).appendTo("#obj_list_group .form-submit-btn").css('margin-right', '12px'); // создать кнопку сохранения файлов
         saveBtn.fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
@@ -792,7 +793,7 @@ function toggleBlock () {
     
  }
 
- function createInfRegData (ownerName = "", ownerBirthDate = "", subDate = "", unsubDate = "", birthPlace = "", current = ""){
+ function createInfRegData (ownerName = "", ownerBirthDate = "", subDate = "", unsubDate = "", birthPlace = "", current = "", inn = "", snils = "", pass = ""){
     let authorText;
     let creationTimeText;
      if(current == ""){
@@ -843,13 +844,19 @@ function toggleBlock () {
         $("<tr>").append(
             $("<td>", {class:"table-input-name", text: "СНИЛС"}),
             $("<td>", {colspan:"3"}).append(
-                $("<input>", {id:"owner_snils",  type:"text", class:"input-main"}).attr("disabled", "true").inputmask('999-999-999 99')
+                $("<input>", {id:"owner_snils",  type:"text", class:"input-main"}).attr("disabled", "true").inputmask('999-999-999 99').val(snils)
             )
         ),
         $("<tr>").append(
             $("<td>", {class:"table-input-name", text: "ИНН"}),
             $("<td>", {colspan:"3"}).append(
-                $("<input>", {id:"owner_inn",  type:"text", class:"input-main"}).attr("disabled", "true").inputmask('999999999999')
+                $("<input>", {id:"owner_inn",  type:"text", class:"input-main"}).attr("disabled", "true").inputmask('999999999999').val(inn)
+            )
+        ),
+        $("<tr>").append(
+            $("<td>", {class:"table-input-name", text: "ПАСПОРТ"}),
+            $("<td>", {colspan:"3"}).append(
+                $("<input>", {id:"owner_passport",  type:"text", class:"input-main"}).attr("disabled", "true").val(pass)
             )
         )
 
@@ -857,7 +864,7 @@ function toggleBlock () {
     
     $("<div>", { class:"form-submit-btn"}).append(
         $("<i>", {id:"owner_btn_cancel", class:"material-icons", text: 'cancel', title: 'Отменить'}).on("click", () => {
-            createInfRegData(ownerName, ownerBirthDate, subDate, unsubDate, birthPlace, current);
+            createInfRegData(ownerName, ownerBirthDate, subDate, unsubDate, birthPlace, current, inn, snils, pass);
             showPopupNotification('alert', 'Редактирование прописанного отменено!');
         }).css({"display": "none","margin-right": "10px"}),
         $("<i>", {id:"owner_btn_save", class:"material-icons", text: 'save', title: 'Сохранить'}).on("click", editOwnerRequest).css({"display": "none","margin-right": "10px"}),
@@ -869,18 +876,81 @@ function toggleBlock () {
     const creationTime = $("<div>", { class:"notification", id:"owner_creation_time" ,text: `Добавил: ${authorText} ${creationTimeText}`}).appendTo(formBlock);
  }
 
- function createAgrData (agreementsData){
+ function createAgrData (agreementsData, prop){
      console.log(agreementsData);
+     console.log(prop)
      $("#owner_btn_edit").hide();
+     $("#agreement_edit").hide();
      $("#add_agreement_btn, #cancel_agreement_btn").hide();
+     $("#obj_list_group .form-submit-btn").remove();
 
     const parent = "#obj_list_group .block-content";
     $(parent).empty();
-    const parentDiv = $('<div>', {class: "obj_list_item"}).appendTo(parent);
-    for (i = 0; i < agreementsData.length; i++) {
-        $('<span>', {text: agreementsData[i] }).css("padding-right","10px").appendTo(parentDiv);
-    }
-    
+    $("#obj_list_group .form-submit-btn").remove();
+
+    const formBlock = $("<form>", {name: "agreement"}).appendTo(parent);
+
+
+    // for (i = 0; i < agreementsData.length; i++) {
+    //     console.log(agreementsData)
+    //     $('<span>', {text: agreementsData[i] }).css("padding-right","10px").appendTo(parentDiv);
+    // }
+    // const formBlock = $("<form>", {name: "agreement"}).appendTo(parentDiv);
+
+
+    const table = $("<table>", {class: "table-form"}).appendTo(formBlock).append(
+        $("<tbody>").append(
+            $("<tr>").append(
+                $("<td>", {class:"table-input-name", text: "ФИО *"}),
+                $("<td>", {colspan: "3"}).append(
+                    $("<input>", {id:"agreement_fio",  type:"text", class:"input-main"}).val(agreementsData[0]).attr("disabled", "true")
+                )
+            ),
+            $("<tr>").append(
+                $("<td>", {class:"table-input-name", text: "Дата рождения"}),
+                $("<td>", {colspan: "3"}).append(
+                    $("<input>", {id:"agreement_birth_date",  type:"date", class:"input-main birth-date"}).val(RemakeDateFormatToInput(prop.db)).attr("disabled", "true")
+                )
+            ),
+            $("<tr>").append(
+                $("<td>", {class:"table-input-name", text: "Наименование договора"}),
+                $("<td>", {colspan: "3"}).append(
+                    $("<input>", {id:"agreement_name",  type:"text", class:"input-main"}).val(prop.name).attr("disabled", "true")
+                )
+            ),
+            $("<td>", {class:"table-input-name", text: "Дата договора *"}),
+                $("<td>", {colspan: "3"}).append(
+                    $("<input>", {id:"agreement_date", type:"date", class:"input-main"}).attr("disabled", "true").val(RemakeDateFormatToInput(prop.dateagr))
+            ),
+            $("<tr>").append(
+                $("<td>", {class:"table-input-name", text: "СНИЛС"}),
+                $("<td>", {colspan:"3"}).append(
+                    $("<input>", {id:"agreement_snils",  type:"text", class:"input-main"}).attr("disabled", "true").inputmask('999-999-999 99').val(prop.snils)
+                )
+            ),
+            $("<tr>").append(
+                $("<td>", {class:"table-input-name", text: "ИНН"}),
+                $("<td>", {colspan:"3"}).append(
+                    $("<input>", {id:"agreement_inn",  type:"text", class:"input-main"}).attr("disabled", "true").inputmask('999999999999').val(prop.inn)
+                )
+            ),
+            $("<tr>").append(
+                $("<td>", {class:"table-input-name", text: "ПАСПОРТ"}),
+                $("<td>", {colspan:"3"}).append(
+                    $("<input>", {id:"agreement_passport",  type:"text", class:"input-main"}).attr("disabled", "true").val(prop.pass)
+                )
+            )
+        )
+    );
+
+    $("<div>", { class:"form-submit-btn"}).append(
+        $("<i>", {id:"agreement_btn_cancel", class:"material-icons", text: 'cancel', title: 'Отменить'}).on("click", () => {
+            createAgrData(agreementsData, prop);
+            showPopupNotification('alert', 'Редактирование прописанного отменено!');
+        }).css({"display": "none","margin-right": "10px"}),
+        $("<i>", {id:"agreement_btn_save", class:"material-icons", text: 'save', title: 'Сохранить'}).on("click", editAgreementRequest).css({"display": "none","margin-right": "10px"}),
+        $("<i>", {id:"agreement_btn_edit", class:"material-icons", text: "edit", title: 'Редактировать'}).on("click", () => clickIconEditAgreement()).css("margin-right", "10px")
+    ).appendTo("#obj_list_group .block-header-with-manipulation");
  }
 
  function addAgrData(){
@@ -1246,6 +1316,7 @@ function getObjectsTreeData(callback) {
             removeContentLoader('#object_list_tree', '.object-list-tree');
         }
     });
+    
 }
 
 function createObjectsTree(objectsList) {
@@ -1826,8 +1897,40 @@ function initializeObjectFiles() {
     filesDownloadDiv.appendTo(popupContent);
 
     const filesList = $('<div>', { id: 'object_files_list' });
-    const filesListBlock = createContentBlock('Список файлов', { 'width': '100%', 'height': '100%' }).appendTo(filesList);
+    const filesListBlock = createContentBlock('', { 'width': '100%', 'height': '100%' }).appendTo(filesList)
+    const filesListHeader  = filesListBlock.find(".block-header")
+    filesListHeader.empty();
+    filesListHeader.addClass("block-header-with-tab")
+    filesListHeader.append(
+        $("<div>", {class: "active", text: "Список загруженных файлов"}),
+        $("<div>", {class: "", text: "Список сгенерированных файлов"})
+    )
     filesList.appendTo(popupContent);
+
+    const filesListContent  = filesListBlock.find(".block-content");
+
+    filesListContent.append(
+        $("<div>", {id: "files-list-upload", class: "show"}),
+        $("<div>", {id: "files-list-generate", class: "hide"})
+    )
+
+    $("#files-list-generate").text("сгенерированный список файлов")
+
+    filesListHeader.find("div").each((index, btn) => {
+        $(btn).on("click", () => {   
+            filesListHeader.find("div").each((jendex, elem) => $(elem).hasClass("active") ? $(elem).removeClass("active") : null);
+            filesListContent.find("div").each((jendex, elem) => {
+                console.log(elem)
+                if($(elem).hasClass("show")){
+                    $(elem).removeClass("show")
+                    $(elem).addClass("hide")
+                } else if($(elem).hasClass("hide")){
+                    $(elem).removeClass("hide")
+                    $(elem).addClass("show")
+                }});       
+            $(btn).addClass("active");
+        })
+    })
 
     function initializeFilesList(files) {
         for (const file of files) {
@@ -1891,12 +1994,12 @@ function initializeObjectFiles() {
 
             if (files.length == 1) {
                 fileDiv.hide();
-                fileDiv.prependTo(filesListBlock.find('.block-content'));
+                fileDiv.prependTo("#files-list-upload");
                 fileDiv.fadeIn(400);
 
             }
             else {
-                fileDiv.prependTo(filesListBlock.find('.block-content'));
+                fileDiv.prependTo("#files-list-upload");
             }
         }
     }
@@ -1925,6 +2028,7 @@ function openFilesRegistryPopup(registryId, registryName, registryType, document
         uploadFilesListBlockContent.empty();
         if (files.length > 0) {
             for (const file of files) {
+                console.log(file)
                 const fileNameDiv = $('<div>', { style: 'padding-bottom: 5px' }).append(
                     $('<span>', { text: file.name, style: 'color: var(--third-color)' })
                 );
@@ -1938,8 +2042,8 @@ function openFilesRegistryPopup(registryId, registryName, registryType, document
                 uploadedFilesRepository[file.name] = fileDiv;
 
                 const fileTypesSelect = fileTypeDiv.find('select');
-
-                $('<option>', { text: 'Выбрать тип файла', disabled: 'true', selected: 'true' }).appendTo(fileTypesSelect);
+n>
+                $('<optio', { text: 'Выбрать тип файла', disabled: 'true', selected: 'true' }).appendTo(fileTypesSelect);
                 for (const type of registryData.upload_file_types) {
                     $('<option>', { text: type.name, value: type.value }).appendTo(fileTypesSelect);
                 }
@@ -2850,7 +2954,7 @@ function getObjectAgreementsData() {
         let propData = prop.split('&');
         tr = $('<tr>', { 'accid': propData[1], 'human_id': propData[2], class: "tr-btn" }).appendTo(table);
         tr.on("click", function() {
-            createAgrData(propData);
+            createAgrData(propData, agreementsData[prop]);
         })
         td = $('<td>', { text: propData[0] }).appendTo(tr);
 
@@ -2882,12 +2986,16 @@ function getObjectRegistrationsData() {
         tr = $('<tr>', { 'accid': registrationData[1], 'human_id': registrationData[2], 'author': registrationValue.author, 'creation_time': registrationValue.creation_time, class: "tr-btn"}).append($('<td>', { text: registrationData[0] })).appendTo(table);
 
         tr.on("click", function() {
+            console.log(registrationValue)
             const ownerName = registrationData[0],
-                  ownerBirthDate = RemakeDateFormatToInput(registrationValue.birth_date),
-                  subDate = RemakeDateFormatToInput(registrationValue.registration_date);
-            let unsubDate = RemakeDateFormatToInput(registrationValue.unregistration_date);
-            let birthPlace = registrationValue.birth_place;
-            createInfRegData(ownerName, ownerBirthDate, subDate, unsubDate, birthPlace, this);
+            ownerBirthDate = RemakeDateFormatToInput(registrationValue.db),
+            subDate = RemakeDateFormatToInput(registrationValue.dateb),
+            unsubDate = RemakeDateFormatToInput(registrationValue.datee),
+            birthPlace = registrationValue.db,
+            inn = registrationValue.inn,
+            snils = registrationValue.snils,
+            pass = registrationValue.pass;
+            createInfRegData(ownerName, ownerBirthDate, subDate, unsubDate, birthPlace, this, inn, snils, pass);
         })
 
         $('<option>', {text: registrationData[0], humanId: registrationData[2]}).appendTo('#add_agreement_owner_select');
@@ -3109,8 +3217,7 @@ function getObjectCommunicationsData() {
 
     console.log(OBJECT_JSON.communication)
     $("#object_communication_select").empty();
-    $(OBJECT_JSON.communication).each((index, elem) => {
-        console.log(elem)       
+    $(OBJECT_JSON.communication).each((index, elem) => {     
         $("<option>", {value: elem, text: elem}).appendTo("#object_communication_select")
     })
 
@@ -3710,6 +3817,24 @@ function clickIconEditOwner(ownerName, ownerBirthDate, subDate, unsubDate, birth
     $('#owner_creation_time').text(`Добавил: ${author} ${creationTime}`)
 }
 
+function clickIconEditAgreement(ownerName, ownerBirthDate, subDate, unsubDate, birthPlace, current) {
+    $('#agreement_btn_save').fadeIn(100);
+    $('#agreement_btn_cancel').fadeIn(100);
+    $("#obj_list_group .notification").fadeIn(100);
+    $('#agreement_fio, #agreement_birth_date, #agreement_name, #agreement_date, #agreement_snils, #agreement_inn, #agreement_passport').removeAttr("disabled");
+
+    const author = $(current).attr('author');
+    const creationTime = $(current).attr('creation_time');
+
+    let humanId = $(current).attr('human_id');
+    console.log(humanId);
+    $('#agreement_btn_save').attr('human_id', humanId);
+    $('#agreement_fio').val(agreementFio);
+    $('#agreement_name').val(agreemenName);
+    $('#agreement_birth_date').val(agreementBirthDate);
+    $('#owner_creation_time').text(`Добавил: ${author} ${creationTime}`)
+}
+
 function editOwnerRequest() {
     event.preventDefault();
     let accid = CURRENT_OBJECT_DATA.accid,
@@ -3720,7 +3845,8 @@ function editOwnerRequest() {
         birthPlace = $('#owner_birth_place').val(),
         humanId = $('#owner_btn_save').attr('human_id'),
         snils = $("#owner_snils").val(),
-        inn = $("#owner_inn").val();
+        inn = $("#owner_inn").val(),
+        pass = $("#owner_passport").val();
 
     if (date !== '') {
         let birthDate = $('#owner_birth_date').val().split('-');
@@ -3747,7 +3873,8 @@ function editOwnerRequest() {
             fio: name,
             inn: inn,
             snils: snils,
-            humanid: humanId
+            humanid: humanId,
+            pass: pass
         }
         $.ajax({
             type: "POST",
@@ -3759,7 +3886,59 @@ function editOwnerRequest() {
                     showPopupNotification('notification', 'Прописанный успешно отредактирован!');
                     closePopupWindow();
                     refreshObjectData([getObjectRegistrationsData, clickDropdownMenu]);
+                } else {
+                    $('#owner_name, #owner_birth_date, #owner_subscribe_date, #owner_unsubscribe_date, #owner_birth_place, #owner_snils, #owner_inn').attr("disabled", true);
+                    showPopupNotification('alert', 'Ошибка сервера!');
                 }
+                
+            }
+        });
+    }
+}
+
+function editAgreementRequest() {
+    let accid = CURRENT_OBJECT_DATA.accid,
+        fio = $('#agreement_fio').val(),
+        date = $('#agreement_birth_date').val(),
+        name = $('#agreement_name').val(),
+        dateAgr = $('#agreement_date').val(),
+        snils = $("#agreement_snils").val(),
+        inn = $("#agreement_inn").val(),
+        pass = $("#agreement_passport").val();
+
+    if (date !== '') {
+        let birthDate = $('#agreement_birth_date').val().split('-');
+        date = `${birthDate[2]}.${birthDate[1]}.${birthDate[0]}`;
+    }
+    if ($('#agreement_fio').val() == '') {
+        $('#agreement_fio').attr('placeholder', 'Заполните поле');
+        $('#agreement_fio').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+    }
+    else {
+        const data = {
+            db: date,
+            fio: fio,
+            inn: inn,
+            snils: snils,
+            name: name,
+            dateagr: dateAgr,
+            pass: pass
+        }
+        $.ajax({
+            type: "POST",
+            url: "/base_func?fnk_name=addchg_human",
+            data: JSON.stringify(data),
+            success: function (data) {
+                console.log(data);
+                if (data == 'success') {
+                    showPopupNotification('notification', 'Собственник успешно отредактирован!');
+                    closePopupWindow();
+                    refreshObjectData([getObjectRegistrationsData, clickDropdownMenu]);
+                } else {
+                   $('#agreement_fio, #agreement_birth_date, #agreement_name, #agreement_date, #agreement_snils, #agreement_inn, #agreement_passport').attr("disabled", true); 
+                   showPopupNotification('alert', 'Ошибка сервера!');   
+                }
+             
             }
         });
     }
@@ -3769,12 +3948,13 @@ function addNewOwner() {
     event.preventDefault();
     let accid = CURRENT_OBJECT_DATA.accid,
         name = $('#owner_name').val(),
-        date = RemakeDateFormatFromInput($('#owner_birth_date').val()),
+        birthDate = RemakeDateFormatFromInput($('#owner_birth_date').val()),
         subDate = RemakeDateFormatFromInput($('#owner_subscribe_date').val()),
         unsubDate = RemakeDateFormatFromInput($('#owner_unsubscribe_date').val()),
         birthPlace = $('#owner_birth_place').val(),
         snils = $("#owner_snils").val(),
-        inn = $("#owner_inn").val();
+        inn = $("#owner_inn").val(),
+        pass = $("#owner_passport").val();
 
     if ($('#owner_name').val() == '') {
         $('#owner_name').attr('placeholder', 'Заполните поле');
@@ -3785,10 +3965,11 @@ function addNewOwner() {
             bp: birthPlace,
             dateb: subDate,
             datee: unsubDate,
-            db: date,
+            db: birthDate,
             fio: name,
             inn: inn,
-            snils: snils
+            snils: snils,
+            pass: pass,
         }
         console.log(data)
         $.ajax({
@@ -3800,7 +3981,7 @@ function addNewOwner() {
                 if (data == 'success') {
                     closePopupWindow();
                     refreshObjectData([getObjectRegistrationsData, clickDropdownMenu]);
-                    createInfRegData(name, date, subDate, unsubDate, birthPlace);
+                    createInfRegData(name, date, subDate, unsubDate, birthPlace, "",inn, snils, pass);
                     showPopupNotification('notification', 'Прописанный успешно создан!');
                 }
             }
@@ -4554,6 +4735,16 @@ function initializationPopupControl() {
     });
 
     getObjectsGroupsList();
+
+    // let quill = new Quill('#editor-container', {
+    //     modules: {
+    //       formula: true,
+    //       syntax: true,
+    //       toolbar: '#toolbar-container'
+    //     },
+    //     placeholder: 'Введите для изменения нижней части сайта',
+    //     theme: 'snow'
+    //   });
 }
 
 function initializeSettingItem(parent, settingName, settingContent, callback) {
@@ -5585,8 +5776,13 @@ function changeTabControlReportSettings() {
         $('#report_settings .block-content').empty();
         tabsCollection.removeClass('active');
         $(this).addClass('active');
+        
+        // конструктор
+
+        $("#editor-container").text("")
 
         const reportsArr = getCurrentCompanyReportsArray();
+        console.log(reportsArr)
         const repId = $(this).attr('rep_id');
 
         const report = reportsArr[repId];

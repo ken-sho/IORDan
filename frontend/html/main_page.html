@@ -11,14 +11,24 @@
     <link type="text/css" rel="stylesheet" href="/css/jquery.dropdown.css" />
     <link type="text/css" rel="stylesheet" href="/css/gifplayer.css" />
     <link type="text/css" rel="stylesheet" href="/css/pagination.css" />
+    <link type="text/css" rel="stylesheet" href="/css/editor/quill.snow.css" />
+
     <script src="/js/jquery-3.4.1.min.js"></script>
-    <script type="text/javascript" src="/js/jquery.dropdown.js"></script>
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/jquery.dropdown.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    <script src="/js/editor/quill.min.js"></script>
+
     <script src="/js/1.12.1-jquery-ui.js"></script>
     <script src="/js/datepicker-ru.js"></script>
     <script src="/js/jquery.inputmask.js"></script>
     <script src="/js/gifplayer.js"></script>
     <script src="/js/pagination.js"></script>
     <script src="/js/main_page.js"></script>
+
+
 </head>
 
 <body>
@@ -323,7 +333,6 @@
                                             <div class="header_agr">Подробная информация</div>
                                         </div>
                                         <div class="block-content">
-                                            
                                         </div>    
                                     </div>                              
                                 </div>
@@ -451,7 +460,21 @@
                 </div>
                 <div id="object_files_list">
                     <div class="block">
-                        <div class="block-header"><div class="header">Список файлов</div></div>
+                        <div class="block-header">
+                            <div class="tabs" id="">
+                                <button 
+                                    class="tab-button active"  
+                                >
+                                <!-- onclick="openTab('control_tabs', this,'control_reports')" -->
+                                    Список загруженных файлов
+                                </button>
+                                <button 
+                                    class="tab-button" 
+                                >
+                                    Список сгенирированных файлов
+                                </button>
+                            </div>
+                        </div>
                         <div class="block-content"></div>
                     </div>
                 </div>
@@ -652,6 +675,47 @@
                 </div>
             </div>
         </div>
+        <div class="background_editor">
+            <div id="popup_editor" class="popup-window">
+                <div class="popup-header">
+                    <div class="popup-name">Редактировать нижнюю часть документа</div>
+                    <div class="popup-close" onclick="closePopupWindow('popup_object_communications')"><i class="material-icons">close</i></div>
+                </div>
+                <div class="popup-content">
+                    <div id="standalone-container">
+                        <div id="toolbar-container">
+                        <span class="ql-formats">
+                            <select class="ql-font"></select>
+                            <select class="ql-size"></select>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-bold" title="Жирный"></button>
+                            <button class="ql-italic" title="Курсив"></button>
+                            <button class="ql-underline" title="Подчеркивание"></button>
+                            <button class="ql-strike" title="Зачеркивание"></button>
+                        </span>
+                        <span class="ql-formats">
+                            <select class="ql-color" title="Цвет текста"></select>
+                            <select class="ql-background" title="Цвет заливки"></select>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-header" value="1" title="Заголовок h1"></button>
+                            <button class="ql-header" value="2" title="Заголовок h2"></button>
+                        </span>
+                        <span class="ql-formats">
+                            <select class="ql-align" title="Выравнивание"></select>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-clean" title="Убрать форматирование"></button>
+                        </span>
+                        </div>
+                        <div id="editor-container"></div>
+                    </div>
+                    <button id="editor-save" class="button-primary">Сохранить</button>
+                </div>
+            </div>    
+        </div>
+        
 
         <div id="popup_objects_group_users" class="popup-window">
             <div class="popup-header">
@@ -1142,8 +1206,11 @@
                             </div>
                             <div id="report_settings_content" class="main-content">
                                 <div id="report_settings_preview" class="block">
-                                    <div class="block-header">
+                                    <div class="block-header-with-manipulation">
                                         <div class="header">Превью справки</div>
+                                        <div class="header-manipulation" style="display: block;">
+                                            <i class="material-icons help-menu-icon" id="editor" title="Редактировать справку" onclick="openPopupWindow('popup_editor')">edit</i>
+                                        </div>
                                     </div>
                                     <div class="block-content"></div>
                                 </div>
