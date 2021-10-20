@@ -876,7 +876,7 @@ function toggleBlock () {
     const creationTime = $("<div>", { class:"notification", id:"owner_creation_time" ,text: `Добавил: ${authorText} ${creationTimeText}`}).appendTo(formBlock);
  }
 
- function createAgrData (agreementsData, prop){
+ function createAgrData (agreementsData, prop, current){
      console.log(agreementsData);
      console.log(prop)
      $("#owner_btn_edit").hide();
@@ -909,7 +909,7 @@ function toggleBlock () {
             $("<tr>").append(
                 $("<td>", {class:"table-input-name", text: "Дата рождения"}),
                 $("<td>", {colspan: "3"}).append(
-                    $("<input>", {id:"agreement_birth_date",  type:"date", class:"input-main birth-date"}).val(RemakeDateFormatToInput(prop.db)).attr("disabled", "true")
+                    $("<input>", {id:"agreement_birth_date",  type:"date", class:"input-main birth-date"}).val(RemakeDateFormatToInput(prop.db ? prop.db : "")).attr("disabled", "true")
                 )
             ),
             $("<tr>").append(
@@ -945,11 +945,20 @@ function toggleBlock () {
 
     $("<div>", { class:"form-submit-btn"}).append(
         $("<i>", {id:"agreement_btn_cancel", class:"material-icons", text: 'cancel', title: 'Отменить'}).on("click", () => {
-            createAgrData(agreementsData, prop);
+            createAgrData(agreementsData, prop, current);
             showPopupNotification('alert', 'Редактирование прописанного отменено!');
         }).css({"display": "none","margin-right": "10px"}),
         $("<i>", {id:"agreement_btn_save", class:"material-icons", text: 'save', title: 'Сохранить'}).on("click", editAgreementRequest).css({"display": "none","margin-right": "10px"}),
-        $("<i>", {id:"agreement_btn_edit", class:"material-icons", text: "edit", title: 'Редактировать'}).on("click", () => clickIconEditAgreement()).css("margin-right", "10px")
+        $("<i>", {id:"agreement_btn_edit", class:"material-icons", text: "edit", title: 'Редактировать'}).on("click", () => clickIconEditAgreement(
+            agreementsData[0], 
+            RemakeDateFormatToInput(prop.db ? prop.db : ""), 
+            prop.name, 
+            RemakeDateFormatToInput(prop.dateagr), 
+            prop.snils,
+            prop.inn,
+            prop.pass,
+            current
+        )).css("margin-right", "10px")
     ).appendTo("#obj_list_group .block-header-with-manipulation");
  }
 
@@ -2954,7 +2963,7 @@ function getObjectAgreementsData() {
         let propData = prop.split('&');
         tr = $('<tr>', { 'accid': propData[1], 'human_id': propData[2], class: "tr-btn" }).appendTo(table);
         tr.on("click", function() {
-            createAgrData(propData, agreementsData[prop]);
+            createAgrData(propData, agreementsData[prop], this);
         })
         td = $('<td>', { text: propData[0] }).appendTo(tr);
 
@@ -3817,7 +3826,7 @@ function clickIconEditOwner(ownerName, ownerBirthDate, subDate, unsubDate, birth
     $('#owner_creation_time').text(`Добавил: ${author} ${creationTime}`)
 }
 
-function clickIconEditAgreement(ownerName, ownerBirthDate, subDate, unsubDate, birthPlace, current) {
+function clickIconEditAgreement(agrFio, agrBithday, agrName, dataAgr, snils, inn, pass, current) {
     $('#agreement_btn_save').fadeIn(100);
     $('#agreement_btn_cancel').fadeIn(100);
     $("#obj_list_group .notification").fadeIn(100);
@@ -3829,9 +3838,13 @@ function clickIconEditAgreement(ownerName, ownerBirthDate, subDate, unsubDate, b
     let humanId = $(current).attr('human_id');
     console.log(humanId);
     $('#agreement_btn_save').attr('human_id', humanId);
-    $('#agreement_fio').val(agreementFio);
-    $('#agreement_name').val(agreemenName);
-    $('#agreement_birth_date').val(agreementBirthDate);
+    $('#agreement_fio').val(agrFio);
+    $('#agreement_name').val(agrName);
+    $('#agreement_birth_date').val(agrBithday);
+    $('#agreement_date').val(dataAgr);
+    $('#agreement_snils').val(snils);
+    $('#agreement_inn').val(inn);
+    $('#agreement_passport').val(pass);
     $('#owner_creation_time').text(`Добавил: ${author} ${creationTime}`)
 }
 
@@ -3906,8 +3919,7 @@ function editAgreementRequest() {
         snils = $("#agreement_snils").val(),
         inn = $("#agreement_inn").val(),
         pass = $("#agreement_passport").val(),
-        humanId = $("#agreement_btn_save").attr("human_id")
-
+        humanId = $("#agreement_btn_save").attr("human_id");
     if (date !== '') {
         let birthDate = $('#agreement_birth_date').val().split('-');
         date = `${birthDate[2]}.${birthDate[1]}.${birthDate[0]}`;
@@ -3928,6 +3940,7 @@ function editAgreementRequest() {
             param: "chg",
             humanId: humanId
         }
+        console.log(data)
         $.ajax({
             type: "POST",
             url: "/base_func?fnk_name=addchg_human",
