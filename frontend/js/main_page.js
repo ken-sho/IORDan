@@ -957,9 +957,12 @@ function toggleBlock () {
             prop.snils,
             prop.inn,
             prop.pass,
+            prop.author,
+            prop.creation_time,
             current
         )).css("margin-right", "10px")
     ).appendTo("#obj_list_group .block-header-with-manipulation");
+    const creationTime = $("<div>", { class:"notification", id:"agreement_creation_time" ,text: `Добавил: ${prop.author} ${prop.creation_time}`}).appendTo(formBlock);
  }
 
  function addAgrData(){
@@ -3809,6 +3812,7 @@ function isActivePrintMode() {
 function clickIconEditOwner(ownerName, ownerBirthDate, subDate, unsubDate, birthPlace, current) {
     $('#owner_btn_save').fadeIn(100);
     $('#owner_btn_cancel').fadeIn(100);
+    $("#owner_btn_edit").hide();
     $("#obj_list_group .notification").fadeIn(100);
     $('#owner_name, #owner_birth_date, #owner_subscribe_date, #owner_unsubscribe_date, #owner_birth_place, #owner_snils, #owner_inn').removeAttr("disabled");
 
@@ -3826,10 +3830,11 @@ function clickIconEditOwner(ownerName, ownerBirthDate, subDate, unsubDate, birth
     $('#owner_creation_time').text(`Добавил: ${author} ${creationTime}`)
 }
 
-function clickIconEditAgreement(agrFio, agrBithday, agrName, dataAgr, snils, inn, pass, current) {
+function clickIconEditAgreement(agrFio, agrBithday, agrName, dataAgr, snils, inn, pass, author, creationTime, current) {
     $('#agreement_btn_save').fadeIn(100);
     $('#agreement_btn_cancel').fadeIn(100);
     $("#obj_list_group .notification").fadeIn(100);
+    $("#agreement_btn_edit").hide();
     $('#agreement_fio, #agreement_birth_date, #agreement_name, #agreement_date, #agreement_snils, #agreement_inn, #agreement_passport').removeAttr("disabled");
 
     const author = $(current).attr('author');
@@ -3845,7 +3850,7 @@ function clickIconEditAgreement(agrFio, agrBithday, agrName, dataAgr, snils, inn
     $('#agreement_snils').val(snils);
     $('#agreement_inn').val(inn);
     $('#agreement_passport').val(pass);
-    $('#owner_creation_time').text(`Добавил: ${author} ${creationTime}`)
+    $('#agreement_creation_time').text(`Добавил: ${author} ${creationTime}`)
 }
 
 function editOwnerRequest() {
@@ -3897,6 +3902,10 @@ function editOwnerRequest() {
             success: function (data) {
                 console.log(data);
                 if (data == 'success') {
+                    $('#owner_btn_save').fadeOut(100);
+                    $('#owner_btn_cancel').fadeOut(100);
+                    $("#owner_btn_edit").fadeIn(100);
+
                     showPopupNotification('notification', 'Прописанный успешно отредактирован!');
                     closePopupWindow();
                     refreshObjectData([getObjectRegistrationsData, clickDropdownMenu]);
@@ -3911,6 +3920,7 @@ function editOwnerRequest() {
 }
 
 function editAgreementRequest() {
+
     let accid = CURRENT_OBJECT_DATA.accid,
         fio = $('#agreement_fio').val(),
         date = $('#agreement_birth_date').val(),
@@ -3948,12 +3958,19 @@ function editAgreementRequest() {
             success: function (data) {
                 console.log(data);
                 if (data == 'success') {
+                    $("#agreement_btn_edit").fadeOut(100);
+                    $('#agreement_btn_save').fadeOut(100);
+                    $('#agreement_btn_cancel').fadeIn(100);
                     showPopupNotification('notification', 'Собственник успешно отредактирован!');
                     closePopupWindow();
                     refreshObjectData([getObjectRegistrationsData, clickDropdownMenu]);
+                    $('#agreement_fio, #agreement_birth_date, #agreement_name, #agreement_date, #agreement_snils, #agreement_inn, #agreement_passport').attr("disabled", true); 
+                    getObjectData();
+                } else if(data.lock_value){
+                //    $('#agreement_fio, #agreement_birth_date, #agreement_name, #agreement_date, #agreement_snils, #agreement_inn, #agreement_passport').attr("disabled", true); 
+                   showPopupNotification('alert', data.lock_value);   
                 } else {
-                   $('#agreement_fio, #agreement_birth_date, #agreement_name, #agreement_date, #agreement_snils, #agreement_inn, #agreement_passport').attr("disabled", true); 
-                   showPopupNotification('alert', 'Ошибка сервера!');   
+                    showPopupNotification('alert', "Ошибка сервера");
                 }
              
             }
