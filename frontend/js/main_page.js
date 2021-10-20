@@ -3874,7 +3874,8 @@ function editOwnerRequest() {
             inn: inn,
             snils: snils,
             humanid: humanId,
-            pass: pass
+            pass: pass,
+            param: "chg"
         }
         $.ajax({
             type: "POST",
@@ -3904,7 +3905,8 @@ function editAgreementRequest() {
         dateAgr = $('#agreement_date').val(),
         snils = $("#agreement_snils").val(),
         inn = $("#agreement_inn").val(),
-        pass = $("#agreement_passport").val();
+        pass = $("#agreement_passport").val(),
+        humanId = $("#agreement_btn_save").attr("human_id")
 
     if (date !== '') {
         let birthDate = $('#agreement_birth_date').val().split('-');
@@ -3922,7 +3924,9 @@ function editAgreementRequest() {
             snils: snils,
             name: name,
             dateagr: dateAgr,
-            pass: pass
+            pass: pass,
+            param: "chg",
+            humanId: humanId
         }
         $.ajax({
             type: "POST",
@@ -3970,6 +3974,8 @@ function addNewOwner() {
             inn: inn,
             snils: snils,
             pass: pass,
+            accid: accid,
+            param: "add"
         }
         console.log(data)
         $.ajax({
