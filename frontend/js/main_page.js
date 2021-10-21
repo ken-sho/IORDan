@@ -3003,7 +3003,7 @@ function getObjectRegistrationsData() {
             ownerBirthDate = RemakeDateFormatToInput(registrationValue.db),
             subDate = RemakeDateFormatToInput(registrationValue.dateb),
             unsubDate = RemakeDateFormatToInput(registrationValue.datee),
-            birthPlace = registrationValue.db,
+            birthPlace = registrationValue.bp,
             inn = registrationValue.inn,
             snils = registrationValue.snils,
             pass = registrationValue.pass;
@@ -3814,7 +3814,7 @@ function clickIconEditOwner(ownerName, ownerBirthDate, subDate, unsubDate, birth
     $('#owner_btn_cancel').fadeIn(100);
     $("#owner_btn_edit").hide();
     $("#obj_list_group .notification").fadeIn(100);
-    $('#owner_name, #owner_birth_date, #owner_subscribe_date, #owner_unsubscribe_date, #owner_birth_place, #owner_snils, #owner_inn').removeAttr("disabled");
+    $('#owner_name, #owner_birth_date, #owner_subscribe_date, #owner_unsubscribe_date, #owner_birth_place, #owner_snils, #owner_inn, #owner_passport').removeAttr("disabled");
 
     const author = $(current).attr('author');
     const creationTime = $(current).attr('creation_time');
@@ -3836,9 +3836,6 @@ function clickIconEditAgreement(agrFio, agrBithday, agrName, dataAgr, snils, inn
     $("#obj_list_group .notification").fadeIn(100);
     $("#agreement_btn_edit").hide();
     $('#agreement_fio, #agreement_birth_date, #agreement_name, #agreement_date, #agreement_snils, #agreement_inn, #agreement_passport').removeAttr("disabled");
-
-    const author = $(current).attr('author');
-    const creationTime = $(current).attr('creation_time');
 
     let humanId = $(current).attr('human_id');
     console.log(humanId);
@@ -3910,7 +3907,7 @@ function editOwnerRequest() {
                     closePopupWindow();
                     refreshObjectData([getObjectRegistrationsData, clickDropdownMenu]);
                 } else {
-                    $('#owner_name, #owner_birth_date, #owner_subscribe_date, #owner_unsubscribe_date, #owner_birth_place, #owner_snils, #owner_inn').attr("disabled", true);
+                    $('#owner_name, #owner_birth_date, #owner_subscribe_date, #owner_unsubscribe_date, #owner_birth_place, #owner_snils, #owner_inn, #owner_passport').attr("disabled", true);
                     showPopupNotification('alert', 'Ошибка сервера!');
                 }
                 
@@ -3948,7 +3945,7 @@ function editAgreementRequest() {
             dateagr: dateAgr,
             pass: pass,
             param: "chg",
-            humanId: humanId
+            humanid: humanId
         }
         console.log(data)
         $.ajax({
@@ -5404,7 +5401,7 @@ function uploadFiles(files, fileTypes, parentNode, filesInfoNode, accid, callbac
     }
 }
 
-function resizeTwoDiv(parentDiv, firstDiv, SecondDiv, error, handles, maxHeight = "auto", minHeight = "auto") {
+function resizeTwoDiv(parentDiv, firstDiv, SecondDiv, error, handles, maxHeight = "auto", minHeight = "auto") {localStorage.getItem("currentCompany")
     if(handles == "e"){
         if(localStorage.hasOwnProperty(`width_${firstDiv}`)){
             const heightFirstDiv = localStorage.getItem(`width_${firstDiv}`);
@@ -7040,7 +7037,8 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
     }
 
     $("#add_container").remove();
-    const {thead, tbody, tfooter, blocked, rows_per_page, upload_file_types} = data; // data.thead, data,tbody ...
+    const {thead, tbody, tfooter, blocked, rows_per_page, upload_file_types} = data; 
+    console.log(data)
 
     const registryIsBlocked = (blocked == 'true');
 
@@ -7157,7 +7155,20 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                         if (isHidden) {
                             td.css({ 'display': 'none' });
                         }
-    
+                        const onClick = (thead[index].name == ("Адрес")) || (thead[index].name == ("ЛС"));
+                        if(onClick && entry.accid){
+                            td.addClass("link-td")
+                            td.on("click", () => {
+                                CURRENT_OBJECT_DATA.accid = entry.accid;
+                                $('#obj_ls_info .header-ls').attr('did', entry.accid);
+                                getObjectData();
+                                openHomePage();
+                                chooseCompany($(`#noactive`), localStorage.getItem("currentCompany"), getCookie('companyId'));
+                      
+                            })
+                        }
+                        
+
                         if(entry.rec_clr){
                             if(localStorage.getItem('color_theme') =='dark'){
                                 td.css("background-color", "#d1e1e8");
