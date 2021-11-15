@@ -13,9 +13,31 @@ var filesRegistry;
 var COUNT_ID = 0;
 var C_REG_DATA = {};
 var office_admin_active = false;
+var quill = {};
 
 
 $(document).ready(function() {  
+
+    quill = new Quill('#editor-container', {
+        modules: {
+          formula: true,
+          syntax: true,
+          toolbar: '#toolbar-container'
+        },
+        placeholder: 'Введите для изменения нижней части сайта',
+        theme: 'snow'
+      });
+      
+      $(window).on('popstate', function (e) {
+        var state = e.originalEvent.state;
+        console.log(e.originalEvent.state);
+        console.log(e.originalEvent);
+        console.log(e)
+        if (state !== null) {
+            //load content with ajax 
+        }
+    });
+
     sessionStorage.setItem('printMode', 'off');
     // getProjectTaskList("web_deb");
     toggleBlock ()
@@ -1120,6 +1142,7 @@ function openCloseMainMenu () {
 
 function openPopupWindow(id) {
     $('.popup-window, .popup-fullscreen').hide();
+    $(".background_editor").hide();
     if(office_admin_active){
         console.log("active");
         $("<div>", {id:"popup_background_2"}).appendTo("#popup_background").on('click', (e) => {
@@ -1146,9 +1169,12 @@ function openPopupWindow(id) {
                 "z-index": "90",
                 "left": "14%"
             }); 
-        }
+        }       
         $("#popup_office_administration").show();
     }
+    if(id == "popup_editor"){
+        $(".background_editor").show();
+       }
     $(`#${id}, #popup_background`).fadeIn(200);
     if (id == 'popup_search') {
         setOffsetFastSearchMenu();
@@ -3007,6 +3033,7 @@ function getObjectRegistrationsData() {
             inn = registrationValue.inn,
             snils = registrationValue.snils,
             pass = registrationValue.pass;
+            console.log()
             createInfRegData(ownerName, ownerBirthDate, subDate, unsubDate, birthPlace, this, inn, snils, pass);
         })
 
@@ -4768,16 +4795,6 @@ function initializationPopupControl() {
     });
 
     getObjectsGroupsList();
-
-    // let quill = new Quill('#editor-container', {
-    //     modules: {
-    //       formula: true,
-    //       syntax: true,
-    //       toolbar: '#toolbar-container'
-    //     },
-    //     placeholder: 'Введите для изменения нижней части сайта',
-    //     theme: 'snow'
-    //   });
 }
 
 function initializeSettingItem(parent, settingName, settingContent, callback) {
@@ -5805,6 +5822,55 @@ function getUpdateList() {
 
 function changeTabControlReportSettings() {
     let tabsCollection = $('#report_settings_select_menu ul li');
+
+    
+
+    $("#editor-save").on("click", () => {
+        const reportsArr = getCurrentCompanyReportsArray();
+
+        const repId =  $('#report_settings_select_menu ul li').filter((index,item) => $(item).hasClass("active"));
+
+        console.log(repId.attr('rep_id'));
+
+        console.log(quill.getContents())
+        
+        const report = reportsArr[repId.attr('rep_id')];
+        const data = JSON.stringify({ setting: "trustee_signature", rep_type: report.rep_type, rep_num: report.rep_num, value: quill.getContents() });
+        console.log(data)
+        try{
+            $.ajax({
+                type: "POST",
+                url: "/base_func?fnk_name=reports_setting",
+                data: data,
+                success: function (data) {
+                    console.log(data)
+                    if (data == 'success') {
+                        closePopupWindow('popup_editor');
+                        $(".background_editor").hide();
+                        getUserData([() => {
+                            const reportsArr = getCurrentCompanyReportsArray();    
+                            const report = reportsArr[repId];
+                            textarea.val(report.trustee_signature);
+                        }]);
+                        showPopupNotification('notification', 'Подпись доверенного лица успешно сохранена!');
+                    } else {
+                        showPopupNotification('alert', 'Ошибка сервера!');
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                  console.log(xhr.status);
+                  console.log(thrownError);
+                  console.log(xhr.responseText);
+                  showPopupNotification('alert', `Ошибка сервера! ${xhr.status}`);
+                }
+            })
+        } catch(e){
+            console.log(e);
+            showPopupNotification('alert', 'Ошибка сервера!');
+        }
+        
+    })
+
     tabsCollection.on('click', function() {
         $('#report_settings .block-content').empty();
         tabsCollection.removeClass('active');
@@ -5812,7 +5878,9 @@ function changeTabControlReportSettings() {
         
         // конструктор
 
-        $("#editor-container").text("")
+
+
+        // $("#editor-container").text("")
 
         const reportsArr = getCurrentCompanyReportsArray();
         console.log(reportsArr)
@@ -5919,6 +5987,31 @@ function changeTabControlReportSettings() {
                 }
             })
         }).appendTo(TrusteeSignatureContent);
+
+        
+        $("#editor-save").on("click", () => {
+            const data = JSON.stringify({ setting: "trustee_signature", rep_type: report.rep_type, rep_num: report.rep_num, value: textarea.val() });
+
+            $.ajax({
+                type: "POST",
+                url: "/base_func?fnk_name=reports_setting",
+                data: data,
+                success: function (data) {
+                    if (data == 'success') {
+                        
+                    } else {
+                        getUserData([() => {
+                            const reportsArr = getCurrentCompanyReportsArray();    
+                            const report = reportsArr[repId];
+                            textarea.val(report.trustee_signature);
+                        }]);
+                        textarea.val("");
+                        closePopupWindow('popup_editor');
+                        showPopupNotification('notification', 'Подпись доверенного лица успешно сохранена!');
+                    }
+                }
+            })
+        })
 
         initializeSettingItem('#report_settings .block-content', 'Подпись доверенного лица', TrusteeSignatureContent, () => {});
 
