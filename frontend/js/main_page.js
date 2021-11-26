@@ -13,20 +13,20 @@ var filesRegistry;
 var COUNT_ID = 0;
 var C_REG_DATA = {};
 var office_admin_active = false;
-var quill = {};
+// var quill = {};
 
 
 $(document).ready(function() {  
 
-    quill = new Quill('#editor-container', {
-        modules: {
-          formula: true,
-          syntax: true,
-          toolbar: '#toolbar-container'
-        },
-        placeholder: 'Введите для изменения нижней части сайта',
-        theme: 'snow'
-      });
+    // quill = new Quill('#editor-container', {
+    //     modules: {
+    //       formula: true,
+    //       syntax: true,
+    //       toolbar: '#toolbar-container'
+    //     },
+    //     placeholder: 'Введите для изменения нижней части сайта',
+    //     theme: 'snow'
+    //   });
       
       $(window).on('popstate', function (e) {
         var state = e.originalEvent.state;
@@ -5832,42 +5832,42 @@ function changeTabControlReportSettings() {
 
         console.log(repId.attr('rep_id'));
 
-        console.log(quill.getContents())
+        // console.log(quill.getContents())
         
-        const report = reportsArr[repId.attr('rep_id')];
-        const data = JSON.stringify({ setting: "trustee_signature", rep_type: report.rep_type, rep_num: report.rep_num, value: quill.getContents() });
-        console.log(data)
-        try{
-            $.ajax({
-                type: "POST",
-                url: "/base_func?fnk_name=reports_setting",
-                data: data,
-                success: function (data) {
-                    console.log(data)
-                    if (data == 'success') {
-                        closePopupWindow('popup_editor');
-                        $(".background_editor").hide();
-                        getUserData([() => {
-                            const reportsArr = getCurrentCompanyReportsArray();    
-                            const report = reportsArr[repId];
-                            textarea.val(report.trustee_signature);
-                        }]);
-                        showPopupNotification('notification', 'Подпись доверенного лица успешно сохранена!');
-                    } else {
-                        showPopupNotification('alert', 'Ошибка сервера!');
-                    }
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                  console.log(xhr.status);
-                  console.log(thrownError);
-                  console.log(xhr.responseText);
-                  showPopupNotification('alert', `Ошибка сервера! ${xhr.status}`);
-                }
-            })
-        } catch(e){
-            console.log(e);
-            showPopupNotification('alert', 'Ошибка сервера!');
-        }
+        // const report = reportsArr[repId.attr('rep_id')];
+        // const data = JSON.stringify({ setting: "trustee_signature", rep_type: report.rep_type, rep_num: report.rep_num, value: quill.getContents() });
+        // console.log(data)
+        // try{
+        //     $.ajax({
+        //         type: "POST",
+        //         url: "/base_func?fnk_name=reports_setting",
+        //         data: data,
+        //         success: function (data) {
+        //             console.log(data)
+        //             if (data == 'success') {
+        //                 closePopupWindow('popup_editor');
+        //                 $(".background_editor").hide();
+        //                 getUserData([() => {
+        //                     const reportsArr = getCurrentCompanyReportsArray();    
+        //                     const report = reportsArr[repId];
+        //                     textarea.val(report.trustee_signature);
+        //                 }]);
+        //                 showPopupNotification('notification', 'Подпись доверенного лица успешно сохранена!');
+        //             } else {
+        //                 showPopupNotification('alert', 'Ошибка сервера!');
+        //             }
+        //         },
+        //         error: function (xhr, ajaxOptions, thrownError) {
+        //           console.log(xhr.status);
+        //           console.log(thrownError);
+        //           console.log(xhr.responseText);
+        //           showPopupNotification('alert', `Ошибка сервера! ${xhr.status}`);
+        //         }
+        //     })
+        // } catch(e){
+        //     console.log(e);
+        //     showPopupNotification('alert', 'Ошибка сервера!');
+        // }
         
     })
 
