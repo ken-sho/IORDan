@@ -271,7 +271,7 @@ body{
     background-image: url(../images/login_page_img/background.png);
     background-repeat: no-repeat;
     background-position: center;
-    height: 682px;
+    height: auto;
     padding: 138px 0px;
     box-sizing: border-box;
 }
@@ -566,12 +566,12 @@ hr {
 
     .conclusion {
         padding: 128px 0px;
-        height: 663px;
+        height: auto;
     }
 
     .contacts {
         width: 690px;
-        height: 407px;
+        height: auto;
         padding: 0px 49px;
     }
 
@@ -613,7 +613,7 @@ hr {
 }
 
 
-@media (max-width: 667px) {
+@media (max-width: 715px) {
     .text_logo {
         font-style: normal;
         text-align: center;
@@ -700,14 +700,14 @@ hr {
 
     .conclusion {
         padding: 60px 15px;
-        height: 726px;
+        height: auto;
         background-position: top;
         background-repeat: round;
     }
 
     .contacts {
-        width: 290px;
-        height: 606px;
+        width: 100%;
+        height: auto;
         padding: 38px 24px;
         flex-direction: column;
         justify-content: start;
@@ -811,7 +811,7 @@ hr {
 
 
 
-@media (min-width: 380px) and (max-width: 667px) {
+@media (min-width: 380px) and (max-width: 715px) {
        /* CSS-стили */
 	   
 	.facepage{    
@@ -825,7 +825,7 @@ hr {
 	} 
 }
 
-@media (min-width: 500px) and (max-width: 667px) {
+@media (min-width: 500px) and (max-width: 715px) {
        /* CSS-стили */
 	   
 	.facepage{    
@@ -839,3 +839,25 @@ hr {
 	} 
 }
 
+@media (max-width: 484px){
+    .contacts{
+        height: auto;    
+    }
+    
+}
+
+@media (max-width: 400px){
+    .contacts{
+        height: auto;    
+    }
+
+    .browser_content{
+        margin-top: 15px;
+    }
+
+    .browser-icon-png{
+        width: 40px;
+        height: 40px;
+    }
+    
+}
