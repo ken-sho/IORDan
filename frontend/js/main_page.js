@@ -2514,23 +2514,41 @@ function getPackage(repName, repNum, repType) {
 
     const reportData = {number: repNum, type : repType, accid: CURRENT_OBJECT_DATA.accid};
 
+    let note = $("<div>");
+
     $.ajax({
         type: 'POST',
         url: '/report',
         data: JSON.stringify({operation: "check", report_data: reportData}),
         success: (data) => {
-            const periodsData = JSON.parse(data);
-            console.log(periodsData)
+            console.log(data)
+            let periodsData = JSON.parse(data)
+             
+            if(!Array.isArray(JSON.parse(data))){
+                periodsData = JSON.parse(data).list;
+                note = $("<div>", {text:JSON.parse(data).note, class: "note"})
+            }
             if (data !== 'error' && !isEmpty(periodsData)) {
                 const ownershipPeriodsRepository = [];
 
                 const table = $('<table>', { class: 'table-form border-block-default' });
 
                 for (const period of periodsData) {
-                    const tr = $('<tr>', {class: 'border-bottom', style: 'height: 50px'});
-                    const tdCheckBox = $('<td>').append(
-                        $('<input>', {type: 'checkbox', checked: 'checked'})
-                    )
+                    const blocked = period.blocked;
+                    let styleBlocked = ``
+                    let checked = `checked: "checked"`
+                    if(blocked){
+                        styleBlocked = "blocked-tr"
+                        checked = "none"
+                    }
+ 
+                    const tr = $('<tr>', {class: `border-bottom' ${styleBlocked}`, style: "height: 50px"});
+                    const inputCheck = $('<input>', {type: 'checkbox', checked: "checked"})
+                    const tdCheckBox = $('<td>').append(inputCheck)
+
+                    if(blocked){
+                        inputCheck.removeAttr("checked")
+                    }
                     const tdName = $('<td>', { text: period.name, style: 'font-weight: bold' });
                     const tdStartDate = $('<td>', { text: 'Дата начала', style: 'text-align: center' });
                     const tdStartDateInput = $('<td>').append(
@@ -2553,86 +2571,77 @@ function getPackage(repName, repNum, repType) {
                     tr.appendTo(table);
                 }
 
-                const button = $('<div>', { class: 'form-submit-btn' }).append(
-                    $('<button>', { class: 'button-primary', text: 'Выполнить'}).on('click', () => {
-                        const ownershipPeriodsData = [];
+                const button = $('<button>', { class: 'button-primary', text: 'Выполнить'}).on('click', () => {
+                    const ownershipPeriodsData = [];
 
-                        for (const period of ownershipPeriodsRepository) {
-                            if (period.isSelected.prop('checked')) {
-                                ownershipPeriodsData.push({ name: period.name, start_date: RemakeDateFormatFromInput(period.start_date.val()), end_date: RemakeDateFormatFromInput(period.end_date.val()) });
-                            }
+                    for (const period of ownershipPeriodsRepository) {
+                        if (period.isSelected.prop('checked')) {
+                            ownershipPeriodsData.push({ name: period.name, start_date: RemakeDateFormatFromInput(period.start_date.val()), end_date: RemakeDateFormatFromInput(period.end_date.val()) });
                         }
+                    }
 
-                        const isCheked = [];
-                        $('input[name="action_radio"]').each((index, elem) => {
-                            if($(elem).prop('checked') == true){
-                              isCheked.push($(elem).val())  
-                            }                            
-                        });
+                    const isCheked = [];
+                    $('input[name="action_radio"]').each((index, elem) => {
+                        if($(elem).prop('checked') == true){
+                          isCheked.push($(elem).val())  
+                        }                            
+                    });
 
-                        const data = { 
-                            operation: 'get_report', 
-                            report_data: reportData, 
-                            ownership_periods: ownershipPeriodsData, 
-                            checkbox: isCheked,  
-                            type : repType
-                        };
-                        console.log(data)
-                        if (!isEmpty(ownershipPeriodsData)) {
-                            const callback = (data) => {
-                                initializeReportNewWindow(data, repName, reportId);
-                            }
-                            console.log("это")
-                            getReportContent(data, callback);
+                    const defaultDate = $("#date-default").val();
+
+                    const data = { 
+                        operation: 'get_report', 
+                        report_data: reportData, 
+                        ownership_periods: ownershipPeriodsData, 
+                        checkbox: isCheked,  
+                        type : repType,
+                        default_date: defaultDate
+                    };
+                    if (!isEmpty(ownershipPeriodsData)) {
+                        const callback = (data) => {
+                            initializeReportNewWindow(data, repName, reportId);
                         }
-                        else {
-                            showPopupNotification('alert', 'Выберите хотя бы один период!')
-                        }
+                        getReportContent(data, callback);
+                    }
+                    else {
+                        showPopupNotification('alert', 'Выберите хотя бы один период!')
+                    }
 
-                    }).css("margin-left","15%"),$("<div>", {class: "additional-block"})
-                );
-                const btnAction = $("<button>",{text: "Выбрать действия", class:"button-secondary"}).appendTo(button); 
+                }).css("margin-left","15%")
+
+                const buttonParent = $('<div>', { class: 'form-submit-btn' }).append(button,$("<div>", {class: "additional-block"}));
+                const btnAction = $("<button>",{text: "Выбрать действия", class:"button-secondary"}).appendTo(buttonParent); 
                 btnAction.css("float", "right");
-                btnAction.css("width", "175px");  
-
-                let btnAddSp = $("#add_sp"),
-                    btnAddGp = $("#add_gp");
+                btnAction.css("width", "196px");  
+                let countAction = 0; 
                 
-                btnAddSp.on("click", () => {
-                    if(btnAddSp.prop('checked') == true){
-                        btnAction.text(btnAddSp.attr("textname"));
-
-                        if(btnAddGp.prop('checked') == true && btnAddSp.prop('checked') == true){
-                            btnAction.text("Добавить в ГП и СП");
+                $('.action_package').on("click", (e) => {
+                    if(e.target.checked){
+                        
+                        countAction++
+                        btnAction.text("Выбрано действий: " + countAction);
+                        if(e.target.id === "add_date"){
+                            $(".date-input").remove();
+                            const date = $("<div>", {class: "date-input"}).append($('<input>', { class: 'input-main', id: "date-default", type: 'date' }))
+                            btnAction.after(date)
+                        } 
+                    } else {
+                        if(e.target.id === "add_date"){
+                            $(".date-input").remove();
+                        } 
+                        countAction--
+                        if(countAction != 0){
+                            btnAction.text("Выбрано действий: " + countAction);
+                        } else {
+                            btnAction.text("Без действий");
                         }
-
-                    } else if(btnAddSp.prop('checked') == false && btnAddGp.prop('checked') == true){
-                        btnAction.text("Добавить в ГП");
-
-                    } else if(btnAddSp.prop('checked') == false && btnAddGp.prop('checked') == false){
-                        btnAction.text("Без действий");
-                    }                    
-                });
-
-                btnAddGp.on("click", () => {
-                    if(btnAddGp.prop('checked') == true){
-                        btnAction.text(btnAddGp.attr("textname"));
-
-                        if(btnAddSp.prop('checked') == true && btnAddGp.prop('checked') == true){
-                            btnAction.text("Добавить в СП и ГП");
-                        }  
-                    }   else if(btnAddGp.prop('checked') == false && btnAddSp.prop('checked') == true){
-                        btnAction.text("Добавить в СП");
-
-                    }   else if(btnAddSp.prop('checked') == false && btnAddGp.prop('checked') == false){
-                        btnAction.text("Без действий");
-                    } 
-                    
-                });
+                    }
+                
+                })
                                 
                 btnAction.attr("data-jq-dropdown","#jq-dropdown-additional-block"); 
                 popupContent.empty();
-                popupContent.append(table, button);
+                popupContent.append(table,note, buttonParent);
             }
             else {
                 popupContent.empty();

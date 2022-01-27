@@ -2365,8 +2365,12 @@ div {
 #jq-dropdown-additional-block li, #jq-dropdown-additional-block input, #jq-dropdown-additional-block label{
     cursor: pointer;
 }
+#jq-dropdown-additional-block li{
+    border: 1px solid var(--default-third-color);
+}
 #jq-dropdown-additional-block li:hover{
-border: 1px solid #fff;
+    border: 1px solid #fff;
+    border-radius: 5px;
 }
 
 .popup-fullscreen .main-content,
@@ -4389,6 +4393,12 @@ tr:not(:last-child).border-bottom td {
     border-bottom: 1px solid lightgray;
 }
 
+.blocked-tr{
+    pointer-events: none;
+    color: #afa8a8;
+}
+
+
 #adress_options_ui {
     list-style-type: none;
     padding: 0;
@@ -4419,4 +4429,19 @@ tr:not(:last-child).border-bottom td {
 
 .show{
     display: block;
+}
+
+.note{
+    height: 63px;
+    overflow-y: auto;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    padding: 5px;
+    text-align: justify;
+}
+
+
+.date-input{
+    float: right;
+    margin-right: 12px;
 }
