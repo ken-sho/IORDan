@@ -2548,6 +2548,7 @@ function getPackage(repName, repNum, repType) {
 
                     if(blocked){
                         inputCheck.removeAttr("checked")
+                        $("#rem_rest_wrap").show()
                     }
                     const tdName = $('<td>', { text: period.name, style: 'font-weight: bold' });
                     const tdStartDate = $('<td>', { text: 'Дата начала', style: 'text-align: center' });
@@ -2626,7 +2627,8 @@ function getPackage(repName, repNum, repType) {
                         } else if(e.target.id === "remove_restrictions"){
                             console.log("нажал")
                             $('.border-bottom').each((index, elem) => {
-                                $(elem).prop( "checked", true);
+                                console.log(elem.firstChild.firstChild)
+                                $(elem.firstChild.firstChild).prop( "checked", true);
                                 $(elem).removeClass('blocked-tr');                        
                             });
                         }
@@ -2635,8 +2637,8 @@ function getPackage(repName, repNum, repType) {
                             $(".date-input").remove();
                         } else if(e.target.id === "remove_restrictions"){
                             $('.border-bottom').each((index, elem) => {
-                                console.dir(elem)
-                                $(elem).removeAttr("checked");
+                                console.dir(elem.firstChild.firstChild)
+                                $(elem.firstChild.firstChild).prop("checked", false);
                                 $(elem).addClass('blocked-tr');                  
                             });
                         }
