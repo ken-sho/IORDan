@@ -2542,7 +2542,7 @@ function getPackage(repName, repNum, repType) {
                         checked = "none"
                     }
  
-                    const tr = $('<tr>', {class: `border-bottom' ${styleBlocked}`, style: "height: 50px"});
+                    const tr = $('<tr>', {class: `border-bottom ${styleBlocked}`, style: "height: 50px"});
                     const inputCheck = $('<input>', {type: 'checkbox', checked: "checked"})
                     const tdCheckBox = $('<td>').append(inputCheck)
 
@@ -2607,7 +2607,7 @@ function getPackage(repName, repNum, repType) {
                         showPopupNotification('alert', 'Выберите хотя бы один период!')
                     }
 
-                }).css("margin-left","15%")
+                }).css("margin-left","15%");
 
                 const buttonParent = $('<div>', { class: 'form-submit-btn' }).append(button,$("<div>", {class: "additional-block"}));
                 const btnAction = $("<button>",{text: "Выбрать действия", class:"button-secondary"}).appendTo(buttonParent); 
@@ -2616,19 +2616,30 @@ function getPackage(repName, repNum, repType) {
                 let countAction = 0; 
                 
                 $('.action_package').on("click", (e) => {
-                    if(e.target.checked){
-                        
+                    if(e.target.checked){                        
                         countAction++
                         btnAction.text("Выбрано действий: " + countAction);
                         if(e.target.id === "add_date"){
                             $(".date-input").remove();
                             const date = $("<div>", {class: "date-input"}).append($('<input>', { class: 'input-main', id: "date-default", type: 'date' }))
                             btnAction.after(date)
-                        } 
+                        } else if(e.target.id === "remove_restrictions"){
+                            console.log("нажал")
+                            $('.border-bottom').each((index, elem) => {
+                                $(elem).prop( "checked", true);
+                                $(elem).removeClass('blocked-tr');                        
+                            });
+                        }
                     } else {
                         if(e.target.id === "add_date"){
                             $(".date-input").remove();
-                        } 
+                        } else if(e.target.id === "remove_restrictions"){
+                            $('.border-bottom').each((index, elem) => {
+                                console.dir(elem)
+                                $(elem).removeAttr("checked");
+                                $(elem).addClass('blocked-tr');                  
+                            });
+                        }
                         countAction--
                         if(countAction != 0){
                             btnAction.text("Выбрано действий: " + countAction);
