@@ -2607,7 +2607,9 @@ function getPackage(repName, repNum, repType) {
                         default_date: defaultDate,
                     };
                     if($("#remove_restrictions").prop('checked')){
-                        data.blocked = false
+                        data.blockAlgr = false
+                    } else if($("#remove_restrictions").prop('checked') == false){
+                        data.blockAlgr = true
                     }
 
                     if (!isEmpty(ownershipPeriodsData)) {
