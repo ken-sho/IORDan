@@ -2536,8 +2536,11 @@ function getPackage(repName, repNum, repType) {
                 const isBloked = periodsData.find(period => period.blocked == true)
                 if(isBloked){
                     $("#rem_rest_wrap").show();
+                    $("#remove_restrictions").remove();
+                    $("<input>", {type:'checkbox', id:'remove_restrictions', name:'action_radio', value:'remove_restrictions', class:"action_package"}).prependTo("#rem_rest_wrap")
                 }else {
                     $("#rem_rest_wrap").hide();
+                    $("#remove_restrictions").remove();
                 }
 
                 for (const period of periodsData) {
@@ -2606,9 +2609,11 @@ function getPackage(repName, repNum, repType) {
                         type : repType,
                         default_date: defaultDate,
                     };
+                    console.log($("#remove_restrictions").prop('checked'));
+                    console.log($("#remove_restrictions").prop('checked') === false)
                     if($("#remove_restrictions").prop('checked')){
                         data.blockAlgr = false
-                    } else if($("#remove_restrictions").prop('checked') == false){
+                    } else if($("#remove_restrictions").prop('checked') === false){
                         data.blockAlgr = true
                     }
 
