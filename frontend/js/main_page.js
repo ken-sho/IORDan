@@ -2533,6 +2533,13 @@ function getPackage(repName, repNum, repType) {
 
                 const table = $('<table>', { class: 'table-form border-block-default' });
 
+                const isBloked = periodsData.find(period => period.blocked == true)
+                if(isBloked){
+                    $("#rem_rest_wrap").show();
+                }else {
+                    $("#rem_rest_wrap").hide();
+                }
+
                 for (const period of periodsData) {
                     const blocked = period.blocked;
                     let styleBlocked = ``
@@ -2548,10 +2555,8 @@ function getPackage(repName, repNum, repType) {
 
                     if(blocked){
                         inputCheck.removeAttr("checked")
-                        $("#rem_rest_wrap").show();
-                    } else {
-                        $("#rem_rest_wrap").hide();
-                    }
+                        
+                    } 
                     const tdName = $('<td>', { text: period.name, style: 'font-weight: bold' });
                     const tdStartDate = $('<td>', { text: 'Дата начала', style: 'text-align: center' });
                     const tdStartDateInput = $('<td>').append(
@@ -2592,13 +2597,20 @@ function getPackage(repName, repNum, repType) {
 
                     const defaultDate = $("#date-default").val();
 
+                    let blockAlgr = "";
+
+                    if($("#remove_restrictions").prop('checked')){
+                        blockAlgr = {blocked: false}
+                    }
+
                     const data = { 
                         operation: 'get_report', 
                         report_data: reportData, 
                         ownership_periods: ownershipPeriodsData, 
                         checkbox: isCheked,  
                         type : repType,
-                        default_date: defaultDate
+                        default_date: defaultDate,
+                        blockAlgr
                     };
                     if (!isEmpty(ownershipPeriodsData)) {
                         const callback = (data) => {
