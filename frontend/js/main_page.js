@@ -184,12 +184,6 @@ $(document).ready(function() {
     $('#add_owner_icon').on('click', function() {
 
         createInfRegData();
-        $("<i>", {id:"owner_btn_cancel_save", class:"material-icons", text: 'cancel', title: 'Отменить'}).on("click", () => {
-            $("#obj_list_group").find(".block-content").empty();
-            $("#owner_btn_cancel_save").hide();
-            $("#add_owner_btn").hide();
-            showPopupNotification('alert', 'Создание прописанного отменено!');
-        }).css({"margin-right": "10px"}).appendTo("#obj_list_group .form-submit-btn");
 
         $("#owner_btn_edit").hide(); // скрыть кнопку редактировать
 
@@ -204,6 +198,12 @@ $(document).ready(function() {
 
         saveBtn.on("click", addNewOwner);
 
+        $("<i>", {id:"owner_btn_cancel_save", class:"material-icons", text: 'cancel', title: 'Отменить'}).on("click", () => {
+            $("#obj_list_group").find(".block-content").empty();
+            $("#owner_btn_cancel_save").hide();
+            $("#add_owner_btn").hide();
+            showPopupNotification('alert', 'Создание прописанного отменено!');
+        }).css({"margin-right": "10px"}).appendTo("#obj_list_group .form-submit-btn");
         // openPopupWindow('popup_add_owner');
     });
 
@@ -885,11 +885,11 @@ function toggleBlock () {
     ).appendTo(table);
     
     $("<div>", { class:"form-submit-btn"}).append(
+        $("<i>", {id:"owner_btn_save", class:"material-icons", text: 'save', title: 'Сохранить'}).on("click", editOwnerRequest).css({"display": "none","margin-right": "10px"}),
         $("<i>", {id:"owner_btn_cancel", class:"material-icons", text: 'cancel', title: 'Отменить'}).on("click", () => {
             createInfRegData(ownerName, ownerBirthDate, subDate, unsubDate, birthPlace, current, inn, snils, pass);
             showPopupNotification('alert', 'Редактирование прописанного отменено!');
         }).css({"display": "none","margin-right": "10px"}),
-        $("<i>", {id:"owner_btn_save", class:"material-icons", text: 'save', title: 'Сохранить'}).on("click", editOwnerRequest).css({"display": "none","margin-right": "10px"}),
         $("<i>", {id:"owner_btn_edit", class:"material-icons", text: "edit", title: 'Редактировать'}).on("click", () => clickIconEditOwner(ownerName, ownerBirthDate, subDate, unsubDate, birthPlace, current)).css("margin-right", "10px")
     ).appendTo("#obj_list_group .block-header-with-manipulation");
 
@@ -2542,13 +2542,15 @@ function getPackage(repName, repNum, repType) {
                         checked = "none"
                     }
  
-                    const tr = $('<tr>', {class: `border-bottom ${styleBlocked}`, style: "height: 50px"});
+                    const tr = $('<tr>', {class: `border-bottom ${styleBlocked}`, style: "height: 50px", blocked: blocked});
                     const inputCheck = $('<input>', {type: 'checkbox', checked: "checked"})
                     const tdCheckBox = $('<td>').append(inputCheck)
 
                     if(blocked){
                         inputCheck.removeAttr("checked")
-                        $("#rem_rest_wrap").show()
+                        $("#rem_rest_wrap").show();
+                    } else {
+                        $("#rem_rest_wrap").hide();
                     }
                     const tdName = $('<td>', { text: period.name, style: 'font-weight: bold' });
                     const tdStartDate = $('<td>', { text: 'Дата начала', style: 'text-align: center' });
@@ -2627,7 +2629,7 @@ function getPackage(repName, repNum, repType) {
                         } else if(e.target.id === "remove_restrictions"){
                             console.log("нажал")
                             $('.border-bottom').each((index, elem) => {
-                                console.log(elem.firstChild.firstChild)
+                                console.dir(elem)
                                 $(elem.firstChild.firstChild).prop( "checked", true);
                                 $(elem).removeClass('blocked-tr');                        
                             });
@@ -2637,9 +2639,11 @@ function getPackage(repName, repNum, repType) {
                             $(".date-input").remove();
                         } else if(e.target.id === "remove_restrictions"){
                             $('.border-bottom').each((index, elem) => {
-                                console.dir(elem.firstChild.firstChild)
-                                $(elem.firstChild.firstChild).prop("checked", false);
-                                $(elem).addClass('blocked-tr');                  
+                                if(elem.attributes.blocked.value){
+                                    $(elem.firstChild.firstChild).prop("checked", false);
+                                    $(elem).addClass('blocked-tr');  
+                                }
+                                                
                             });
                         }
                         countAction--
