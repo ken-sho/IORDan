@@ -2596,12 +2596,7 @@ function getPackage(repName, repNum, repType) {
                     });
 
                     const defaultDate = $("#date-default").val();
-
-                    let blockAlgr = "";
-
-                    if($("#remove_restrictions").prop('checked')){
-                        blockAlgr = {blocked: false}
-                    }
+                   
 
                     const data = { 
                         operation: 'get_report', 
@@ -2610,8 +2605,11 @@ function getPackage(repName, repNum, repType) {
                         checkbox: isCheked,  
                         type : repType,
                         default_date: defaultDate,
-                        blockAlgr
                     };
+                    if($("#remove_restrictions").prop('checked')){
+                        data.blocked = false
+                    }
+
                     if (!isEmpty(ownershipPeriodsData)) {
                         const callback = (data) => {
                             initializeReportNewWindow(data, repName, reportId);
