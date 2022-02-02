@@ -2651,7 +2651,8 @@ function getPackage(repName, repNum, repType) {
                             $(".date-input").remove();
                         } else if(e.target.id === "remove_restrictions"){
                             $('.border-bottom').each((index, elem) => {
-                                if(elem.attributes.blocked.value){
+
+                                if(elem.attributes.blocked.value == "true"){
                                     $(elem.firstChild.firstChild).prop("checked", false);
                                     $(elem).addClass('blocked-tr');  
                                 }
