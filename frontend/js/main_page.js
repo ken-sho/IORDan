@@ -7176,6 +7176,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
     $("#add_container").remove();
     const {thead, tbody, tfooter, blocked, rows_per_page, upload_file_types} = data; 
     console.log(data)
+    console.log(thead)
 
     const registryIsBlocked = (blocked == 'true');
 
@@ -7213,9 +7214,18 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
                 const tr = $('<tr>');
 
                 const tdName = $('<td>', { text: th.name, class: 'td-bold' });
-                const tdValue = $('<td>').append(
-                    $('<input>', { type: 'text', class: 'table-td-input', name: th.name, value_type: th.type, editable: th.editable})
+
+                let tdValue = $('<td>').append(
+                    $('<input>', { type: 'text', class: 'table-td-input', name: th.name, value_type: th.type})
                 );
+
+                if(th.editable !== "true") {
+                    console.log("dsa")
+                    const input = $('<input>', { type: 'text', class: 'table-td-input',  name: th.name, value_type: th.type, disabled: true})
+                    input.css({"pointer-events": "none"})
+                    tdValue = $('<td>').append(input);
+                }
+
                 tdValue.each(function(index, element){
                     $(element).on('keypress', function(e){
                         if(e.which == 13){
@@ -7800,6 +7810,7 @@ function openAddRegistryEntryPopup(registryId, registryName, registryType, docum
     inputCollection.each(function() {
         $(this).off('keyup');
         $(this).on('keyup', () => {
+            console.log("событие")
             $('#add_entry_total_sum').val(sumUpInputValues(inputCollection));
             inputCollection.each(function() {
                 if ($(this).val() !== '') {
