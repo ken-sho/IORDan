@@ -7580,7 +7580,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
         const input = $(this);
         const valueType = $(this).attr('value_type')
         if (valueType == 'numeric') {
-            input.inputmask('[-]9{1,}[(.|,)9{1,2}]');
+            input.inputmask("[0-9\uFF11-\uFF19]");
         }
         else if (valueType == 'date') {
             input.inputmask({alias: 'datetime', inputFormat: "dd.mm.yyyy", placeholder: '__.__.____'});
