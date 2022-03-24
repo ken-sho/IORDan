@@ -7580,7 +7580,7 @@ function displayRegistry(data, registryId, registryName, registryType, documentT
         const input = $(this);
         const valueType = $(this).attr('value_type')
         if (valueType == 'numeric') {
-            input.inputmask("[0-9\uFF11-\uFF19]");
+            input.attr("type", "number")
         }
         else if (valueType == 'date') {
             input.inputmask({alias: 'datetime', inputFormat: "dd.mm.yyyy", placeholder: '__.__.____'});
@@ -7843,9 +7843,10 @@ function openAddRegistryEntryPopup(registryId, registryName, registryType, docum
         const input = $(this);
         const valueType = $(this).attr('value_type')
         if (valueType == 'numeric') {
-            input.on('keyup', () => {
-                input.val(input.val().replace(/,/g, '.'));
-            });
+            input.attr("type", "number")
+            // input.on('keyup', () => {
+            //     input.val(input.val().replace(/,/g, '.'));
+            // });
         }
     });
 
@@ -7909,9 +7910,9 @@ function openEditRegistryEntryPopup(e, registryId, entryId, registryName, regist
         const input = $(this);
         const valueType = $(this).attr('value_type')
         if (valueType == 'numeric') {
-            input.on('keyup', () => {
-                input.val(input.val().replace(/,/g, '.'));
-            });
+            // input.on('keyup', () => {
+            //     input.val(input.val().replace(/,/g, '.'));
+            // });
         }
     });
     openPopupWindow('popup_add_edit_registry_entry');
